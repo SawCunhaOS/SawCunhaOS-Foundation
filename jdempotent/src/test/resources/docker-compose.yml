@@ -1,0 +1,25 @@
+networks:
+  jdempotent-example:
+    driver: bridge
+
+services:
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - jdempotent-example
+    ports:
+      - '6379:6379'
+  redis-sentinel:
+    image: 'bitnami/redis-sentinel:latest'
+    environment:
+      - REDIS_MASTER_HOST=localhost
+      - REDIS_MASTER_PASSWORD=jdempotent
+      - REDIS_MASTER_SET=jdempotent
+    depends_on:
+      - redis
+    ports:
+      - '26379:26379'
+    networks:
+      - jdempotent-example

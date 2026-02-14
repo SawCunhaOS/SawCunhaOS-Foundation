@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/audit/property.yml
+  - include:
+      file: db/changelog/audit/init/init.yml

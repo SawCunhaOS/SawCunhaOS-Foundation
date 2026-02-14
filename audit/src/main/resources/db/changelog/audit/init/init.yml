@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/audit/init/create_db.yml

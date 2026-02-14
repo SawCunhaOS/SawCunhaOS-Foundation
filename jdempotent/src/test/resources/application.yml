@@ -1,0 +1,33 @@
+server:
+  port: 8880
+
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
+  cache:
+    enable: false
+  data:
+    redis:
+      database: 0
+      repositories:
+        enabled: false
+      port: 26379
+      password: jdempotent
+      timeout: 5000ms
+      sentinel:
+        master: jdempotent
+        nodes: localhost
+scos:
+  jdempotent:
+    enabled: true
+    cache:
+      redis:
+        expirationTimeHour: 2
+        dialTimeoutSecond: 3
+        readTimeoutSecond: 3
+        writeTimeoutSecond: 3
+        maxRetryCount: 3
+        persistReqRes: true

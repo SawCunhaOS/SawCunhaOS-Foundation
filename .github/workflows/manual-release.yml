@@ -1,0 +1,94 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch para fazer release'
+        required: true
+        default: 'main'
+        type: choice
+        options:
+          - main
+          - develop
+      version_type:
+        description: 'Tipo de versão'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - major
+          - minor
+          - fix
+      confirm:
+        description: 'Confirmar execução do release?'
+        required: true
+        default: 'não'
+        type: choice
+        options:
+          - sim
+          - não
+
+jobs:
+  check-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check user permissions
+        run: |
+          ALLOWED_USERS="SawCunha"
+          if [[ ! $ALLOWED_USERS =~ ${{ github.actor }} ]]; then
+            echo "❌ Usuário ${{ github.actor }} não tem permissão para executar releases"
+            exit 1
+          fi
+          echo "✅ Usuário ${{ github.actor }} autorizado"
+
+  release:
+    needs: check-permissions
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'sim'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Import GPG key
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent || true
+          
+          # Try to import the key (handle both base64-encoded and plain text formats)
+          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 -d 2>/dev/null | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || \
+          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || true
+          
+          # List imported keys and set default key
+          gpg --list-secret-keys --keyid-format short
+          
+          # Configure GPG to use loopback for all operations
+          echo "pinentry-program /usr/bin/pinentry-loopback" >> ~/.gnupg/gpg-agent.conf || true
+          gpgconf --kill gpg-agent || true
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run release script
+        run: bash scripts/release.sh ${{ github.event.inputs.version_type }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

@@ -1,0 +1,36 @@
+package br.com.sawcunhaos.foundation.jdempotent.core.callback;
+
+import br.com.sawcunhaos.foundation.jdempotent.core.aspect.IdempotentAspect;
+import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
+import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+@Configuration
+@EnableAspectJAutoProxy
+@ComponentScan(basePackages = { "br.com.sawcunhaos.foundation.jdempotent.core" })
+public class TestAopWithErrorCallbackContext {
+
+    @Bean
+    public IdempotentAspect idempotentAspect (InMemoryIdempotentRepository inMemoryIdempotentRepository, DefaultKeyGenerator defaultKeyGenerator, TestCustomErrorCallback testCustomErrorCallback) {
+        return new IdempotentAspect(inMemoryIdempotentRepository,testCustomErrorCallback, defaultKeyGenerator);
+    }
+
+    @Bean
+    public InMemoryIdempotentRepository inMemoryIdempotentRepository(){
+        return new InMemoryIdempotentRepository();
+    }
+
+    @Bean
+    public DefaultKeyGenerator defaultKeyGenerator(){
+        return new DefaultKeyGenerator();
+    }
+
+    @Bean
+    public TestCustomErrorCallback testCustomErrorCallback(){
+        return new TestCustomErrorCallback();
+    }
+
+}

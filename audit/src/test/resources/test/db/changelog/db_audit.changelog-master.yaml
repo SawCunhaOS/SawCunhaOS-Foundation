@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: audit/property.yml
+      relativeToChangelogFile: true
+  - include:
+      file: audit/init/init.yml
+      relativeToChangelogFile: true

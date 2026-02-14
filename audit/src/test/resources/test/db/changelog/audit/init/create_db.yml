@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_SFA_COUNTRY
+      author: Samuel Cunha
+      changes:
+        - tagDatabase:
+            tag: CREATE_COUNTRY
+        - createTable:
+            tableName: SFA_COUNTRY
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: COUNTRY_ID
+                  autoIncrement: false
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: PK_SFA_COUNTRY
+                    nullable: false
+              - column:
+                  name: NAME
+                  autoIncrement: false
+                  type: VARCHAR(255)
+                  remarks: Represents the name of the country
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ACRONYM
+                  autoIncrement: false
+                  type: VARCHAR(15)
+                  remarks: Represents the Acronym of the Country
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CODE
+                  autoIncrement: false
+                  type: INT
+                  remarks: 'Represents the Country Code (Ex Brazil: 55)'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: DESCRIPTION
+                  autoIncrement: false
+                  type: VARCHAR(300)
+                  remarks: A brief description for the line or additional information
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            constraintName: UK_SFA_COUNTRY_CODE
+            tableName: SFA_COUNTRY
+            columnNames: CODE
+      rollback:
+        - dropTable:
+            cascadeConstraints: true
+            tableName: SFA_COUNTRY

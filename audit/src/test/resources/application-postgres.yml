@@ -1,0 +1,46 @@
+scos:
+  audit:
+    system: SCOS_AUDIT
+    enabled: true
+    liquibase:
+      enable: true
+
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+  datasource:
+    audit:
+      url: jdbc:postgresql://localhost:5432/test
+      username: test
+      password: test
+      hikari:
+        connection-timeout: 5000
+        idle-timeout: 150000
+        max-lifetime: 300000
+        minimum-idle: 10
+        maximum-pool-size: 50
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        enable_lazy_load_no_trans: true
+        ddl-auto: none
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        naming:
+          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+          physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        type:
+          json_format_mapper: br.com.sawcunhaos.foundation.utils.configuration.hibernate.JacksonCustomJsonFormatMapper
+  aop:
+    proxy-target-class: true
+    auto: true
+
+liquibase:
+  scos-audit:
+    contexts: test
+    database-change-log-lock-table: IF_DATABASECHANGELOGLOCK
+    database-change-log-table: IF_DATABASECHANGELOG
+    change-log: classpath:db/changelog/db_audit.changelog-master.yaml
+    default-schema: public

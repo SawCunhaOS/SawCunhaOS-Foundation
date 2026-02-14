@@ -1,0 +1,88 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ '**' ]  # Run on any branch push
+  pull_request:         # Run on any PR regardless of target branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        java-version: [ '25' ]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for git describe
+        token: ${{ secrets.PAT_TOKEN }}
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Validate pom.xml
+      run: mvn -B validate
+
+    - name: Compile
+      run: mvn -B clean compile -DskipTests
+
+    - name: Run tests
+      run: mvn -B test
+
+    - name: Build package
+      run: mvn -B package -DskipTests
+
+    - name: Archive artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: maven-build-${{ matrix.java-version }}
+        path: target/
+        retention-days: 5
+
+  security-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Run dependency check
+      run: mvn -B -Panalyze dependency-check:check
+      continue-on-error: true
+
+    - name: Run checkstyle
+      run: mvn -B -Panalyze checkstyle:check
+      continue-on-error: true
+
+    - name: Publish test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report
+        path: target/
+        retention-days: 3
+

@@ -1,0 +1,80 @@
+# SCOS BOM Code Owners
+#
+# This file defines code ownership and responsibility for different areas of the project
+# GitHub will REQUIRE approval from code owners before merging PRs
+# Only @sawcunha can approve changes to protected areas
+#
+# ⚠️  IMPORTANT: Only @sawcunha can approve PRs for these files
+# Changes require explicit approval from the code owner
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DEFAULT: All files require @sawcunha approval
+# ═══════════════════════════════════════════════════════════════════════════
+* @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: POM and dependency management - REQUIRE @sawcunha approval only
+# ═══════════════════════════════════════════════════════════════════════════
+pom.xml @sawcunha
+**/pom.xml @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: CI/CD workflows - REQUIRE @sawcunha approval only
+# ═══════════════════════════════════════════════════════════════════════════
+.github/workflows/ @sawcunha
+.github/workflows/* @sawcunha
+.github/*.yml @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: Documentation and Standards - REQUIRE @sawcunha approval only
+# ═══════════════════════════════════════════════════════════════════════════
+*.md @sawcunha
+docs/ @sawcunha
+README.md @sawcunha
+CONTRIBUTING.md @sawcunha
+CHANGELOG.md @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: Build configuration - REQUIRE @sawcunha approval only
+# ═══════════════════════════════════════════════════════════════════════════
+.gitignore @sawcunha
+.gitattributes @sawcunha
+.maven* @sawcunha
+mvnw @sawcunha
+mvnw.* @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: Build scripts - REQUIRE @sawcunha approval only
+# ═══════════════════════════════════════════════════════════════════════════
+scripts/ @sawcunha
+scripts/* @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: GitHub configuration - REQUIRE @sawcunha approval only
+# Cannot be changed by other contributors
+# ═══════════════════════════════════════════════════════════════════════════
+.github/ @sawcunha
+.github/* @sawcunha
+.github/CODEOWNERS @sawcunha
+.github/PULL_REQUEST_TEMPLATE.md @sawcunha
+.github/ISSUE_TEMPLATE/ @sawcunha
+CODEOWNERS @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL: License and legal - REQUIRE @sawcunha approval only
+# ═══════════════════════════════════════════════════════════════════════════
+LICENSE @sawcunha
+LICENSE.txt @sawcunha
+COPYING @sawcunha
+
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Code Owner Responsibilities:
+#
+# 1. @sawcunha is the ONLY person who can approve changes to critical files
+# 2. All PRs touching protected areas MUST be reviewed by @sawcunha
+# 3. Automated checks cannot override this requirement
+# 4. Ensures consistency and quality across the entire project
+# 5. Maintains security and integrity of build pipelines
+# 6. Controls release process and versioning
+

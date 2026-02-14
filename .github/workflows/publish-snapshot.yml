@@ -1,0 +1,60 @@
+name: Publish Snapshot
+
+on:
+  push:
+    branches: [ 'develop', 'fix/**/*', 'release/**/*' ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Import GPG key
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent || true
+          
+          # Try to import the key (handle both base64-encoded and plain text formats)
+          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 -d 2>/dev/null | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || \
+          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || true
+          
+          # List imported keys and set default key
+          gpg --list-secret-keys --keyid-format short
+          
+          # Configure GPG to use loopback for all operations
+          echo "pinentry-program /usr/bin/pinentry-loopback" >> ~/.gnupg/gpg-agent.conf || true
+          gpgconf --kill gpg-agent || true
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run release script
+        run: bash scripts/deploy.sh ${{ github.event.inputs.version_type }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Clean up GPG keyring on error
+        if: failure()
+        run: |
+          gpg-connect-agent KILLAGENT /bye || true
+          rm -rf ~/.gnupg || true
+

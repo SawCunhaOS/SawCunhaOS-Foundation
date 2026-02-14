@@ -1,0 +1,119 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_SFA_LOG_AUDIT
+      author: System
+      changes:
+        - tagDatabase:
+            tag: INIT
+        - createTable:
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: ID_LOG
+                  autoIncrement: false
+                  type: ${UUIDType}
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: PK_SFA_LOG_AUDIT
+                    nullable: false
+              - column:
+                  name: ORIGIN_SYSTEM
+                  autoIncrement: false
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ACTION_TYPE
+                  autoIncrement: false
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ID_ENTITY
+                  autoIncrement: false
+                  type: VARCHAR(256)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ENTITY
+                  autoIncrement: false
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ENTITY_OLD
+                  autoIncrement: false
+                  type: JSONB
+                  constraints:
+                    nullable: true
+              - column:
+                  name: ENTITY_NEW
+                  autoIncrement: false
+                  type: JSONB
+                  constraints:
+                    nullable: true
+              - column:
+                  name: LOGGED_USER
+                  autoIncrement: false
+                  type: VARCHAR(256)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: EXECUTION_DATE
+                  autoIncrement: false
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: IP_ADDRESS
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: X_REQUEST_ID
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+        - createIndex:
+            clustered: true
+            indexName: IDX_ILA_ORIGIN_SYSTEM
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: ORIGIN_SYSTEM
+        - createIndex:
+            clustered: true
+            indexName: IDX_ILA_LOGGED_USER
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: LOGGED_USER
+        - createIndex:
+            clustered: true
+            indexName: IDX_ILA_START_EXECUTION_DATE
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: EXECUTION_DATE
+        - createIndex:
+            clustered: true
+            indexName: IDX_ILA_SDC_ORS
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: EXECUTION_DATE
+              - column:
+                  name: ORIGIN_SYSTEM
+        - createIndex:
+            clustered: true
+            indexName: IDX_ILA_REQUEST_ID
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: X_REQUEST_ID
