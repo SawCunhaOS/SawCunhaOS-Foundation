@@ -1,0 +1,83 @@
+/**
+* {{description}}{{^description}}{{classname}}{{/description}}{{#isDeprecated}}
+* @deprecated{{/isDeprecated}}
+*/
+
+import br.com.sawcunhaos.foundation.utils.validation.zipcode.ZipCode;
+import br.com.sawcunhaos.foundation.utils.validation.taxIdentifier.CPF;
+import br.com.sawcunhaos.foundation.utils.validation.taxIdentifier.CNPJ;
+import br.com.sawcunhaos.foundation.utils.validation.taxIdentifier.TaxIdentifier;
+{{#serializableModel}}
+import java.io.Serial;
+import java.io.Serializable;
+{{/serializableModel}}
+{{>additionalModelTypeAnnotations}}
+{{#description}}
+{{#isDeprecated}}
+@Deprecated
+{{/isDeprecated}}
+{{/description}}
+{{#discriminator}}
+{{>typeInfoAnnotation}}
+{{/discriminator}}
+{{#jackson}}
+{{#isClassnameSanitized}}
+{{^hasDiscriminatorWithNonEmptyMapping}}
+@JsonTypeName("{{name}}")
+{{/hasDiscriminatorWithNonEmptyMapping}}
+{{/isClassnameSanitized}}
+{{/jackson}}
+{{>generatedAnnotation}}
+{{#vendorExtensions.x-class-extra-annotation}}
+{{{vendorExtensions.x-class-extra-annotation}}}
+{{/vendorExtensions.x-class-extra-annotation}}
+@Builder(toBuilder = true)
+public record {{classname}} (
+{{#vars}}
+    {{#isNullable}}
+    @Nullable()
+    {{/isNullable}}
+    {{#useBeanValidation}}
+    {{>beanValidation}}
+    {{/useBeanValidation}}
+    {{^useBeanValidation}}
+    {{#required}}@NotNull{{#vendorExtensions.x-required-message}}(message = "{{vendorExtensions.x-required-message}}"){{/vendorExtensions.x-required-message}}{{/required}}
+    {{/useBeanValidation}}
+    {{#vendorExtensions.x-empty-message}}
+    @NotEmpty(message = "{{vendorExtensions.x-empty-message}}")
+    {{/vendorExtensions.x-empty-message}}
+    {{#deprecated}}
+    @Deprecated
+    {{/deprecated}}
+    {{#jackson}}
+    @JsonProperty("{{baseName}}")
+    {{/jackson}}
+    {{#isDate}}
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    {{/isDate}}
+    {{#isDateTime}}
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    {{/isDateTime}}
+    {{#vendorExtensions.x-is-zip-code}}
+    @ZipCode(message = "SCOS-009")
+    {{/vendorExtensions.x-is-zip-code}}
+    {{#vendorExtensions.x-is-cpf}}
+    @CPF
+    {{/vendorExtensions.x-is-cpf}}
+    {{#vendorExtensions.x-is-cnpj}}
+    @CNPJ
+    {{/vendorExtensions.x-is-cnpj}}
+    {{#vendorExtensions.x-is-tax-identifier}}
+    @TaxIdentifier
+    {{/vendorExtensions.x-is-tax-identifier}}
+    {{#vendorExtensions.x-extra-annotation}}
+    {{{vendorExtensions.x-extra-annotation}}}
+    {{/vendorExtensions.x-extra-annotation}}
+    {{{datatypeWithEnum}}} {{name}}{{#-last}}{{/-last}}{{^-last}},{{/-last}}
+{{/vars}}
+) {{#serializableModel}} implements Serializable {{/serializableModel}}{
+{{#serializableModel}}
+    @Serial
+    private static final long serialVersionUID = 1L;
+{{/serializableModel}}
+}

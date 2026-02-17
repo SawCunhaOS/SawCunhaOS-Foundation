@@ -61,6 +61,20 @@ public final class PaginationUtils {
                 );
     }
 
+    public static Pageable createPageable(
+            final int page,
+            final int sizePerPage,
+            final Sort.Direction direction,
+            final String order,
+            final PropertiesOrder orderDefault
+    ) {
+        String orderPage = orderDefault.value(order);
+        Sort sort = createSort(direction, orderPage);
+        return Objects.nonNull(sort) ?
+                PageRequest.of( calculatePage(page), sizePerPage, sort) :
+                PageRequest.of( calculatePage(page), sizePerPage);
+    }
+
     private static Sort createSort(
             final Sort.Direction direction,
             final String order

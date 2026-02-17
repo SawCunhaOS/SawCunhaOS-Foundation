@@ -30,6 +30,7 @@ public enum ScosExceptionCode implements ExceptionCode {
     TAX_IDENTIFIER_INVALID("SCOS-006"),
     CPF_INVALID("SCOS-007"),
     CNPJ_INVALID("SCOS-008"),
+    EMAIL_INVALID("SCOS-009"),
 
     ;
 

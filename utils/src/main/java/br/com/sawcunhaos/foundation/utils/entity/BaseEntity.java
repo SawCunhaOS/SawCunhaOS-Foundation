@@ -13,17 +13,36 @@
 
 package br.com.sawcunhaos.foundation.utils.entity;
 
+import com.querydsl.core.annotations.QueryEmbeddable;
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-public class BaseEntity {
+@Getter
+@Setter
+@EntityListeners(AuditingEntityListener.class)
+@MappedSuperclass
+@QueryEmbeddable
+public abstract class BaseEntity {
 
+    @CreationTimestamp
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt;
     @Column(name = "USER_AT")
     private String userAt;
+
+    public void updateAuditInfo(String user) {
+        userAt = user;
+    }
 
 }

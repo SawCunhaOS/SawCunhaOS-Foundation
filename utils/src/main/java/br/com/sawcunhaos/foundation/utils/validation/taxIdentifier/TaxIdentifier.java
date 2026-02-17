@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TaxIdentifier {
-    String message() default "IFV-012";
+    String message() default "SCOS-012";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

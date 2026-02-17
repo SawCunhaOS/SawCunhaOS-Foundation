@@ -52,7 +52,7 @@ class ZipCodeValidatorTest {
         Set<ConstraintViolation<ZipCodeDTO>> violations = validator.validate(zipCodeDTO);
 
         assertFalse(violations.isEmpty());
-        assertEquals("IFV-009", violations.stream().findFirst().get().getMessage());
+        assertEquals("SCOS-009", violations.stream().findFirst().get().getMessage());
     }
 
     private ZipCodeDTO createZipCode(final String zipCode) {

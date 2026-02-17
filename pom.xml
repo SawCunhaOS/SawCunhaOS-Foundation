@@ -85,6 +85,7 @@
         <module>exception</module>
         <module>audit</module>
         <module>jdempotent</module>
+        <module>security</module>
     </modules>
 
     <properties>
@@ -114,6 +115,11 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-jdempotent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

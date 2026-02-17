@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = ZipCodeValidator.class)
 public @interface ZipCode {
 
-    String message() default "IFV-009";
+    String message() default "SCOS-009";
 
     Class<?>[] groups() default {};
 

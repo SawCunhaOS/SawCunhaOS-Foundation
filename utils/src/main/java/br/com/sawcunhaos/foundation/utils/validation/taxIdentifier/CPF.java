@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CPF {
-    String message() default "IFV-011";
+    String message() default "SCOS-011";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
