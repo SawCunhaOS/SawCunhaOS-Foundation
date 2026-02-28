@@ -18,6 +18,7 @@ import br.com.sawcunhaos.foundation.utils.exception.ScosException;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
+import jakarta.persistence.Transient;
 
 import static br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode.CPF_INVALID;
 
@@ -26,6 +27,7 @@ import static br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode.CPF_INV
 public class Cpf {
 
     private String cpf;
+    @Transient
     private String type;
 
     protected Cpf(){}

@@ -19,6 +19,7 @@ import com.querydsl.core.annotations.QueryEmbeddable;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
+import jakarta.persistence.Transient;
 
 import static br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode.CNPJ_INVALID;
 
@@ -28,6 +29,7 @@ import static br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode.CNPJ_IN
 public class Cnpj {
 
     private String cnpj;
+    @Transient
     private String type;
 
     protected Cnpj(){}

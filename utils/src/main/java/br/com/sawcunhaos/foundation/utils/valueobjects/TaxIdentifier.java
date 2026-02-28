@@ -17,6 +17,7 @@ import br.com.caelum.stella.validation.CNPJValidator;
 import br.com.caelum.stella.validation.CPFValidator;
 import br.com.sawcunhaos.foundation.utils.exception.ScosException;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
 
@@ -27,6 +28,7 @@ import static br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode.TAX_IDE
 public class TaxIdentifier {
 
     private String taxIdentifier;
+    @Transient
     private String type;
 
     protected TaxIdentifier(){}
