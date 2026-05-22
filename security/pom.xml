@@ -12,7 +12,7 @@
 
     <artifactId>scos-foundation-security</artifactId>
     <name>SCOS Foundation Security</name>
-    <description></description>
+    <description>Security control module to prevent unauthorized access to critical operations in SCOS projects.</description>
     <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation</url>
     <inceptionYear>2026</inceptionYear>
 
