@@ -6,11 +6,8 @@ on:
       branch:
         description: 'Branch para fazer release'
         required: true
-        default: 'main'
-        type: choice
-        options:
-          - main
-          - develop
+        default: 'develop'
+        type: string
       version_type:
         description: 'Tipo de versão'
         required: true
