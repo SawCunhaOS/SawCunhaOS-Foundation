@@ -1,3 +1,16 @@
+
+/*
+ *
+ *  * Copyright 2026 SawCunha Open System - SawCunhaOS-Foundation
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
 package br.com.sawcunhaos.foundation.utils.validation.taxIdentifier;
 
 import br.com.sawcunhaos.foundation.utils.validation.taxIdentifier.constraint.CpfValidator;
@@ -15,7 +28,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CPF {
-    String message() default "IFV-011";
+    String message() default "SCOS-011";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

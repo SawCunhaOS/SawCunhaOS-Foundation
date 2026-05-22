@@ -3,7 +3,12 @@ scos:
     system: SCOS_AUDIT
     enabled: true
     liquibase:
-      enable: true
+      enabled: true
+      contexts: test
+      database-change-log-lock-table: IF_DATABASECHANGELOGLOCK
+      database-change-log-table: IF_DATABASECHANGELOG
+      change-log: classpath:db/changelog/db_audit.changelog-master.yaml
+      default-schema: public
 
 spring:
   cloud:
@@ -36,11 +41,3 @@ spring:
   aop:
     proxy-target-class: true
     auto: true
-
-liquibase:
-  scos-audit:
-    contexts: test
-    database-change-log-lock-table: IF_DATABASECHANGELOGLOCK
-    database-change-log-table: IF_DATABASECHANGELOG
-    change-log: classpath:db/changelog/db_audit.changelog-master.yaml
-    default-schema: public

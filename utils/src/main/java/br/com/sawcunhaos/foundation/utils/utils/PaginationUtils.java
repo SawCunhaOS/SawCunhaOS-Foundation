@@ -1,3 +1,16 @@
+
+/*
+ *
+ *  * Copyright 2026 SawCunha Open System - SawCunhaOS-Foundation
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
 package br.com.sawcunhaos.foundation.utils.utils;
 
 import br.com.sawcunhaos.foundation.utils.dto.request.ScosPaginationFilterDTO;
@@ -46,6 +59,20 @@ public final class PaginationUtils {
                         calculatePage(scosPaginationFilterDTO.getPage()),
                         scosPaginationFilterDTO.getSizePerPage()
                 );
+    }
+
+    public static Pageable createPageable(
+            final int page,
+            final int sizePerPage,
+            final Sort.Direction direction,
+            final String order,
+            final PropertiesOrder orderDefault
+    ) {
+        String orderPage = orderDefault.value(order);
+        Sort sort = createSort(direction, orderPage);
+        return Objects.nonNull(sort) ?
+                PageRequest.of( calculatePage(page), sizePerPage, sort) :
+                PageRequest.of( calculatePage(page), sizePerPage);
     }
 
     private static Sort createSort(
