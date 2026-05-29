@@ -1,6 +1,6 @@
 package br.com.sawcunhaos.foundation.security.filter;
 
-import br.com.sawcunhaos.foundation.exception.model.ExceptionResponse;
+import br.com.sawcunhaos.foundation.exception.model.ScosProblemDetails;
 import br.com.sawcunhaos.foundation.security.utils.AuthenticationUtils;
 import br.com.sawcunhaos.foundation.security.utils.SecurityExceptionCode;
 import br.com.sawcunhaos.foundation.utils.specification.LocaleService;
@@ -15,8 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -49,18 +50,16 @@ public class AuthorizationRequiredFilter implements Filter {
 
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || authorizationHeader.isEmpty()) {
-            ExceptionResponse exceptionResponse = ExceptionResponse.builder()
-                    .codeError(SecurityExceptionCode.AUTH_005.getCode())
-                    .message(localeService.getMessage(SecurityExceptionCode.AUTH_005.getCode()))
-                    .build();
-
-            String body = objectMapper.writeValueAsString(
-                    AuthenticationUtils.createResponse(exceptionResponse)
+            ProblemDetail problem = ScosProblemDetails.enrich(
+                    ScosProblemDetails.of(
+                            HttpStatus.UNAUTHORIZED,
+                            SecurityExceptionCode.AUTH_005,
+                            localeService.getMessage(SecurityExceptionCode.AUTH_005.getCode()),
+                            request.getRequestURI()
+                    )
             );
 
-            AuthenticationUtils.createResponseHttpServlet(response, body);
-            ContentCachingResponseWrapper servletResponse = new ContentCachingResponseWrapper(response);
-            servletResponse.copyBodyToResponse();
+            AuthenticationUtils.writeProblemDetail(response, HttpStatus.UNAUTHORIZED.value(), problem, objectMapper);
         }
     }
 }

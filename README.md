@@ -155,12 +155,20 @@ Módulo para tratamento centralizado de exceções e padronização de respostas
 
 - **Handler Global**
   - `ExceptionsHandler`: Tratamento automático de todas as exceções
-  - Formatação padronizada de erros de validação
+  - Respostas de erro em conformidade com a RFC 9457 (`ProblemDetail`,
+    `Content-Type: application/problem+json`)
   - Suporte a internacionalização de mensagens
 
 - **Modelos de Resposta**
-  - `ExceptionResponse`: Estrutura de resposta de erro
-  - `AttributeNotValid`: Detalhes de validação de atributos
+  - `ProblemDetail` (Spring 7, nativo): corpo de erro RFC 9457 com
+    `type`, `title`, `status`, `detail`, `instance` e as extensões SCOS
+    `code`, `errors`, `requestId`, `timestamp`
+  - `ScosProblemDetails`: fábrica central que monta e enriquece o `ProblemDetail`
+    (usada pelo `@ControllerAdvice` e pelos handlers de segurança)
+  - `ScosFieldError`: erro de campo com `pointer` (JSON Pointer, RFC 6901) e `detail`
+
+> **Nota:** o wrapper `ScosResponseDTO` permanece apenas para respostas de
+> sucesso (`2xx`). Erros (`4xx`/`5xx`) usam `ProblemDetail` sem wrapper.
 
 #### Como Usar
 
