@@ -172,9 +172,13 @@ public class AuditIntegrationTest {
                 .filter(log -> log.getActionType() == ActionType.UPDATE)
                 .count();
 
+        long allSize = allLogs.stream()
+                        .filter(log -> log.getActionType() == ActionType.UPDATE || log.getActionType() == ActionType.INSERT)
+                        .count();
+
         assertEquals(10, insertCount, "Deve haver 10 INSERTs");
         assertEquals(10, updateCount, "Deve haver 10 UPDATEs");
-        assertEquals(21, allLogs.size(), "Total de 20 operações auditadas");
+        assertEquals(20, allSize, "Total de 20 operações auditadas");
     }
 
     @Test

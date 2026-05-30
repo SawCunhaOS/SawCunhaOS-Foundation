@@ -8,9 +8,10 @@ foundation paths.
 
 | Module      | artifactId                     | Provides                                    |
 | ----------- | ------------------------------ | ------------------------------------------- |
-| utils       | `scos-foundation-utils`        | annotations, DTOs, validators, cache, LGPD  |
+| privacy     | `scos-foundation-privacy`      | PII masking engine, YAML rules, builtins, field cipher |
+| utils       | `scos-foundation-utils`        | annotations, DTOs, validators, cache (PII masking moved to privacy) |
 | exception   | `scos-foundation-exception`    | `ExceptionsHandler`, `ScosException` family |
-| audit       | `scos-foundation-audit`        | `@Auditable` + Hibernate audit log          |
+| audit       | `scos-foundation-audit`        | `@Auditable` + Hibernate audit log (opt-in field encryption via privacy) |
 | jdempotent  | `scos-foundation-jdempotent`   | idempotency (in-memory / Redis)             |
 
 groupId `br.com.sawcunhaos`. **Version note:** the foundation's own pom imports
@@ -75,8 +76,9 @@ only if the BOM does not manage them.
 - **Cache:** `ScosCacheConfiguration`, `ScosCacheKeyGenerator`,
   `PolymorphicRedisSerializer`, `ScosCacheProperties`. `@ScosRequestGET` ties into
   this via its `nameCache`/`keyGenerator` attributes.
-- **LGPD / PII:** `@DataMask` + `DataMaskingService`; request/response sanitization
-  components for headers and body.
+- **LGPD / PII:** the old `utils.lgpd` package was **removed** — masking now lives
+  entirely in `scos-foundation-privacy` (`DataMaskingService`, sanitization
+  components, `DataMask`, `DataMaskingValues`). Depend on `privacy` directly.
 - **Brazilian validators** (`...utils.validation`): `@CPF`, `@CNPJ`,
   `@TaxIdentifier`, `@ZipCode` (with Jakarta `ConstraintValidator`s). Use these on
   DTOs/value objects instead of regex.
@@ -91,10 +93,39 @@ only if the BOM does not manage them.
 - **Feign:** `JacksonDecoderCustom` / `JacksonEncoderCustom`.
 - **Lifecycle:** `ScosOnStartupListener` / `ScosStartupListener`.
 
+## Privacy / PII masking — `scos-foundation-privacy`
+
+- **Engine:** `MaskingEngine` (immutable, stateless, thread-safe singleton) is the
+  single source of masking for the HTTP log filter, the Logback `%mask` converter,
+  and the audit field cipher. `maskStructured(key,value)`, `maskHeader`, `maskText`.
+- **Rules as data:** read from `privacy-masking.yml` (resolution: external
+  `scos.privacy.masking.config-path` / env `SCOS_PRIVACY_MASKING_CONFIG` → classpath
+  → builtins + WARN). Strategies: `fixed`, `partial`, `email`, `hash` (HMAC),
+  `encrypt`, `redact`. Country/region builtin packs (`generic`, `br`, `us`, `eu`,
+  `uk`, `in`) togglable per item.
+- **Standalone (no Spring):** `MaskingEngine.fromYaml(Path | InputStream)` works in
+  plain Java, batch, lambda — zero Spring required.
+- **Auto-config:** `ScosPrivacyAutoConfiguration` loads on classpath presence
+  (`@ConditionalOnProperty scos.privacy.enabled`, `matchIfMissing=true`); every bean
+  `@ConditionalOnMissingBean`. Optional `DataMaskingValues` SPI is injected via
+  `ObjectProvider` and added on top (precedence builtins → YAML → SPI).
+- **Log masking:** `%mask(%msg)` (free text) and `%maskmdc{key}` (a single MDC
+  value) registered programmatically — no `logback.xml` edit; opt-out via
+  `scos.privacy.log.register-converter=false`.
+- **At-rest field cipher:** `ScosFieldCipher` (AES-256/GCM, token `enc:v<keyId>:…`)
+  + `ScosCryptoKeyProvider` SPI (Jasypt default, plug Vault/KMS). The audit trail
+  encrypts the opt-in `auditEncryptFields` before persisting the JSONB snapshot.
+- **Pseudonymization vs checksum:** `utils.HashUtils.pseudonymize(value, secret)` is
+  keyed HMAC-SHA256 (LGPD Art.13 / GDPR A4(5)); `HashUtils.createHash` is an unkeyed
+  SHA-256 checksum — **not** a privacy mechanism.
+
 ## Config keys seen in the foundation
 
 - `spring.main.allow-bean-definition-overriding: true`
 - `spring.jpa.properties.hibernate.type.json_format_mapper:
   br.com.sawcunhaos.foundation.utils.configuration.hibernate.JacksonCustomJsonFormatMapper`
 - `scos.audit.enabled: true` (+ audit datasource/liquibase properties)
+- `scos.privacy.*`: `enabled` (default true), `strict`, `max-payload-kb`,
+  `masking.config-path`, `log.register-converter`, `crypto.secret` (or env
+  `SCOS_PRIVACY_CRYPTO_SECRET`).
 - Redis properties for jdempotent/cache when those modules are used.

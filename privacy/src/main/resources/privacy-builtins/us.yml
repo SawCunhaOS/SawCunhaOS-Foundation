@@ -1,0 +1,23 @@
+# United States PII patterns. Enabled via: scos.privacy.masking.builtins.enabled: [us]
+pack: us
+patterns:
+  - name: ssn
+    regex: '\b\d{3}\-\d{2}\-\d{4}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 4
+  - name: ein
+    regex: '\b\d{2}\-\d{7}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 4
+  - name: zip
+    regex: '\b\d{5}(?:\-\d{4})?\b'
+    strategy: partial
+    keep-first: 2
+    keep-last: 0
+  - name: phone-us
+    regex: '\b(?:\+1\s?)?(?:\(?\d{3}\)?[\s\-]?)\d{3}[\s\-]?\d{4}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2

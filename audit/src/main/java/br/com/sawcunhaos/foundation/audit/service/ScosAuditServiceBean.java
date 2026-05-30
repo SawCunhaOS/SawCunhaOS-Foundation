@@ -17,6 +17,8 @@ import br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditLogP
 import br.com.sawcunhaos.foundation.audit.domain.entity.ActionType;
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditLog;
 import br.com.sawcunhaos.foundation.audit.specification.ScosAuditService;
+import br.com.sawcunhaos.foundation.privacy.core.MaskingEngine;
+import br.com.sawcunhaos.foundation.privacy.crypto.ScosFieldCipher;
 import br.com.sawcunhaos.foundation.utils.annotation.audit.Auditable;
 import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.hibernate.event.spi.AbstractEvent;
 import org.hibernate.event.spi.PostDeleteEvent;
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostUpdateEvent;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @Service("ScosAuditService")
@@ -43,6 +47,12 @@ public class ScosAuditServiceBean implements ScosAuditService {
 
     private final ScosAuditLogService scosAuditLogService;
     private final ScosAuditLogProperties scosAuditLogProperties;
+    /**
+     * Optional engine from the privacy module. When a key is configured and {@code auditEncryptFields} is
+     * non-empty, the listed property values are encrypted at rest before being serialized into the JSONB
+     * snapshot. Absent (or empty field set) keeps the previous plaintext behaviour — encryption is opt-in.
+     */
+    private final ObjectProvider<MaskingEngine> maskingEngineProvider;
 
     @Async("ScosAuditLogAsyncExecutor")
     public void saveAuditLog(final AbstractEvent abstractEvent, final String user, final String ipAddress, final String xRequestId) {
@@ -149,12 +159,21 @@ public class ScosAuditServiceBean implements ScosAuditService {
 
     private String createJsonObject(String[] propertyNames, Object[] state) {
         if (state == null) return null;
+
+        // Resolve the (optional) at-rest encryption once per snapshot. Runs on the @Async audit thread.
+        final MaskingEngine engine = maskingEngineProvider.getIfAvailable();
+        final ScosFieldCipher cipher = engine != null ? engine.fieldCipher() : null;
+        final Set<String> encryptFields = engine != null ? engine.auditEncryptFields() : Set.of();
+        final boolean encryptEnabled = cipher != null && !encryptFields.isEmpty();
+
         Map<String, Object> stateMap = new HashMap<>();
         for (int i = 0; i < propertyNames.length; i++) {
-            stateMap.put(
-                    propertyNames[i],
-                    Objects.nonNull(state[i]) ? state[i].toString() : null
-            );
+            final String name = propertyNames[i];
+            String value = Objects.nonNull(state[i]) ? state[i].toString() : null;
+            if (encryptEnabled && value != null && encryptFields.contains(name)) {
+                value = cipher.encrypt(value);
+            }
+            stateMap.put(name, value);
         }
         return GsonUtils.getInstance().toJson(stateMap);
     }

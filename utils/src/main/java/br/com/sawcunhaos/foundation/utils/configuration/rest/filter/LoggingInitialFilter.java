@@ -14,9 +14,9 @@
 package br.com.sawcunhaos.foundation.utils.configuration.rest.filter;
 
 
+import br.com.sawcunhaos.foundation.privacy.SanitizationBodyComponent;
+import br.com.sawcunhaos.foundation.privacy.SanitizationHeadersComponent;
 import br.com.sawcunhaos.foundation.utils.configuration.rest.filter.properties.ScosFilterProperties;
-import br.com.sawcunhaos.foundation.utils.lgpd.SanitizationBodyComponent;
-import br.com.sawcunhaos.foundation.utils.lgpd.SanitizationHeadersComponent;
 import br.com.sawcunhaos.foundation.utils.utils.DateUtils;
 import br.com.sawcunhaos.foundation.utils.utils.IpAddressExtractor;
 import jakarta.servlet.FilterChain;
@@ -28,10 +28,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -47,6 +55,9 @@ import java.util.stream.Collectors;
  * correlation id even on {@code /actuator}, {@code /health}, etc.), and the
  * {@code X-Request-ID} is echoed back in the response header. The verbose
  * request/response logging stays conditional on the configured URI prefix.</p>
+ *
+ * <p>PII masking is delegated to the {@code scos-foundation-privacy} sanitization
+ * components; this filter only adapts the web types (headers, body stream) to them.</p>
  *
  * <p>As the outermost filter, it owns the single {@code MDC.clear()} in a
  * {@code finally} block, guaranteeing cleanup even when the chain throws and
@@ -116,11 +127,22 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
 	}
 
 	private String getRequestHeaders(MultiReadHttpServletRequest servletRequest) {
-		String resquestHeaders = "Headers view not enabled";
-		if(scosFilterProperties.isShowRequestHeaders()) {
-			resquestHeaders = sanitizationHeadersComponent.sanitizeHeader(new ServletServerHttpRequest(servletRequest).getHeaders());
+		if (!scosFilterProperties.isShowRequestHeaders()) {
+			return "Headers view not enabled";
 		}
-		return resquestHeaders;
+		final HttpHeaders headers = new ServletServerHttpRequest(servletRequest).getHeaders();
+		final Map<String, String> raw = new LinkedHashMap<>();
+		headers.headerNames().forEach(name -> {
+			final List<String> values = headers.get(name);
+			raw.put(name, (values != null && !values.isEmpty()) ? values.get(0) : "");
+		});
+
+		final Map<String, String> masked = sanitizationHeadersComponent.sanitize(raw);
+		final StringBuilder formatted = new StringBuilder();
+		masked.forEach((name, value) -> formatted.append("""
+				Header Name -> %s -- %s
+				""".formatted(name, value)));
+		return formatted.toString();
 	}
 
     /**
@@ -140,10 +162,22 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
     }
 
 	private String getRequestBody(MultiReadHttpServletRequest servletRequest) throws IOException {
-		String responseBody = "Body view not enabled";
-		if(scosFilterProperties.isShowRequestBody()) {
-			responseBody = sanitizationBodyComponent.sanitizeBody(servletRequest.getInputStream());
+		if (!scosFilterProperties.isShowRequestBody()) {
+			return "Body view not enabled";
 		}
-		return responseBody;
+		return sanitizeBody(servletRequest.getInputStream());
+	}
+
+	/**
+	 * Reads the stream and applies the privacy body sanitizer; an empty payload is reported with a marker.
+	 */
+	private String sanitizeBody(final InputStream bodyInputStream) {
+		final String body = new BufferedReader(new InputStreamReader(bodyInputStream, StandardCharsets.UTF_8))
+				.lines()
+				.collect(Collectors.joining("\n"));
+		if (body.isEmpty()) {
+			return "Does not have Body";
+		}
+		return sanitizationBodyComponent.sanitize(body);
 	}
 }

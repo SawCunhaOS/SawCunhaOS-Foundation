@@ -117,7 +117,8 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		ex.getBindingResult().getFieldErrors().forEach(
 				e -> errors.add(ScosFieldError.of(
 						e.getField(),
-						localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments()))
+						localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
+						e.getDefaultMessage()
 				))
 		);
 
@@ -147,7 +148,8 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		ex.getBeanResults().get(0).getFieldErrors().forEach(
 				e -> errors.add(ScosFieldError.of(
 						e.getField(),
-						localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments()))
+						localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
+						e.getDefaultMessage()
 				))
 		);
 
@@ -183,7 +185,8 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
 					errors.add(ScosFieldError.of(
 							attributes.get(0),
-							localeService.getMessage(e.getMessage(), attributes.toArray(Object[]::new))
+							localeService.getMessage(e.getMessage(), attributes.toArray(Object[]::new)),
+							e.getMessage()
 					));
 				}
 		);

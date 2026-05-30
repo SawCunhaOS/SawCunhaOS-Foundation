@@ -14,8 +14,8 @@
 package br.com.sawcunhaos.foundation.utils.configuration.rest.filter;
 
 
+import br.com.sawcunhaos.foundation.privacy.SanitizationBodyComponent;
 import br.com.sawcunhaos.foundation.utils.configuration.rest.filter.properties.ScosFilterProperties;
-import br.com.sawcunhaos.foundation.utils.lgpd.SanitizationBodyComponent;
 import br.com.sawcunhaos.foundation.utils.utils.DateUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,11 +29,19 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 /**
  * Final-stage filter ({@code @Order(100)}) that logs the response. Extends
  * {@link OncePerRequestFilter} to avoid double execution on forward/include.
+ *
+ * <p>PII masking is delegated to the {@code scos-foundation-privacy} body sanitizer; this filter only adapts
+ * the response stream to it.</p>
  *
  * <p>It no longer calls {@code MDC.clear()}: cleanup is owned exclusively by the
  * outermost {@link LoggingInitialFilter} ({@code @Order(0)}), whose
@@ -71,10 +79,22 @@ public class LoggingFinalFilter extends OncePerRequestFilter {
 	}
 
 	private String getResponseBody(ContentCachingResponseWrapper servletResponse) {
-		String responseBody = "Body view not enabled";
-		if(scosFilterProperties.isShowResponseBody()) {
-			responseBody = sanitizationBodyComponent.sanitizeBody(servletResponse.getContentInputStream());
+		if (!scosFilterProperties.isShowResponseBody()) {
+			return "Body view not enabled";
 		}
-		return responseBody;
+		return sanitizeBody(servletResponse.getContentInputStream());
+	}
+
+	/**
+	 * Reads the stream and applies the privacy body sanitizer; an empty payload is reported with a marker.
+	 */
+	private String sanitizeBody(final InputStream bodyInputStream) {
+		final String body = new BufferedReader(new InputStreamReader(bodyInputStream, StandardCharsets.UTF_8))
+				.lines()
+				.collect(Collectors.joining("\n"));
+		if (body.isEmpty()) {
+			return "Does not have Body";
+		}
+		return sanitizationBodyComponent.sanitize(body);
 	}
 }

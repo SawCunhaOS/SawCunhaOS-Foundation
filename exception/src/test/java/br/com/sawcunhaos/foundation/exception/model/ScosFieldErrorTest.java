@@ -27,7 +27,7 @@ class ScosFieldErrorTest {
     @Test
     @DisplayName("simple field becomes #/<field>")
     void simpleFieldBecomesPointer() {
-        ScosFieldError error = ScosFieldError.of("email", "deve ser um e-mail válido");
+        ScosFieldError error = ScosFieldError.of("email", "deve ser um e-mail válido", "CODE");
 
         assertEquals("#/email", error.pointer());
         assertEquals("deve ser um e-mail válido", error.detail());
@@ -36,7 +36,7 @@ class ScosFieldErrorTest {
     @Test
     @DisplayName("nested field becomes #/<path>/<segments>")
     void nestedFieldBecomesNestedPointer() {
-        ScosFieldError error = ScosFieldError.of("address.street", "não deve estar em branco");
+        ScosFieldError error = ScosFieldError.of("address.street", "não deve estar em branco", "CODE");
 
         assertEquals("#/address/street", error.pointer());
         assertEquals("não deve estar em branco", error.detail());

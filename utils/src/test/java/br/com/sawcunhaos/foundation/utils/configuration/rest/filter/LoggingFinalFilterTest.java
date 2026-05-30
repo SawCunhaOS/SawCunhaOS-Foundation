@@ -14,7 +14,7 @@
 package br.com.sawcunhaos.foundation.utils.configuration.rest.filter;
 
 import br.com.sawcunhaos.foundation.utils.configuration.rest.filter.properties.ScosFilterProperties;
-import br.com.sawcunhaos.foundation.utils.lgpd.SanitizationBodyComponent;
+import br.com.sawcunhaos.foundation.privacy.SanitizationBodyComponent;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;

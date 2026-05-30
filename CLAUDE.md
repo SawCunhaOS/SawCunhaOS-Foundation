@@ -1,3 +1,11 @@
+# Claude Instructions
+- Antes de responder a qualquer pergunta, valide a resposta se esta de acordo com o que foi perguntado.
+- Sempre que tiver no modo openspec explore deve ser criado um arquivo de ideia na pasta @etc/doc/ideia com base no template @etc/doc/templates/template.md
+- O comando do openspec propose deve sempre ter um arquivo de ideia criado.
+- NUNCA adivinhe soluções e nem mesmo tentar resolver problemas sem antes perguntar.
+- SEMPRE pergunte para ter todos os detalhes.
+- Sempre responda em PT-BR.
+
 <!-- rtk-instructions v2 -->
 # RTK (Rust Token Killer) - Token-Optimized Commands
 

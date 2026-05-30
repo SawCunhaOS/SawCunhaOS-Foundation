@@ -1,0 +1,44 @@
+{
+  "properties": [
+    {
+      "name": "scos.privacy.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the SCOS privacy masking module is active. Loads on import when true.",
+      "defaultValue": true
+    },
+    {
+      "name": "scos.privacy.strict",
+      "type": "java.lang.Boolean",
+      "description": "When true, missing crypto for hash/encrypt strategies is a startup error instead of degrading to a fixed mask.",
+      "defaultValue": false
+    },
+    {
+      "name": "scos.privacy.max-payload-kb",
+      "type": "java.lang.Integer",
+      "description": "Maximum payload size in KB before masking truncates the input, bounding worst-case latency.",
+      "defaultValue": 64
+    },
+    {
+      "name": "scos.privacy.masking.config-path",
+      "type": "java.lang.String",
+      "description": "External path to the masking rules YAML. Empty falls back to the classpath privacy-masking.yml."
+    },
+    {
+      "name": "scos.privacy.masking.default-patterns",
+      "type": "java.lang.Boolean",
+      "description": "Enable the default builtin packs when the YAML does not list any.",
+      "defaultValue": true
+    },
+    {
+      "name": "scos.privacy.log.register-converter",
+      "type": "java.lang.Boolean",
+      "description": "Register the Logback %mask conversion rule programmatically at startup (no logback.xml edit). Set false to opt out.",
+      "defaultValue": true
+    },
+    {
+      "name": "scos.privacy.crypto.secret",
+      "type": "java.lang.String",
+      "description": "Externalized secret for the default key provider (hash/encrypt). Prefer env SCOS_PRIVACY_CRYPTO_SECRET or Vault/KMS."
+    }
+  ]
+}

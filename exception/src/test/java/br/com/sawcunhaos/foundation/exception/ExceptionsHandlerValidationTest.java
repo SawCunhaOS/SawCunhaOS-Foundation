@@ -80,13 +80,13 @@ class ExceptionsHandlerValidationTest {
     @Test
     @DisplayName("simple fields produce #/<field> pointers")
     void simpleFieldsBecomeJsonPointers() {
-        when(localeService.getMessage(eq("deve ser um e-mail válido"), anyList())).thenReturn("deve ser um e-mail válido");
-        when(localeService.getMessage(eq("não deve estar em branco"), anyList())).thenReturn("não deve estar em branco");
+        when(localeService.getMessage(eq("SCOS-002"), anyList())).thenReturn("deve ser um e-mail válido");
+        when(localeService.getMessage(eq("SCOS-003"), anyList())).thenReturn("não deve estar em branco");
         when(localeService.getMessage(eq("SCOS-001"), any(Object[].class))).thenReturn("Um ou mais campos estão inválidos.");
 
         MethodArgumentNotValidException ex = exceptionWith(
-                fieldError("email", "deve ser um e-mail válido"),
-                fieldError("name", "não deve estar em branco")
+                fieldError("email", "SCOS-002"),
+                fieldError("name", "SCOS-003")
         );
         ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("POST", "/api/users"));
 
@@ -113,7 +113,7 @@ class ExceptionsHandlerValidationTest {
         when(localeService.getMessage(anyString(), anyList())).thenReturn("não deve estar em branco");
         when(localeService.getMessage(eq("SCOS-001"), any(Object[].class))).thenReturn("inválido");
 
-        MethodArgumentNotValidException ex = exceptionWith(fieldError("address.street", "não deve estar em branco"));
+        MethodArgumentNotValidException ex = exceptionWith(fieldError("address.street", "SCOS-002"));
         ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("POST", "/api/users"));
 
         ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(

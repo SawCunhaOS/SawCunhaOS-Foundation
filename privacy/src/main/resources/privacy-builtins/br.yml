@@ -1,0 +1,47 @@
+# Brazil PII patterns. Enabled via: scos.privacy.masking.builtins.enabled: [br]
+# cpf/cnpj carry a check-digit (DV) validation flag so a numeric sequence that matches the regex
+# but fails the DV is NOT masked, reducing false positives on the hot path.
+pack: br
+patterns:
+  - name: cpf
+    regex: '\b\d{3}\.?\d{3}\.?\d{3}\-?\d{2}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2
+    cpf: true
+  - name: cnpj
+    regex: '\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}\-?\d{2}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2
+    cnpj: true
+  - name: cep
+    regex: '\b\d{5}\-?\d{3}\b'
+    strategy: partial
+    keep-first: 2
+    keep-last: 0
+  - name: tel-br
+    regex: '\b(?:\+55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}\-?\d{4}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2
+  - name: rg
+    regex: '\b\d{1,2}\.?\d{3}\.?\d{3}\-?[0-9Xx]\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 1
+  - name: cnh
+    regex: '\b\d{11}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2
+  - name: pis
+    regex: '\b\d{3}\.?\d{5}\.?\d{2}\-?\d{1}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 1
+  - name: titulo-eleitor
+    regex: '\b\d{4}\s?\d{4}\s?\d{4}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2

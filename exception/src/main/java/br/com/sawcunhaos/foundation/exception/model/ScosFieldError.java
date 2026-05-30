@@ -13,8 +13,11 @@
 
 package br.com.sawcunhaos.foundation.exception.model;
 
+import br.com.sawcunhaos.foundation.utils.specification.ExceptionCode;
+
 import java.io.Serial;
 import java.io.Serializable;
+import java.net.URI;
 
 /**
  * Single field-level validation error inside an RFC 9457 problem response
@@ -31,7 +34,9 @@ import java.io.Serializable;
  */
 public record ScosFieldError(
         String pointer,
-        String detail
+        String detail,
+        String code,
+        String type
 ) implements Serializable {
 
     @Serial
@@ -44,8 +49,18 @@ public record ScosFieldError(
      * @param field   field path as reported by validation (e.g. {@code "email"},
      *                {@code "address.street"}).
      * @param detail  localized validation message.
+     * @param code   stable error code (e.g. {@code "VALIDATION_ERROR"}).
+     * @param type   error type (e.g. {@code "https://tools.ietf.org/html/rfc7807"}).
      */
-    public static ScosFieldError of(String field, String detail) {
-        return new ScosFieldError("#/" + field.replace(".", "/"), detail);
+    public static ScosFieldError of(String field, String detail, String code) {
+        return new ScosFieldError("#/" + field.replace(".", "/"), detail, code, typeFromCode(code).toString());
+    }
+
+    /**
+     * Derives the RFC 9457 {@code type} URI from a string code: lower-case,
+     * underscores to hyphens, appended to {@link ExceptionCode#PROBLEM_TYPE_BASE_URI}.
+     */
+    private static URI typeFromCode(String code) {
+        return URI.create(ExceptionCode.PROBLEM_TYPE_BASE_URI + code.toLowerCase().replace("_", "-"));
     }
 }

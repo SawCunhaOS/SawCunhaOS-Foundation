@@ -3,21 +3,23 @@
 ![Java](https://img.shields.io/badge/Java-25-orange.svg)
 ![Maven](https://img.shields.io/badge/Maven-3.x-blue.svg)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)
-![Version](https://img.shields.io/badge/Version-1.0.0--SNAPSHOT-yellow.svg)
+![Version](https://img.shields.io/badge/Version-1.2.0--SNAPSHOT-yellow.svg)
 
-Core foundation framework that provides shared infrastructure, integration utilities, auditing, exception handling, caching, and cross-cutting components for all SCOS projects.
+Core foundation framework that provides shared infrastructure, integration utilities, auditing, exception handling, caching, PII masking/privacy, security and cross-cutting components for all SCOS projects.
 
 ## 📋 Sumário
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Módulos](#módulos)
+  - [SCOS Foundation Privacy](#-scos-foundation-privacy)
   - [SCOS Foundation Utils](#-scos-foundation-utils)
   - [SCOS Foundation Exception](#-scos-foundation-exception)
   - [SCOS Foundation Audit](#-scos-foundation-audit)
   - [SCOS Foundation Jdempotent](#-scos-foundation-jdempotent)
+  - [SCOS Foundation Security](#-scos-foundation-security)
 - [Requisitos](#requisitos)
 - [Instalação](#instalação)
-- [Configuração](#configuração)
+- [Skills de configuração](#skills-de-configuração)
 - [Exemplos de Uso](#exemplos-de-uso)
 - [Contribuindo](#contribuindo)
 - [Licença](#licença)
@@ -28,8 +30,10 @@ O **SawCunhaOS-Foundation** é um framework fundamental que fornece componentes 
 
 ### Características Principais
 
-- ✅ Tratamento centralizado de exceções
-- ✅ Sistema de auditoria automatizado
+- ✅ Tratamento centralizado de exceções (RFC 9457 / `ProblemDetail`)
+- ✅ Sistema de auditoria automatizado (com cifra em repouso de PII opt-in)
+- ✅ Masking de PII de alto desempenho (logs, HTTP, auditoria) — foco LGPD
+- ✅ Segurança (resource server OAuth2/JWT, permissões, CORS)
 - ✅ Controle de idempotência para operações críticas
 - ✅ Utilitários para validação, cache, paginação e mais
 - ✅ Integração com Spring Boot e Spring Cloud
@@ -37,10 +41,109 @@ O **SawCunhaOS-Foundation** é um framework fundamental que fornece componentes 
 
 ## 📦 Módulos
 
+### 🛡️ SCOS Foundation Privacy
+
+**Artifact ID:** `scos-foundation-privacy`  
+**Versão:** `1.2.0-SNAPSHOT`
+
+Motor de **masking de PII** de alto desempenho, multithread-safe, com regras em YAML. Uma única fonte de
+regras alimenta três superfícies: filtro de log HTTP, converter Logback `%mask`, e cifra de campos do audit.
+O núcleo é **utilizável fora do Spring** via `MaskingEngine.fromYaml(...)`.
+
+> O antigo `utils.lgpd` foi **removido**; o masking agora vive inteiramente neste módulo. `utils` e `audit`
+> dependem de `privacy`.
+
+#### Funcionalidades
+
+- **Regras como dado (`privacy-masking.yml`)** — resolução externo → classpath → builtins + WARN; sem banco,
+  sem recompilar.
+- **Estratégias** — `fixed`, `partial`, `email`, `hash` (HMAC), `encrypt` (`enc:vN:`), `redact`, com fail-safe
+  e validação no startup.
+- **Builtins por país/região** — `generic`, `br`, `us`, `eu`, `uk`, `in` (cpf/cnpj/credit-card validam DV).
+- **Auto-configuração** — carrega ao estar no classpath (`scos.privacy.enabled`, default ligado); tudo
+  `@ConditionalOnMissingBean`; SPI `DataMaskingValues` opcional (precedência builtins → YAML → SPI).
+- **Masking de log Logback** — `%mask(%msg)` (texto livre) e `%maskmdc{chave}` (um valor de MDC), registrados
+  programaticamente (sem editar `logback.xml`).
+- **Cifra em repouso (audit)** — `ScosFieldCipher` (AES-256/GCM, token `enc:vN:`) + `ScosCryptoKeyProvider`
+  (Jasypt default, plugável Vault/KMS), chave versionada por registro.
+- **Performance** — `Pattern` pré-compilado, lookup O(1), Aho-Corasick, walk JSON in-place, fast-path
+  zero-alocação, proteção ReDoS; JMH com baseline.
+
+#### Como Usar
+
+**1. Adicione a dependência** (vem transitiva via `scos-foundation-utils`):
+
+```xml
+<dependency>
+    <groupId>br.com.sawcunhaos</groupId>
+    <artifactId>scos-foundation-privacy</artifactId>
+</dependency>
+```
+
+**2. Defina as regras em `privacy-masking.yml` (classpath):**
+
+```yaml
+scos:
+  privacy:
+    masking:
+      builtins:
+        enabled: [generic, br]
+      body:
+        - key: cpf
+          strategy: partial
+          keep-first: 0
+          keep-last: 2
+        - key: email
+          strategy: email
+      log-patterns:
+        - regex: '(?<![A-Za-z0-9])(\d{14}|[A-Za-z0-9]{8}\d{6})(?![A-Za-z0-9])'
+          strategy: partial
+          keep-first: 3
+          keep-last: 2
+      audit-encrypt-fields: [cpf, email]
+```
+
+**3. Flags em `application.yml`:**
+
+```yaml
+scos:
+  privacy:
+    enabled: true
+    strict: false
+    max-payload-kb: 64
+    log:
+      register-converter: true
+    crypto:
+      secret: ${SCOS_PRIVACY_CRYPTO_SECRET}
+```
+
+**4. Masking do log da aplicação (Logback):**
+
+```xml
+<conversionRule conversionWord="mask"
+                converterClass="br.com.sawcunhaos.foundation.privacy.logback.ScosMaskingConverter"/>
+<conversionRule conversionWord="maskmdc"
+                converterClass="br.com.sawcunhaos.foundation.privacy.logback.ScosMaskingMdcConverter"/>
+<pattern>%d %-5level %logger - %mask(%msg)%n</pattern>
+```
+
+> **`%mask(%msg)` é obrigatório no pattern** — o `%msg` default não mascara. Regras de `log-patterns` não
+> podem ser ancoradas `^...$`. Ver `privacy/README.md` para detalhes (AsyncAppender, Logstash/JSON, opt-out).
+
+**5. Uso standalone (sem Spring):**
+
+```java
+MaskingEngine engine = MaskingEngine.fromYaml(Path.of("/etc/scos/privacy-masking.yml"));
+engine.maskText("cpf=12345678901");          // -> cpf=*********01
+engine.maskStructured("cpf", "12345678901");
+```
+
+---
+
 ### 🔧 SCOS Foundation Utils
 
 **Artifact ID:** `scos-foundation-utils`  
-**Versão:** `1.0.0-SNAPSHOT`
+**Versão:** `1.2.0-SNAPSHOT`
 
 Módulo com utilitários comuns e componentes de infraestrutura compartilhados.
 
@@ -53,7 +156,8 @@ Módulo com utilitários comuns e componentes de infraestrutura compartilhados.
 - **Utilitários**
   - `DateUtils`: Manipulação de datas
   - `StringFieldUtils`: Manipulação de strings
-  - `HashUtils`: Geração de hashes
+  - `HashUtils`: `pseudonymize(value, secret)` (HMAC-SHA256, pseudonimização LGPD Art.13) e `createHash`
+    (SHA-256, **apenas checksum** — não é mecanismo de privacidade)
   - `GsonUtils` e `JacksonXmlUtils`: Serialização/Deserialização JSON/XML
   - `IpAddressExtractor`: Extração de endereços IP
   - `PaginationUtils`: Utilitários para paginação
@@ -83,7 +187,7 @@ Módulo com utilitários comuns e componentes de infraestrutura compartilhados.
 <dependency>
     <groupId>br.com.sawcunhaos</groupId>
     <artifactId>scos-foundation-utils</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -140,7 +244,7 @@ public ScosPaginatedDTO<PessoaDTO> listarPaginado(
 ### ⚠️ SCOS Foundation Exception
 
 **Artifact ID:** `scos-foundation-exception`  
-**Versão:** `1.0.0-SNAPSHOT`
+**Versão:** `1.2.0-SNAPSHOT`
 
 Módulo para tratamento centralizado de exceções e padronização de respostas de erro.
 
@@ -178,7 +282,7 @@ Módulo para tratamento centralizado de exceções e padronização de respostas
 <dependency>
     <groupId>br.com.sawcunhaos</groupId>
     <artifactId>scos-foundation-exception</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -234,7 +338,7 @@ PESSOA_002=CPF já cadastrado no sistema
 ### 📊 SCOS Foundation Audit
 
 **Artifact ID:** `scos-foundation-audit`  
-**Versão:** `1.0.0-SNAPSHOT`
+**Versão:** `1.2.0-SNAPSHOT`
 
 Módulo para auditoria automática de operações em entidades JPA.
 
@@ -247,15 +351,20 @@ Módulo para auditoria automática de operações em entidades JPA.
   - Armazenamento de valores antigos e novos (em formato JSON)
   - Suporte a múltiplas origens/sistemas
 
+- **Cifra em repouso de PII (opt-in, via `privacy`)**
+  - Campos listados em `audit-encrypt-fields` são cifrados antes de gravar o JSONB (`enc:vN:`)
+  - Exige `scos.privacy.crypto.secret`; lista vazia = comportamento atual (texto em claro)
+  - Rotação por `keyId`; histórico não é re-cifrado
+
 - **Configuração**
-  - DataSource dedicado para auditoria
+  - DataSource dedicado para auditoria (`spring.datasource.audit.*`)
   - Integração com Liquibase para gerenciamento de schemas
   - Configuração de pool de conexões Hikari
-  - Suporte a execução assíncrona
+  - Execução assíncrona (`ScosAuditLogAsyncExecutor`)
 
 - **Entidades**
   - `ScosAuditLog`: Registro de auditoria
-  - `ActionType`: Tipo de ação (CREATE, UPDATE, DELETE)
+  - `ActionType`: Tipo de ação (INSERT, UPDATE, DELETE)
 
 #### Como Usar
 
@@ -265,7 +374,7 @@ Módulo para auditoria automática de operações em entidades JPA.
 <dependency>
     <groupId>br.com.sawcunhaos</groupId>
     <artifactId>scos-foundation-audit</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -378,7 +487,7 @@ public class AuditoriaService {
 ### 🔄 SCOS Foundation Jdempotent
 
 **Artifact ID:** `scos-foundation-jdempotent`  
-**Versão:** `1.0.0-SNAPSHOT`
+**Versão:** `1.2.0-SNAPSHOT`
 
 Módulo para garantir idempotência em operações críticas, prevenindo execuções duplicadas.
 
@@ -410,7 +519,7 @@ Módulo para garantir idempotência em operações críticas, prevenindo execuç
 <dependency>
     <groupId>br.com.sawcunhaos</groupId>
     <artifactId>scos-foundation-jdempotent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -516,6 +625,77 @@ public class TransferenciaService {
 
 ---
 
+### 🔐 SCOS Foundation Security
+
+**Artifact ID:** `scos-foundation-security`  
+**Versão:** `1.2.0-SNAPSHOT`
+
+Autenticação e autorização: resource server OAuth2 com JWT (Keycloak), permissões em banco dedicado, cache de
+login/permissão, CORS e usuário corrente (`ScosUserAuthentication`).
+
+#### Funcionalidades
+
+- **Resource server OAuth2/JWT** — validação de token via `issuer-uri`; `JwtAuthConverter` mapeia o principal
+  (`preferred_username`) e as authorities.
+- **DataSource dedicado de segurança** (`scos.security.datasource.*`) para login/permissões.
+- **Cache de login/permissão** (`scos.security.cache.*`).
+- **CORS** configurável via `cors-security.*`.
+- **Modelo de permissões** — `ScosPermission`, `ScosFeature`, `@PreAuthorize`, filtros `ScosCorsFilter` /
+  `AuthorizationRequiredFilter`; usuário corrente via `AuthenticationUtils`.
+
+#### Como Usar
+
+**1. Adicione a dependência:**
+
+```xml
+<dependency>
+    <groupId>br.com.sawcunhaos</groupId>
+    <artifactId>scos-foundation-security</artifactId>
+</dependency>
+```
+
+**2. Configure no `application.yml`:**
+
+```yaml
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://keycloak.exemplo.com/realms/meu-realm
+scos:
+  security:
+    datasource:
+      url: jdbc:postgresql://localhost:5432/security
+      username: security
+      password: ${SECURITY_DB_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+    cache:
+      maximum-size-logins: 1000
+      maximum-size-permission: 5000
+cors-security:
+  allowOrigin: "https://app.exemplo.com"
+  allowMethods: "GET,POST,DELETE,PUT,OPTIONS"
+  allowCredentials: "true"
+  maxAge: "1800"
+```
+
+**3. Proteja endpoints e use o usuário corrente:**
+
+```java
+@ScosRequestGET(uri = "/companies")
+@PreAuthorize("hasAuthority('COMPANY_READ')")
+public ScosResponseDTO<List<CompanyDTO>> list() {
+    ScosUserAuthentication user = AuthenticationUtils.currentUser();
+    return ScosResponseUtils.ok(service.list());
+}
+```
+
+> O módulo sobe pelo **component scan** (`@ComponentScan("br.com.sawcunhaos")`) — não possui
+> `AutoConfiguration.imports`. CORS usa o prefixo `cors-security.*` (não `scos.security.cors`).
+
+---
+
 ## 📋 Requisitos
 
 - **Java:** 25
@@ -548,9 +728,14 @@ Depois adicione os módulos necessários:
 
 ```xml
 <dependencies>
+    <!-- base: traz scos-foundation-privacy transitivamente -->
     <dependency>
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-foundation-utils</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>br.com.sawcunhaos</groupId>
+        <artifactId>scos-foundation-privacy</artifactId>
     </dependency>
     <dependency>
         <groupId>br.com.sawcunhaos</groupId>
@@ -564,8 +749,16 @@ Depois adicione os módulos necessários:
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-foundation-jdempotent</artifactId>
     </dependency>
+    <dependency>
+        <groupId>br.com.sawcunhaos</groupId>
+        <artifactId>scos-foundation-security</artifactId>
+    </dependency>
 </dependencies>
 ```
+
+> **Ativação:** o app consumidor precisa de `@SpringBootApplication` com
+> `@ComponentScan(basePackages = {"br.com.sawcunhaos"})` — `utils`, `exception` e `security` sobem por
+> component scan; `privacy`, `audit` e `jdempotent` por auto-configuração.
 
 ### 2. Build do Projeto
 
@@ -592,6 +785,21 @@ Para fazer deploy para o Maven Central:
 # Execute o script de deploy
 ./scripts/deploy.sh
 ```
+
+## 🧭 Skills de configuração
+
+Para acelerar a configuração de **novos sistemas**, há uma skill de configuração por módulo em
+[`etc/doc/skills`](etc/doc/skills/README.md) — cada uma cobre dependência, ativação, chaves de
+`application.yml`, override de beans, exemplo de uso e pegadinhas:
+
+| Skill | Módulo |
+|---|---|
+| [scos-privacy-config](etc/doc/skills/scos-privacy-config/SKILL.md) | `scos-foundation-privacy` |
+| [scos-utils-config](etc/doc/skills/scos-utils-config/SKILL.md) | `scos-foundation-utils` |
+| [scos-exception-config](etc/doc/skills/scos-exception-config/SKILL.md) | `scos-foundation-exception` |
+| [scos-audit-config](etc/doc/skills/scos-audit-config/SKILL.md) | `scos-foundation-audit` |
+| [scos-jdempotent-config](etc/doc/skills/scos-jdempotent-config/SKILL.md) | `scos-foundation-jdempotent` |
+| [scos-security-config](etc/doc/skills/scos-security-config/SKILL.md) | `scos-foundation-security` |
 
 ## 📚 Exemplos de Uso
 

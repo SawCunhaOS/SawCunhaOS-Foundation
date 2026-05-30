@@ -1,0 +1,13 @@
+# United Kingdom PII patterns. Enabled via: scos.privacy.masking.builtins.enabled: [uk]
+pack: uk
+patterns:
+  - name: nino
+    regex: '\b[A-CEGHJ-PR-TW-Z]{2}\d{6}[A-D]\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 1
+  - name: nhs
+    regex: '\b\d{3}\s?\d{3}\s?\d{4}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 2
