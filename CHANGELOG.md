@@ -5,6 +5,40 @@ All notable changes to SCOS Foundation are documented here. The format is based 
 
 ## [Unreleased]
 
+### Added — `scos-foundation-audit` module (accountability / LGPD)
+
+- **Batch pipeline**: `ScosAuditBatchConsumer` drains `ConcurrentLinkedQueue` by size (default 100) or
+  interval (default 500 ms) via a dedicated virtual thread; `saveAll` replaces `saveAndFlush` — N round-trips
+  → 1 per batch. Configurable via `scos.audit.performance.*`.
+- **Durability**: retry with exponential backoff (`scos.audit.durability.retry-max`, default 3); DLQ table
+  `SFA_AUDIT_DLQ` stores failed batches; `@Scheduled` job reprocesses up to 50 entries per run.
+- **Hash-chain / tamper-evidence**: opt-in via `scos.audit.immutability.hash-chain=true`; SHA-256 chain
+  per `(entity, idEntity)`; `ScosAuditIntegrityService.verifyChain()` detects tampering and missing records.
+- **Audit query**: `ScosAuditQueryService` exposes paginated queries by entity/idEntity, user, period, and
+  `xRequestId`; backed by new JPA queries + indices on `SFA_LOG_AUDIT`.
+- **READ coverage**: `@Auditable` now accepts `action = AuditAction.READ` (method-level); `ScosAuditReadAspect`
+  emits `ActionType.SELECT` after successful return; `ScosAuditService.recordRead()` for manual bulk/JPQL ops.
+- **Retention**: `ScosAuditRetentionJob` purges expired records (`scos.audit.retention.ttl-days`); inserts
+  tombstone record (`ActionType.TOMBSTONE`) to preserve hash-chain integrity. Opt-in via `retention.enabled`.
+- **Observability**: `audit.queue.depth` (Gauge), `audit.batch.size` (DistributionSummary),
+  `audit.events.dlq` (Counter) via Micrometer `ObjectProvider` — no-op when Micrometer is absent.
+- **Integration tests**: Testcontainers + PostgreSQL covering burst batching (≥500 events), retry, DLQ,
+  backpressure, hash-chain (tamper detection), paginated query, READ coverage, retention/tombstone, metrics.
+
+### Changed — `scos-foundation-audit`
+
+- `@Auditable` annotation (in `scos-foundation-utils`) extended with `action()`, `entity()`,
+  `idEntitySpEL()` attributes — backward-compatible (all defaults preserved, existing class-level usage unchanged).
+- `ActionType` enum gains `TOMBSTONE` value.
+
+### **BREAKING** — `scos-foundation-audit`
+
+- **Liquibase migration required**: `SFA_LOG_AUDIT` gains nullable column `HASH_CHAIN VARCHAR(64)`;
+  new table `SFA_AUDIT_DLQ` created; new composite index `IDX_ILA_ENTITY_ID` on `(ENTITY, ID_ENTITY)`.
+  Run migration before deploying; old records have `HASH_CHAIN = NULL` (chain starts from first new record).
+- **Grants**: to enforce append-only policy, revoke `UPDATE` and `DELETE` on `SFA_LOG_AUDIT` for the
+  application role: `REVOKE UPDATE, DELETE ON SFA_LOG_AUDIT FROM <your_app_role>;`
+
 ### Added — `scos-foundation-privacy` module
 
 - New base-layer module **`scos-foundation-privacy`** providing a high-performance, multithread-safe

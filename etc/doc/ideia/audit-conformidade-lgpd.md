@@ -36,11 +36,13 @@ completo** de auditoria/accountability. Mapeando as etapas:
 | Proteção de **PII** na trilha | ❌ | `entityOld`/`entityNew` em JSONB cru | **sim → doc privacy §5** |
 | **Retenção / expurgo** | ❌ | sem TTL/purge (LGPD Art. 15/16) | não |
 | **Garantia de não-perda** | ⚠️ | `saveAuditLog` engole exceção e só loga; `@Async` fire-and-forget → perda silenciosa, sem retry/DLQ | não |
+| **Desempenho de persistência** | ❌ | `saveAndFlush` individual por evento; sem batching → N round-trips sob burst; `ThreadPoolTaskScheduler` pool-30 não resolve gargalo de I/O | não |
 
 **Veredito:** para a trilha sustentar prestação de contas (LGPD Art. 6 X / 37,
 GDPR A5(2), PIPL A55), faltam **consulta**, **imutabilidade**, **retenção**,
-**cobertura de leitura** e **durabilidade**. Hoje o `✅` da accountability é
-**parcial** — a trilha existe, mas não é consultável nem à prova de adulteração.
+**cobertura de leitura**, **durabilidade** e **desempenho de persistência**. Hoje
+o `✅` da accountability é **parcial** — a trilha existe, mas não é consultável,
+não está à prova de adulteração e não aguenta carga moderada-alta sem degradar.
 
 ### Estrutura atual do módulo `audit`
 
@@ -120,17 +122,79 @@ Tornar a trilha **append-only**:
 
 `saveAuditLog` não pode perder evento sem rastro:
 
-- Retry com backoff na persistência.
-- Fila de fallback (**DLQ/outbox**) quando a persistência falha.
-- Métrica de "auditoria perdida" exposta (observabilidade).
-- `@Async` mantém o request rápido, **mas com garantia de entrega** — substituir o
-  atual `catch (Exception) { log }` por caminho de fallback.
+- Retry com backoff na persistência (integrado ao `ScosAuditBatchConsumer` — §6).
+- Tabela **DLQ** (`SFA_AUDIT_DLQ`) no mesmo datasource isolado do audit: batch que
+  falha após retries persiste na DLQ; `@Scheduled` reprocessa a DLQ.
+- Métrica de "auditoria perdida" exposta: `audit.events.dlq` (observabilidade).
+- Substituir o atual `catch (Exception) { log }` por caminho de fallback → DLQ.
+
+> **Tolerância a crash de JVM:** eventos na fila em memória no momento do crash
+> são perdidos. Decisão aceita — se a JVM cai, o sistema não está em uso e não há
+> eventos novos entrando. A durabilidade aqui cobre **falhas transientes do banco**,
+> não crash de processo.
 
 ### 5. Retenção / expurgo
 
 - Job de TTL/purge configurável por política (LGPD Art. 15/16, GDPR A5(e)).
 - Preservar o encadeamento de hash ao expurgar (marca de **tombstone** no lugar do
   registro removido, mantendo a cadeia verificável).
+
+### 6. Desempenho de persistência (batching)
+
+`saveAndFlush` individual por evento = N round-trips sob carga. Substituir por
+pipeline com fila em memória e consumer que drena em lote:
+
+- Evento entra em `ConcurrentLinkedQueue<ScosAuditLog>` via `@Async` — não bloqueia
+  o thread Hibernate nem o request de negócio.
+- `ScosAuditBatchConsumer` (virtual thread dedicada) drena por **tamanho** (N=100)
+  **ou** por **intervalo** (T=500ms), o que vier primeiro.
+- `saveAll(lote)` substitui `saveAndFlush` individual → 1 round-trip por lote.
+- Se fila atingir capacidade máxima (`queue-capacity`), evento vai direto para DLQ
+  (backpressure sem bloquear o negócio).
+- Métricas expostas: `audit.queue.depth`, `audit.batch.size`, `audit.events.dlq`.
+
+```
+Hibernate Event
+    │ @Async (virtual thread — não bloqueia negócio)
+    ▼
+ConcurrentLinkedQueue<ScosAuditLog>  (capacidade: 10000)
+    │
+    ▼  ScosAuditBatchConsumer (virtual thread dedicada)
+    │  drain: size=100 OU 500ms
+    ▼
+saveAll(lote) → audit DB             (1 round-trip para N eventos)
+    │
+    ├── ok
+    └── falha → retry 3× backoff
+                    └── falha → INSERT SFA_AUDIT_DLQ
+                                @Scheduled reprocessa DLQ
+```
+
+**Ganho esperado (carga moderada-alta, ~100–1000 ev/s):**
+- Hoje: 100 eventos = 100 round-trips DB
+- Após: 100 eventos = 1 round-trip DB (batch_size=100)
+
+### 7. Testes de integração (obrigatório)
+
+Todos os novos comportamentos devem ser cobertos por testes de integração com banco
+real (Testcontainers + PostgreSQL). Testes unitários isolados **não substituem** —
+batching, retry, DLQ e hash-chain só são verificáveis com I/O real.
+
+| Cenário | O que verificar |
+|---|---|
+| **Carga / batching** | Burst de ≥500 eventos simultâneos → `ScosAuditBatchConsumer` drena em lotes; thread de negócio não bloqueia; todos os eventos persistem |
+| **Retry** | Derrubar conexão audit DB durante persistência → retry com backoff; evento persiste após DB voltar |
+| **DLQ** | Exaurir `retry-max` (DB permanece fora) → INSERT em `SFA_AUDIT_DLQ`; `@Scheduled` reprocessa e move para `SFA_LOG_AUDIT` |
+| **Backpressure** | Encher fila até `queue-capacity` → excedente vai para DLQ; thread de negócio não bloqueia |
+| **Hash-chain** | Sequência C/U/D → encadeamento correto; adulterar registro diretamente no DB → `auditIntegrityService.verifyChain` retorna `false` |
+| **Consulta paginada** | Inserir trilha variada → queries por entidade/usuário/período/`xRequestId` retornam correto com paginação |
+| **Cobertura READ** | Método anotado com `@Auditable` → `ActionType.SELECT` emitido e persistido na trilha |
+| **Retenção / tombstone** | Registros com `executionDate` expirado → job TTL purga; tombstone inserido; cadeia hash permanece verificável |
+| **Métricas** | Burst de eventos → `audit.queue.depth` e `audit.batch.size` expostos com valores coerentes |
+
+> Usar Testcontainers + `@ServiceConnection` (PostgreSQL) para o datasource de audit.
+> Testes de carga devem usar threads virtuais / `CompletableFuture` para simular
+> burst realista sem overhead de plataforma de load.
 
 ---
 
@@ -150,7 +214,11 @@ scos:
       ttl-days: 1825            # política do controlador (ex.: 5 anos)
     durability:
       retry-max: 3
-      dlq: true                 # fila de fallback se persistência falhar
+      dlq-enabled: true         # tabela SFA_AUDIT_DLQ como fallback
+    performance:
+      queue-capacity: 10000     # buffer máx em memória (carga moderada-alta)
+      batch-size: 100           # eventos por saveAll
+      flush-interval-ms: 500    # drena mesmo se batch-size não atingido
 ```
 
 ### Consulta de trilha (investigação)
@@ -177,9 +245,13 @@ boolean integra = auditIntegrityService.verifyChain("Pessoa", "4711");
    `scos.audit.diff-only` para gravar só campos alterados em UPDATE.
 2. **Imutabilidade:** append-only (grant INSERT/SELECT) + hash-chain;
    WORM opcional onde o storage suportar.
-3. **Durabilidade:** retry + DLQ/outbox; nunca `catch` silencioso.
+3. **Durabilidade:** retry + DLQ (tabela `SFA_AUDIT_DLQ`); nunca `catch` silencioso.
 4. **Retenção:** TTL configurável pela app (controlador define o prazo);
    tombstone preserva a cadeia ao expurgar.
+5. **Desempenho:** fila em memória (`ConcurrentLinkedQueue`) + `ScosAuditBatchConsumer`
+   com drain por tamanho/tempo; `saveAll` substitui `saveAndFlush` individual;
+   backpressure via `queue-capacity`; crash de JVM aceito como janela de perda
+   (sistema fora de uso nesse cenário).
 
 ---
 
@@ -215,8 +287,11 @@ boolean integra = auditIntegrityService.verifyChain("Pessoa", "4711");
 | Consulta paginada por entidade/usuário/período | ✅ Requisito p/ accountability demonstrável |
 | Retenção/TTL com tombstone preservando cadeia | ✅ LGPD Art. 15/16 · GDPR A5(e) |
 | Cobertura de leitura (READ) + fora do Hibernate | ✅ Fecha lacuna de captura |
-| Durabilidade com retry + DLQ/outbox | ✅ Garante não-perda do evento |
+| Durabilidade com retry + DLQ (`SFA_AUDIT_DLQ`) | ✅ Garante não-perda em falha transiente |
 | `@Async` mantém request rápido | ✅ Já existe; só falta garantia de entrega |
+| Batching (`saveAll` por lote) + fila em memória | ✅ Throughput 100–1000 ev/s sem degradar negócio |
+| Métricas de fila (`audit.queue.depth`, `audit.events.dlq`) | ✅ Observabilidade da pipeline de auditoria |
+| Testes de integração com banco real (Testcontainers) | ✅ **Obrigatório** — cobre carga, retry, DLQ, hash-chain, consulta, READ, retenção |
 | Governança (ROPA, base legal, incidente) fora de escopo | ✅ Correto p/ uma biblioteca |
 
 ### Resumo: o que a implementação deve fazer além do código
@@ -224,9 +299,20 @@ boolean integra = auditIntegrityService.verifyChain("Pessoa", "4711");
 1. Estender `ScosAuditLogRepository` + use-case de consulta paginado.
 2. Adicionar coluna de hash encadeado (Liquibase) + serviço de verificação de cadeia.
 3. Emitir `ActionType.READ` (aspecto) + ponto de registro manual para JPQL/bulk.
-4. Substituir `catch` silencioso por retry + DLQ/outbox; expor métrica de perda.
+4. Substituir `catch` silencioso por retry + DLQ (`SFA_AUDIT_DLQ`); expor métrica de perda.
 5. Job de retenção/purge configurável com tombstone.
-6. Documentar grants (negar UPDATE/DELETE) e flags `scos.audit.*` no CHANGELOG.
+6. Implementar `ScosAuditBatchConsumer`: fila `ConcurrentLinkedQueue` + drain por
+   size/tempo + `saveAll` em lote + backpressure via `queue-capacity`; expor métricas
+   `audit.queue.depth`, `audit.batch.size`, `audit.events.dlq`.
+7. Documentar grants (negar UPDATE/DELETE), flags `scos.audit.*` e tuning de
+   performance no CHANGELOG.
+8. **Atualizar README do módulo `audit`** com guia completo de uso em projeto:
+   configuração mínima (`application.yml`), uso de `@Auditable`, consulta de trilha
+   via use-case, grants necessários no banco e tuning de performance
+   (`scos.audit.performance.*`).
+9. **Testes de integração obrigatórios** (Testcontainers + PostgreSQL): carga/batching
+   (≥500 eventos burst), retry, DLQ, backpressure, hash-chain (incluindo detecção de
+   adulteração), consulta paginada, READ coverage, retenção/tombstone e métricas.
 
 ---
 

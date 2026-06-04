@@ -60,5 +60,6 @@ public final class ScosLiquibaseTestConfiguration {
         registry.getEventListenerGroup(EventType.POST_INSERT).appendListener(listener);
         registry.getEventListenerGroup(EventType.POST_UPDATE).appendListener(listener);
         registry.getEventListenerGroup(EventType.POST_DELETE).appendListener(listener);
+        registry.getEventListenerGroup(EventType.POST_LOAD).appendListener(listener);
     }
 }
