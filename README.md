@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)
 ![Version](https://img.shields.io/badge/Version-1.2.0--SNAPSHOT-yellow.svg)
 
-Core foundation framework that provides shared infrastructure, integration utilities, auditing, exception handling, caching, PII masking/privacy, security and cross-cutting components for all SCOS projects.
+Core foundation framework that provides shared infrastructure, integration utilities, auditing, exception handling, caching, PII masking/privacy and cross-cutting components for all SCOS projects.
 
 ## 📋 Sumário
 
@@ -16,7 +16,6 @@ Core foundation framework that provides shared infrastructure, integration utili
   - [SCOS Foundation Exception](#-scos-foundation-exception)
   - [SCOS Foundation Audit](#-scos-foundation-audit)
   - [SCOS Foundation Jdempotent](#-scos-foundation-jdempotent)
-  - [SCOS Foundation Security](#-scos-foundation-security)
 - [Requisitos](#requisitos)
 - [Instalação](#instalação)
 - [Skills de configuração](#skills-de-configuração)
@@ -625,77 +624,6 @@ public class TransferenciaService {
 
 ---
 
-### 🔐 SCOS Foundation Security
-
-**Artifact ID:** `scos-foundation-security`  
-**Versão:** `1.2.0-SNAPSHOT`
-
-Autenticação e autorização: resource server OAuth2 com JWT (Keycloak), permissões em banco dedicado, cache de
-login/permissão, CORS e usuário corrente (`ScosUserAuthentication`).
-
-#### Funcionalidades
-
-- **Resource server OAuth2/JWT** — validação de token via `issuer-uri`; `JwtAuthConverter` mapeia o principal
-  (`preferred_username`) e as authorities.
-- **DataSource dedicado de segurança** (`scos.security.datasource.*`) para login/permissões.
-- **Cache de login/permissão** (`scos.security.cache.*`).
-- **CORS** configurável via `cors-security.*`.
-- **Modelo de permissões** — `ScosPermission`, `ScosFeature`, `@PreAuthorize`, filtros `ScosCorsFilter` /
-  `AuthorizationRequiredFilter`; usuário corrente via `AuthenticationUtils`.
-
-#### Como Usar
-
-**1. Adicione a dependência:**
-
-```xml
-<dependency>
-    <groupId>br.com.sawcunhaos</groupId>
-    <artifactId>scos-foundation-security</artifactId>
-</dependency>
-```
-
-**2. Configure no `application.yml`:**
-
-```yaml
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://keycloak.exemplo.com/realms/meu-realm
-scos:
-  security:
-    datasource:
-      url: jdbc:postgresql://localhost:5432/security
-      username: security
-      password: ${SECURITY_DB_PASSWORD}
-      driver-class-name: org.postgresql.Driver
-    cache:
-      maximum-size-logins: 1000
-      maximum-size-permission: 5000
-cors-security:
-  allowOrigin: "https://app.exemplo.com"
-  allowMethods: "GET,POST,DELETE,PUT,OPTIONS"
-  allowCredentials: "true"
-  maxAge: "1800"
-```
-
-**3. Proteja endpoints e use o usuário corrente:**
-
-```java
-@ScosRequestGET(uri = "/companies")
-@PreAuthorize("hasAuthority('COMPANY_READ')")
-public ScosResponseDTO<List<CompanyDTO>> list() {
-    ScosUserAuthentication user = AuthenticationUtils.currentUser();
-    return ScosResponseUtils.ok(service.list());
-}
-```
-
-> O módulo sobe pelo **component scan** (`@ComponentScan("br.com.sawcunhaos")`) — não possui
-> `AutoConfiguration.imports`. CORS usa o prefixo `cors-security.*` (não `scos.security.cors`).
-
----
-
 ## 📋 Requisitos
 
 - **Java:** 25
@@ -749,15 +677,11 @@ Depois adicione os módulos necessários:
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-foundation-jdempotent</artifactId>
     </dependency>
-    <dependency>
-        <groupId>br.com.sawcunhaos</groupId>
-        <artifactId>scos-foundation-security</artifactId>
-    </dependency>
 </dependencies>
 ```
 
 > **Ativação:** o app consumidor precisa de `@SpringBootApplication` com
-> `@ComponentScan(basePackages = {"br.com.sawcunhaos"})` — `utils`, `exception` e `security` sobem por
+> `@ComponentScan(basePackages = {"br.com.sawcunhaos"})` — `utils`, `exception` sobem por
 > component scan; `privacy`, `audit` e `jdempotent` por auto-configuração.
 
 ### 2. Build do Projeto
@@ -799,7 +723,6 @@ Para acelerar a configuração de **novos sistemas**, há uma skill de configura
 | [scos-exception-config](etc/doc/skills/scos-exception-config/SKILL.md) | `scos-foundation-exception` |
 | [scos-audit-config](etc/doc/skills/scos-audit-config/SKILL.md) | `scos-foundation-audit` |
 | [scos-jdempotent-config](etc/doc/skills/scos-jdempotent-config/SKILL.md) | `scos-foundation-jdempotent` |
-| [scos-security-config](etc/doc/skills/scos-security-config/SKILL.md) | `scos-foundation-security` |
 
 ## 📚 Exemplos de Uso
 

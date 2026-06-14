@@ -1,16 +1,24 @@
 name: Publish Snapshot
 
 on:
-  push:
-    branches: [ 'develop', 'fix/**/*', 'release/**/*' ]
+  workflow_run:
+    workflows: ["Build & Test"]
+    types: [completed]
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Só publica se o build passou e o branch é develop/fix/release
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.head_branch == 'develop' ||
+       startsWith(github.event.workflow_run.head_branch, 'fix/') ||
+       startsWith(github.event.workflow_run.head_branch, 'release/'))
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }} # commit exato que disparou o build
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Set up Java
@@ -23,30 +31,18 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Import GPG key
-        run: |
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent || true
-          
-          # Try to import the key (handle both base64-encoded and plain text formats)
-          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 -d 2>/dev/null | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || \
-          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || true
-          
-          # List imported keys and set default key
-          gpg --list-secret-keys --keyid-format short
-          
-          # Configure GPG to use loopback for all operations
-          echo "pinentry-program /usr/bin/pinentry-loopback" >> ~/.gnupg/gpg-agent.conf || true
-          gpgconf --kill gpg-agent || true
+        uses: ./.github/actions/setup-gpg
+        with:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run release script
-        run: bash scripts/deploy.sh ${{ github.event.inputs.version_type }}
+      - name: Run deploy script
+        run: bash scripts/deploy.sh
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
@@ -57,4 +53,3 @@ jobs:
         run: |
           gpg-connect-agent KILLAGENT /bye || true
           rm -rf ~/.gnupg || true
-

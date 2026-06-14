@@ -58,6 +58,14 @@ public class LoggingFinalFilter extends OncePerRequestFilter {
 	private final SanitizationBodyComponent sanitizationBodyComponent;
 
 	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		// Ignora requisições gRPC — usam I/O async que é incompatível
+		// com o MultiReadHttpServletRequest
+		String contentType = request.getContentType();
+		return contentType != null && contentType.startsWith("application/grpc");
+	}
+
+	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request,
 			HttpServletResponse response,

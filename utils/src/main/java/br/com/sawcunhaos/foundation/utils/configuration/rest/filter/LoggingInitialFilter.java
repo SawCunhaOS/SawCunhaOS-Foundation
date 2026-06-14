@@ -77,6 +77,14 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
     private final IpAddressExtractor ipExtractor;
 
 	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		// Ignora requisições gRPC — usam I/O async que é incompatível
+		// com o MultiReadHttpServletRequest
+		String contentType = request.getContentType();
+		return contentType != null && contentType.startsWith("application/grpc");
+	}
+
+	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request,
 			HttpServletResponse response,
@@ -139,9 +147,8 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
 
 		final Map<String, String> masked = sanitizationHeadersComponent.sanitize(raw);
 		final StringBuilder formatted = new StringBuilder();
-		masked.forEach((name, value) -> formatted.append("""
-				Header Name -> %s -- %s
-				""".formatted(name, value)));
+		masked.forEach((name, value) -> formatted
+				.append("Header Name -> ").append(name).append(" -- ").append(value).append('\n'));
 		return formatted.toString();
 	}
 

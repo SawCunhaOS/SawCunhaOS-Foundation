@@ -28,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
  * A single key id ({@code v1}) is exposed here; rotation is achieved by deploying a provider that knows
  * multiple ids.</p>
  */
-public class JasyptCryptoKeyProvider implements ScosCryptoKeyProvider {
+public final class JasyptCryptoKeyProvider implements ScosCryptoKeyProvider {
 
     private static final String DEFAULT_KEY_ID = "v1";
 

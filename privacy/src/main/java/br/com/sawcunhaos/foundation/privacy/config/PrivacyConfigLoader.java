@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Loads {@link PrivacyConfig} from a dedicated YAML file using SnakeYAML only (no Spring, no database).
@@ -119,9 +120,9 @@ public final class PrivacyConfigLoader {
         }
 
         readBuiltins(masking, config);
-        readRules((List<Object>) masking.get("headers"), config.getHeaders(), false, "headers");
-        readRules((List<Object>) masking.get("body"), config.getBody(), false, "body");
-        readRules((List<Object>) masking.get("log-patterns"), config.getLogPatterns(), true, "log-patterns");
+        readRules((List<Object>) masking.get("headers"), config::addHeader, false, "headers");
+        readRules((List<Object>) masking.get("body"), config::addBody, false, "body");
+        readRules((List<Object>) masking.get("log-patterns"), config::addLogPattern, true, "log-patterns");
         readAuditFields(masking.get("audit-encrypt-fields"), config);
         return config;
     }
@@ -134,16 +135,16 @@ public final class PrivacyConfigLoader {
         }
         final Object enabled = ((Map<String, Object>) b).get("enabled");
         if (enabled instanceof List<?> list) {
-            list.forEach(item -> config.getBuiltins().getEnabled().add(String.valueOf(item).toLowerCase(Locale.ROOT)));
+            list.forEach(item -> config.addEnabledBuiltin(String.valueOf(item).toLowerCase(Locale.ROOT)));
         }
         final Object disabled = ((Map<String, Object>) b).get("disabled");
         if (disabled instanceof List<?> list) {
-            list.forEach(item -> config.getBuiltins().getDisabled().add(String.valueOf(item).toLowerCase(Locale.ROOT)));
+            list.forEach(item -> config.addDisabledBuiltin(String.valueOf(item).toLowerCase(Locale.ROOT)));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private static void readRules(final List<Object> raw, final List<PrivacyConfig.RuleEntry> target,
+    private static void readRules(final List<Object> raw, final Consumer<PrivacyConfig.RuleEntry> sink,
                                   final boolean logPattern, final String section) {
         if (raw == null) {
             return;
@@ -154,7 +155,7 @@ public final class PrivacyConfigLoader {
             }
             final PrivacyConfig.RuleEntry entry = toEntry((Map<String, Object>) map, section);
             validateEntry(entry, logPattern, section);
-            target.add(entry);
+            sink.accept(entry);
         }
     }
 
@@ -175,9 +176,9 @@ public final class PrivacyConfigLoader {
                 case "keep-first" -> entry.setKeepFirst(asInt(v, "keep-first"));
                 case "keep-last" -> entry.setKeepLast(asInt(v, "keep-last"));
                 case "mask-char" -> entry.setMaskChar(asString(v));
-                case "preserve-length" -> entry.setPreserveLength(asBool(v));
-                case "mask-local" -> entry.setMaskLocal(asBool(v));
-                case "mask-domain" -> entry.setMaskDomain(asBool(v));
+                case "preserve-length" -> { if (v != null) entry.setPreserveLength(asBool(v)); }
+                case "mask-local" -> { if (v != null) entry.setMaskLocal(asBool(v)); }
+                case "mask-domain" -> { if (v != null) entry.setMaskDomain(asBool(v)); }
                 default -> { /* name/luhn/cpf/cnpj: builtin flags handled by BuiltinPackLoader */ }
             }
         }
@@ -223,7 +224,7 @@ public final class PrivacyConfigLoader {
     @SuppressWarnings("unchecked")
     private static void readAuditFields(final Object raw, final PrivacyConfig config) {
         if (raw instanceof List<?> list) {
-            list.forEach(item -> config.getAuditEncryptFields().add(String.valueOf(item)));
+            list.forEach(item -> config.addAuditEncryptField(String.valueOf(item)));
         }
     }
 
@@ -264,10 +265,7 @@ public final class PrivacyConfigLoader {
         }
     }
 
-    private static Boolean asBool(final Object v) {
-        if (v == null) {
-            return null;
-        }
+    private static boolean asBool(final Object v) {
         if (v instanceof Boolean b) {
             return b;
         }

@@ -25,5 +25,5 @@ public class EnvironmentVariableUtils {
      * Application name environment variables value that uses to generate idempotency key
      *
      */
-    public static String APP_NAME = "APP_NAME";
+    public static final String APP_NAME = "APP_NAME";
 }

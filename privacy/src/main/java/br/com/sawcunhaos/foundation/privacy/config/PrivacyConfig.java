@@ -14,6 +14,7 @@
 package br.com.sawcunhaos.foundation.privacy.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,23 +47,59 @@ public final class PrivacyConfig {
     private final BuiltinsConfig builtins = new BuiltinsConfig();
 
     public List<RuleEntry> getHeaders() {
-        return headers;
+        return Collections.unmodifiableList(headers);
+    }
+
+    /** Appends a header rule during parsing. */
+    public void addHeader(final RuleEntry entry) {
+        headers.add(entry);
     }
 
     public List<RuleEntry> getBody() {
-        return body;
+        return Collections.unmodifiableList(body);
+    }
+
+    /** Appends a body rule during parsing. */
+    public void addBody(final RuleEntry entry) {
+        body.add(entry);
     }
 
     public List<RuleEntry> getLogPatterns() {
-        return logPatterns;
+        return Collections.unmodifiableList(logPatterns);
+    }
+
+    /** Appends a log-pattern rule during parsing. */
+    public void addLogPattern(final RuleEntry entry) {
+        logPatterns.add(entry);
     }
 
     public Set<String> getAuditEncryptFields() {
-        return auditEncryptFields;
+        return Collections.unmodifiableSet(auditEncryptFields);
     }
 
-    public BuiltinsConfig getBuiltins() {
-        return builtins;
+    /** Registers a field whose audit-trail value must be encrypted at rest. */
+    public void addAuditEncryptField(final String field) {
+        auditEncryptFields.add(field);
+    }
+
+    /** Enables a builtin pack during parsing. */
+    public void addEnabledBuiltin(final String pack) {
+        builtins.addEnabled(pack);
+    }
+
+    /** Disables a single builtin item during parsing (e.g. {@code br.titulo-eleitor}). */
+    public void addDisabledBuiltin(final String item) {
+        builtins.addDisabled(item);
+    }
+
+    /** @return the enabled builtin packs (unmodifiable). */
+    public List<String> getEnabledBuiltins() {
+        return builtins.getEnabled();
+    }
+
+    /** @return the individually disabled builtin items (unmodifiable). */
+    public Set<String> getDisabledBuiltins() {
+        return builtins.getDisabled();
     }
 
     /** @return an empty configuration (no rules, no builtins). */
@@ -177,16 +214,26 @@ public final class PrivacyConfig {
     }
 
     /** Enabled packs and individually disabled items (e.g. {@code br.titulo-eleitor}). */
-    public static final class BuiltinsConfig {
+    private static final class BuiltinsConfig {
         private final List<String> enabled = new ArrayList<>();
         private final Set<String> disabled = new LinkedHashSet<>();
 
         public List<String> getEnabled() {
-            return enabled;
+            return Collections.unmodifiableList(enabled);
+        }
+
+        /** Enables a builtin pack during parsing. */
+        public void addEnabled(final String pack) {
+            enabled.add(pack);
         }
 
         public Set<String> getDisabled() {
-            return disabled;
+            return Collections.unmodifiableSet(disabled);
+        }
+
+        /** Disables a single builtin item during parsing. */
+        public void addDisabled(final String item) {
+            disabled.add(item);
         }
     }
 }

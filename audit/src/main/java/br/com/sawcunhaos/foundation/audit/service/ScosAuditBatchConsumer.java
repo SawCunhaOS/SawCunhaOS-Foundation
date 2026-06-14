@@ -19,6 +19,7 @@ import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditDlqLog;
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditLog;
 import br.com.sawcunhaos.foundation.audit.domain.repository.ScosAuditDlqRepository;
 import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Gauge;
@@ -55,6 +56,10 @@ public class ScosAuditBatchConsumer {
     private Counter dlqCounter;
     private DistributionSummary batchSizeSummary;
 
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP2", "CT_CONSTRUCTOR_THROW"},
+            justification = "Spring-injected @ConfigurationProperties singletons are shared by design (EI_EXPOSE_REP2). "
+                    + "Metric registration may throw during construction, but the bean has no finalizer and no sensitive state, "
+                    + "so the finalizer-attack vector does not apply (CT_CONSTRUCTOR_THROW).")
     public ScosAuditBatchConsumer(
             ScosAuditQueue queue,
             ScosAuditLogService logService,

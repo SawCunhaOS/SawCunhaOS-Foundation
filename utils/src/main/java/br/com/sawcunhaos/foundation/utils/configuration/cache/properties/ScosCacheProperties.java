@@ -31,7 +31,7 @@ import java.util.List;
  */
 @ConditionalOnProperty(
         prefix = "spring.cache",
-        name = "enable",
+        name = "enabled",
         havingValue = "true",
         matchIfMissing = true)
 @Component

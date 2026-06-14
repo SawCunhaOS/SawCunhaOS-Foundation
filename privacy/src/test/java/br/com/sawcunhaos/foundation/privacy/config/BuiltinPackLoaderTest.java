@@ -25,7 +25,7 @@ class BuiltinPackLoaderTest {
     @Test
     void enablesPackByName() {
         final PrivacyConfig config = new PrivacyConfig();
-        config.getBuiltins().getEnabled().add("br");
+        config.addEnabledBuiltin("br");
         final List<BuiltinPackLoader.BuiltinPattern> patterns = BuiltinPackLoader.resolve(config);
         assertTrue(patterns.stream().anyMatch(p -> "br.cpf".equals(p.mask().key())));
         assertTrue(patterns.stream().anyMatch(p -> "br.cnpj".equals(p.mask().key())));
@@ -34,8 +34,8 @@ class BuiltinPackLoaderTest {
     @Test
     void disablesSingleItem() {
         final PrivacyConfig config = new PrivacyConfig();
-        config.getBuiltins().getEnabled().add("br");
-        config.getBuiltins().getDisabled().add("br.titulo-eleitor");
+        config.addEnabledBuiltin("br");
+        config.addDisabledBuiltin("br.titulo-eleitor");
         final List<BuiltinPackLoader.BuiltinPattern> patterns = BuiltinPackLoader.resolve(config);
         assertFalse(patterns.stream().anyMatch(p -> "br.titulo-eleitor".equals(p.mask().key())));
         assertTrue(patterns.stream().anyMatch(p -> "br.cpf".equals(p.mask().key())));
@@ -44,7 +44,7 @@ class BuiltinPackLoaderTest {
     @Test
     void cpfPatternCarriesValidator() {
         final PrivacyConfig config = new PrivacyConfig();
-        config.getBuiltins().getEnabled().add("br");
+        config.addEnabledBuiltin("br");
         final List<BuiltinPackLoader.BuiltinPattern> patterns = BuiltinPackLoader.resolve(config);
         assertTrue(patterns.stream()
             .filter(p -> "br.cpf".equals(p.mask().key()))

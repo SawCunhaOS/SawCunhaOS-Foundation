@@ -14,6 +14,7 @@
 package br.com.sawcunhaos.foundation.utils.configuration.hibernate;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.format.AbstractJsonFormatMapper;
@@ -34,6 +35,8 @@ public final class JacksonCustomJsonFormatMapper extends AbstractJsonFormatMappe
         this( new ObjectMapper() );
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+            justification = "tools.jackson ObjectMapper (Jackson 3) is immutable and thread-safe; the injected instance is shared by design")
     public JacksonCustomJsonFormatMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }

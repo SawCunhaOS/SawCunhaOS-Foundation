@@ -62,9 +62,9 @@ public final class BuiltinPackLoader {
     @SuppressWarnings("unchecked")
     public static List<BuiltinPattern> resolve(final PrivacyConfig config) {
         final List<BuiltinPattern> result = new ArrayList<>();
-        final Set<String> disabled = config.getBuiltins().getDisabled();
+        final Set<String> disabled = config.getDisabledBuiltins();
 
-        for (final String packRaw : config.getBuiltins().getEnabled()) {
+        for (final String packRaw : config.getEnabledBuiltins()) {
             final String pack = packRaw.toLowerCase(Locale.ROOT);
             if (!KNOWN_PACKS.contains(pack)) {
                 LOG.warn("Unknown builtin pack '{}' ignored. Known packs: {}", pack, KNOWN_PACKS);

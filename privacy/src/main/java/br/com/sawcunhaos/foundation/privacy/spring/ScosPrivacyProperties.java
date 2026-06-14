@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.privacy.spring;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -65,10 +66,14 @@ public class ScosPrivacyProperties {
         this.maxPayloadKb = maxPayloadKb;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+        justification = "Spring binds nested @ConfigurationProperties into the returned instance; it must be the live object, not a copy")
     public Masking getMasking() {
         return masking;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+        justification = "Spring binds nested @ConfigurationProperties into the returned instance; it must be the live object, not a copy")
     public Log getLog() {
         return log;
     }

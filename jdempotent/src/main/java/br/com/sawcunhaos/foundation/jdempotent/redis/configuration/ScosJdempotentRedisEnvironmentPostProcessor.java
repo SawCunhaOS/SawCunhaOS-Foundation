@@ -48,9 +48,9 @@ public class ScosJdempotentRedisEnvironmentPostProcessor implements EnvironmentP
             PropertySource<?> source = propertySources.get(PROPERTY_SOURCE_NAME);
             if (source instanceof MapPropertySource) {
                 target = (MapPropertySource) source;
-                for (String key : map.keySet()) {
-                    if (!target.containsProperty(key)) {
-                        target.getSource().put(key, map.get(key));
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    if (!target.containsProperty(entry.getKey())) {
+                        target.getSource().put(entry.getKey(), entry.getValue());
                     }
                 }
             }
