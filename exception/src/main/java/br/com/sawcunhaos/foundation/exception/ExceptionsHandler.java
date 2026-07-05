@@ -32,6 +32,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -249,6 +250,22 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		);
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
 	}
+
+	@ExceptionHandler(AuthorizationDeniedException.class)
+	protected ResponseEntity<ProblemDetail> handleAccessDeniedException(
+            AuthorizationDeniedException ex, HttpServletRequest request
+	) {
+		log.error("handleSecurity - AuthorizationDeniedException: ", ex);
+		String detail = localeService.getMessage(ScosExceptionCode.ACCESS_DENIED.getCode());
+		ProblemDetail problem = enrich(
+				ScosProblemDetails.of(
+						HttpStatus.FORBIDDEN, ScosExceptionCode.ACCESS_DENIED, detail, request.getRequestURI()
+				)
+		);
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+	}
+
+
 
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<ProblemDetail> handleGenericException(Exception ex, HttpServletRequest request) {
