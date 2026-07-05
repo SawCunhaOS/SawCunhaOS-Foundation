@@ -63,7 +63,7 @@ class ExceptionsHandlerScosExceptionTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(problem);
         assertEquals(400, problem.getStatus());
-        assertEquals("Business Error", problem.getTitle());
+        assertEquals("CPF informado é inválido.", problem.getTitle());
         assertEquals("CPF informado é inválido.", problem.getDetail());
         assertEquals(URI.create("https://docs.sawcunhaos.com.br/problems/scos-007"), problem.getType());
         assertEquals("/api/persons", problem.getInstance().toString());
