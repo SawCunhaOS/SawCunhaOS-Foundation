@@ -72,7 +72,10 @@ public final class ScosHibernateAuditListener
         }
         scosAuditService.recordRead(
                 postLoadEvent.getPersister().getTableName().toUpperCase(),
-                postLoadEvent.getId().toString());
+                postLoadEvent.getId().toString(),
+                scosSoftwaresUserAuthentication.findUserAuthentication(),
+                getIpAddress(),
+                getXRequestId());
     }
 
     @Override

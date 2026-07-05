@@ -24,6 +24,7 @@ import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.event.spi.AbstractEvent;
+import org.hibernate.event.spi.LoadEventListener;
 import org.hibernate.event.spi.PostDeleteEvent;
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostUpdateEvent;
@@ -81,8 +82,7 @@ public class ScosAuditServiceBean implements ScosAuditService {
 
     @Override
     @Async("ScosAuditLogAsyncExecutor")
-    public void recordRead(final String entity, final String idEntity) {
-        String user = resolveUser();
+    public void recordRead(final String entity, final String idEntity, final String user, final String ipAddress, final String xRequestId) {
         ScosAuditLog log = ScosAuditLog.builder()
                 .actionType(ActionType.SELECT)
                 .entity(entity.toUpperCase())
@@ -90,8 +90,8 @@ public class ScosAuditServiceBean implements ScosAuditService {
                 .user(user)
                 .originSystem(scosAuditLogProperties.getSystem())
                 .executionDate(LocalDateTime.now())
-                .ipAddress(MDC.get("IS_IP"))
-                .xRequestId(MDC.get("X-Request-ID"))
+                .ipAddress(ipAddress)
+                .xRequestId(xRequestId)
                 .build();
         batchConsumer.offerOrDlq(log);
     }

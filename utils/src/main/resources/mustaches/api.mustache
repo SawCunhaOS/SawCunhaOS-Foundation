@@ -59,7 +59,8 @@ public interface {{classname}} {
     @ScosRequest{{httpMethod}}(
         uri = "{{{path}}}",
         httpCode = HttpStatus.{{#lambda.uppercase}}{{responses.0.message}}{{/lambda.uppercase}}{{#vendorExtensions.x-cache.0}},
-        nameCache = { {{#vendorExtensions.x-cache}}"{{.}}"{{^-last}}, {{/-last}}{{/vendorExtensions.x-cache}} } {{/vendorExtensions.x-cache.0}}
+        nameCache = { {{#vendorExtensions.x-cache}}"{{.}}"{{^-last}}, {{/-last}}{{/vendorExtensions.x-cache}} } {{/vendorExtensions.x-cache.0}},
+        condition = {{#vendorExtensions.x-cache.0}}"true"{{/vendorExtensions.x-cache.0}}{{^vendorExtensions.x-cache.0}}"false"{{/vendorExtensions.x-cache.0}}
     )
     {{#vendorExtensions.x-authorize.0}}@PreAuthorize("hasAnyRole({{#vendorExtensions.x-authorize}}'{{.}}'{{^-last}}, {{/-last}}{{/vendorExtensions.x-authorize}})"){{/vendorExtensions.x-authorize.0}}
     {{#vendorExtensions.x-jdempotentresource.cachePrefix}}@JdempotentResource(cachePrefix = "{{vendorExtensions.x-jdempotentresource.cachePrefix}}"{{#vendorExtensions.x-jdempotentresource.ttl}}, ttl = {{vendorExtensions.x-jdempotentresource.ttl}}{{/vendorExtensions.x-jdempotentresource.ttl}}){{/vendorExtensions.x-jdempotentresource.cachePrefix}}

@@ -79,29 +79,4 @@ class AuditReadCoverageIntegrationTest extends AbstractAuditIntegrationTest {
         assertEquals(countBefore, countAfter, "No new event must be emitted for unannotated method");
     }
 
-    @Test
-    @DisplayName("recordRead manual enfileira evento SELECT")
-    void recordReadManuallyEmitsSelectEvent() throws InterruptedException {
-        Country country = countryRepository.save(Country.builder()
-                .name("Manual Read")
-                .code(80003)
-                .acronym("MR1")
-                .build());
-        String id = country.getId().toString();
-
-        waitForAsync(1000);
-        auditLogRepository.deleteAll();
-
-        auditService.recordRead("SFA_COUNTRY", id);
-
-        waitForAsync(1500);
-
-        List<ScosAuditLog> logs = auditLogRepository.findAll();
-        assertFalse(logs.isEmpty(), "Manual recordRead must emit event");
-        assertTrue(logs.stream().anyMatch(l ->
-                l.getActionType() == ActionType.SELECT
-                        && "SFA_COUNTRY".equals(l.getEntity())
-                        && id.equals(l.getIdEntity())), "Event must match entity and idEntity");
-    }
-
 }

@@ -75,6 +75,19 @@ public final class PaginationUtils {
                 PageRequest.of( calculatePage(page), sizePerPage);
     }
 
+    public static Pageable createPageable(
+            final int page,
+            final int sizePerPage,
+            final String direction
+    ) {
+        Sort.Direction directionSort = Sort.Direction.fromString(direction);
+
+        Sort sort = createSort(directionSort, "id");
+        return Objects.nonNull(sort) ?
+                PageRequest.of( calculatePage(page), sizePerPage, sort) :
+                PageRequest.of( calculatePage(page), sizePerPage);
+    }
+
     private static Sort createSort(
             final Sort.Direction direction,
             final String order

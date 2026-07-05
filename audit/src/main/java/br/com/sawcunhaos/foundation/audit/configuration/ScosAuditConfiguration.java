@@ -17,6 +17,7 @@ import br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditImmu
 import br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditPerformanceProperties;
 import br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditRetentionProperties;
 import br.com.sawcunhaos.foundation.audit.service.ScosAuditQueue;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+@ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @AutoConfiguration
 @EnableAspectJAutoProxy
 @EnableAsync

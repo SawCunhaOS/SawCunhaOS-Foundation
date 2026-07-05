@@ -208,11 +208,11 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		String detail = localeService.getMessage(exception.getCode(), exception.getArgs());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
-						HttpStatus.BAD_REQUEST, exception.getCode(), "Business Error",
+						resolveHttpCode(exception.getHttpCode()), exception.getCode(), resolveTitle(exception.getTitle()),
 						detail, request.getRequestURI()
 				)
 		);
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+		return ResponseEntity.status(resolveHttpCode(exception.getHttpCode())).body(problem);
 	}
 
 	@ExceptionHandler(ScosNoRollbackException.class)
@@ -223,11 +223,11 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		String detail = localeService.getMessage(exception.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
-						HttpStatus.BAD_REQUEST, exception.getCode(), "Business Error",
+						resolveHttpCode(exception.getHttpCode()), exception.getCode(), resolveTitle(exception.getTitle()),
 						detail, request.getRequestURI()
 				)
 		);
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+		return ResponseEntity.status(resolveHttpCode(exception.getHttpCode())).body(problem);
 	}
 
 	@ExceptionHandler(ScosNoContentException.class)
@@ -275,5 +275,19 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	private String requestUri(WebRequest request) {
 		return ((ServletWebRequest) request).getRequest().getRequestURI();
+	}
+
+	private HttpStatus resolveHttpCode(int httpCode) {
+		HttpStatus httpStatus = HttpStatus.resolve(httpCode);
+
+		return httpStatus != null ? httpStatus : HttpStatus.BAD_REQUEST;
+	}
+
+	private String resolveTitle(String title) {
+		try {
+            return localeService.getMessage(title);
+		} catch (Exception e) {
+			return "Business Error";
+		}
 	}
 }

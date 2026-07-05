@@ -14,6 +14,7 @@
 package br.com.sawcunhaos.foundation.utils.annotation.request;
 
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,9 @@ public @interface ScosRequestDELETE {
     HttpStatus httpCode();
 
     @AliasFor(annotation = CacheEvict.class, attribute = "value")
-    String[] nameCache() default "";
+    String[] nameCache() default "DISABLE";
+
+    @AliasFor(annotation = CacheEvict.class, attribute = "condition")
+    String condition() default "false";
 
 }

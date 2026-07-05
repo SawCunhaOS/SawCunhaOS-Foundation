@@ -22,22 +22,30 @@ import lombok.ToString;
 public class ScosException extends RuntimeException {
     private final String code;
 	private final Object[] args;
+	private final int httpCode;
+	private final String title;
 
 	public ScosException() {
 		super();
 		this.code = null;
 		this.args = null;
+		this.httpCode = 400;
+		this.title = "ERROR";
 	}
 
 	public ScosException(ExceptionCode code) {
 		super();
 		this.code = code.getCode();
 		this.args = null;
+		this.httpCode = code.getHttpCode();
+		this.title = code.getTitle();
 	}
 
 	public ScosException(ExceptionCode code, Object... args) {
 		super();
 		this.code = code.getCode();
 		this.args = args;
+		this.httpCode = code.getHttpCode();
+		this.title = code.getTitle();
 	}
 }

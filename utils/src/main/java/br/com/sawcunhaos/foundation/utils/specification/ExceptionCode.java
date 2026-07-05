@@ -59,4 +59,8 @@ public interface ExceptionCode {
     default String getTitle() {
         return "Error";
     }
+
+    default int getHttpCode() {
+        return 400;
+    }
 }

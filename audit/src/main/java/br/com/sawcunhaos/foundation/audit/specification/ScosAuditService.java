@@ -46,6 +46,6 @@ public interface ScosAuditService {
      * @param entity   nome da entidade/tabela auditada (ex: {@code "SFA_PEDIDO"})
      * @param idEntity identificador do registro lido
      */
-    void recordRead(String entity, String idEntity);
+    void recordRead(final String entity, final String idEntity, final String user, final String ipAddress, final String xRequestId);
 
 }
