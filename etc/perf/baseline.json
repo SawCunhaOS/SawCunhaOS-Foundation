@@ -1,0 +1,9 @@
+{
+  "_comment": "Performance baseline for the privacy MaskingEngine JMH benchmarks (AverageTime, ns/op). Update intentionally when a faster implementation lands. The CI perf gate (profile -Pperf) fails a merge when a benchmark regresses beyond 'regressionThresholdPercent' versus these numbers. Initial numbers are placeholders to be replaced by the first measured run on the CI baseline machine.",
+  "regressionThresholdPercent": 20,
+  "benchmarks": {
+    "MaskingEngineBenchmark.maskTextFastPath": { "scoreNs": 5.0, "unit": "ns/op" },
+    "MaskingEngineBenchmark.maskTextWithPii": { "scoreNs": 50.0, "unit": "ns/op" },
+    "MaskingEngineBenchmark.maskStructured": { "scoreNs": 30.0, "unit": "ns/op" }
+  }
+}

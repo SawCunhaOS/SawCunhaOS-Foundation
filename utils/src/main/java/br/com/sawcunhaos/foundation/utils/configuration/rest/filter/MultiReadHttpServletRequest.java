@@ -24,6 +24,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
     private ByteArrayOutputStream cachedBytes;
@@ -41,7 +43,9 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
 
     @Override
     public BufferedReader getReader() throws IOException{
-        return new BufferedReader(new InputStreamReader(getInputStream()));
+        final String encoding = getCharacterEncoding();
+        final Charset charset = (encoding != null) ? Charset.forName(encoding) : StandardCharsets.UTF_8;
+        return new BufferedReader(new InputStreamReader(getInputStream(), charset));
     }
 
     private void cacheInputStream() throws IOException {

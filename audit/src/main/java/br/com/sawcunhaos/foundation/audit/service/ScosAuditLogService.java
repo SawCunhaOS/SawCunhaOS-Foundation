@@ -20,6 +20,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @Service
 @RequiredArgsConstructor
@@ -28,9 +30,8 @@ public class ScosAuditLogService {
     private final ScosAuditLogRepository scosAuditLogRepository;
 
     @Transactional("ScosAuditLogTransactionManager")
-    public void saveLog(final ScosAuditLog scosAuditLog) {
-        scosAuditLogRepository.saveAndFlush(scosAuditLog);
+    public void saveBatch(final List<ScosAuditLog> logs) {
+        scosAuditLogRepository.saveAll(logs);
     }
-
 
 }

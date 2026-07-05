@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CNPJ {
-    String message() default "SCOS-010";
+    String message() default "SCOS-008";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

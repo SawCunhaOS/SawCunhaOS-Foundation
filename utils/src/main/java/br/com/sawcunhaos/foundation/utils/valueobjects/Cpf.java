@@ -15,6 +15,7 @@ package br.com.sawcunhaos.foundation.utils.valueobjects;
 
 import br.com.caelum.stella.validation.CPFValidator;
 import br.com.sawcunhaos.foundation.utils.exception.ScosException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
@@ -31,6 +32,9 @@ public class Cpf {
     private String type;
 
     protected Cpf(){}
+
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW",
+            justification = "JPA @Embeddable cannot be final; the class declares no finalizer and holds no sensitive state, so the finalizer-attack vector does not apply. Fail-fast validation is intentional.")
     public Cpf(@NonNull String cpf) {
         validate(cpf);
         this.cpf = cpf;

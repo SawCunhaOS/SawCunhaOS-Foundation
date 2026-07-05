@@ -20,6 +20,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestRespo
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisProperties;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,6 +37,8 @@ import java.util.concurrent.TimeUnit;
  *
  */
 @Slf4j
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+        justification = "RedisTemplate and the @ConfigurationProperties bean are Spring-injected collaborators stored by reference by design; they are not value objects to be copied.")
 public class RedisIdempotentRepository implements IdempotentRepository {
 
     private final ValueOperations<String, IdempotentRequestResponseWrapper> valueOperations;

@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.jdempotent.core.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,6 +32,9 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor
 @SuppressWarnings("serial")
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP2", "EQ_UNUSUAL"},
+        justification = "Mutable serializable DTO (Lombok @Getter/@Setter) shared across the idempotency pipeline by design (EI_EXPOSE_REP2). "
+                + "equals() intentionally matches the wrapped request elements for idempotency-key comparison; changing it would alter dedup behavior (EQ_UNUSUAL).")
 public class IdempotentRequestWrapper implements Serializable {
     private List<Object> request;
 

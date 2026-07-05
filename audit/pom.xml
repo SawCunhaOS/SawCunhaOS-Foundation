@@ -96,6 +96,10 @@
         </dependency>
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-privacy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-exception</artifactId>
         </dependency>
         <dependency>

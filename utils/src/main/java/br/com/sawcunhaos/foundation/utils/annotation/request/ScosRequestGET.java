@@ -42,8 +42,11 @@ public @interface ScosRequestGET {
     HttpStatus httpCode();
 
     @AliasFor(annotation = Cacheable.class, attribute = "value")
-    String[] nameCache() default "";
+    String[] nameCache() default "DISABLE";
 
     @AliasFor(annotation = Cacheable.class, attribute = "keyGenerator")
-    String keyGenerator() default "InsideCacheKeyGenerator";
+    String keyGenerator() default "ScosCacheKeyGenerator";
+
+    @AliasFor(annotation = Cacheable.class, attribute = "condition")
+    String condition() default "false";
 }

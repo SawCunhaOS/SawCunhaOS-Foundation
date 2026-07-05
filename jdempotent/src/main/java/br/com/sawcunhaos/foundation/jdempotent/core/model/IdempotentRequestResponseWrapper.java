@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.jdempotent.core.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,8 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @SuppressWarnings("serial")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+        justification = "Mutable serializable DTO (Lombok @Getter/@Setter); the wrapped request/response are shared across the idempotency pipeline by design.")
 public class IdempotentRequestResponseWrapper implements Serializable {
     private IdempotentRequestWrapper request;
     private IdempotentResponseWrapper response = null;

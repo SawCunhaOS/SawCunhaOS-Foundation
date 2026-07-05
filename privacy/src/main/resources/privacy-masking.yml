@@ -1,0 +1,48 @@
+# =============================================================================
+# Default privacy masking rules (classpath fallback).
+#
+# Resolution order (see PrivacyConfigLoader):
+#   1. external path  -> scos.privacy.masking.config-path  (or env SCOS_PRIVACY_MASKING_CONFIG)
+#   2. classpath      -> this file (privacy-masking.yml)
+#   3. neither        -> builtins only + WARN at startup
+#
+# This file is config-as-data: edit it without recompiling, no database required.
+# It is also consumable outside the SCOS layer via MaskingEngine.fromYaml(path).
+# =============================================================================
+scos:
+  privacy:
+    masking:
+      # Builtin packs by country/region. Patterns are embedded data (privacy-builtins/<pack>.yml).
+      builtins:
+        enabled: [generic, br]
+        disabled: []
+
+      # Key-based rules for HTTP headers (matched by header name, O(1) lookup).
+      headers:
+        - key: authorization
+          strategy: fixed
+          value: "***"
+        - key: x-api-key
+          strategy: fixed
+          value: "***"
+
+      # Key-based rules for JSON body fields.
+      body:
+        - key: cpf
+          strategy: partial
+          keep-first: 0
+          keep-last: 2
+        - key: email
+          strategy: email
+        - key: password
+          strategy: fixed
+          value: "***"
+
+      # Text-based rules for free-text log messages (literal -> Aho-Corasick, regex -> Pattern).
+      log-patterns:
+        - literal: "secret"
+          strategy: fixed
+          value: "***"
+
+      # Fields encrypted at rest in the audit trail (opt-in; empty = current behaviour).
+      audit-encrypt-fields: []

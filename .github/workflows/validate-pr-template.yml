@@ -1,0 +1,26 @@
+name: Validate PR Template
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Body via env (nunca interpolar ${{ }} inline no run — evita script injection)
+      - name: Salvar body da PR
+        if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'github-actions[bot]' && github.actor != 'renovate[bot]' }}
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s' "$PR_BODY" > /tmp/pr_body.txt
+
+      - name: Validar template da PR
+        if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'github-actions[bot]' && github.actor != 'renovate[bot]' }}
+        run: bash scripts/validate-pr-template.sh /tmp/pr_body.txt

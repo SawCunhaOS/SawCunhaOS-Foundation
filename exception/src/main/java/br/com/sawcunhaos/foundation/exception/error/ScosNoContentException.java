@@ -17,6 +17,6 @@ import br.com.sawcunhaos.foundation.utils.exception.ScosException;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class ScosNoContentException extends ScosException{
+public class ScosNoContentException extends ScosException {
 
 }

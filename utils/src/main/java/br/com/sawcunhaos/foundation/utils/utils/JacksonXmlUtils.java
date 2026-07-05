@@ -13,27 +13,25 @@
 
 package br.com.sawcunhaos.foundation.utils.utils;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.dataformat.xml.XmlMapper;
 
-import java.util.Objects;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JacksonXmlUtils {
 
-    private static XmlMapper xmlMapper = null;
+    private static final XmlMapper XML_MAPPER = XmlMapper.xmlBuilder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build();
 
+    @SuppressFBWarnings(value = "MS_EXPOSE_REP",
+            justification = "tools.jackson XmlMapper (Jackson 3) is immutable and thread-safe; the shared instance is meant to be reused")
     public static XmlMapper getInstance() {
-        if(Objects.isNull(xmlMapper)) {
-            xmlMapper = XmlMapper.xmlBuilder()
-                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                    .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-                    .build();
-        }
-        return xmlMapper;
+        return XML_MAPPER;
     }
 
 }

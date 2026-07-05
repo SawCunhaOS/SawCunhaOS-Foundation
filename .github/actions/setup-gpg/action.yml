@@ -1,0 +1,34 @@
+name: Setup GPG
+description: Importa a chave GPG privada e configura loopback pinentry para assinatura de artefatos Maven.
+
+inputs:
+  GPG_PRIVATE_KEY:
+    description: Chave GPG privada (texto puro ou base64).
+    required: true
+  GPG_PASSPHRASE:
+    description: Passphrase da chave GPG (usada pelo Maven no momento da assinatura).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Import GPG key
+      shell: bash
+      env:
+        GPG_PRIVATE_KEY: ${{ inputs.GPG_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.gnupg
+        chmod 700 ~/.gnupg
+        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+        gpgconf --kill gpg-agent || true
+
+        # Try to import the key (handle both base64-encoded and plain text formats)
+        (echo "$GPG_PRIVATE_KEY" | base64 -d 2>/dev/null | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || \
+        (echo "$GPG_PRIVATE_KEY" | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || true
+
+        # List imported keys and set default key
+        gpg --list-secret-keys --keyid-format short
+
+        # Configure GPG to use loopback for all operations
+        echo "pinentry-program /usr/bin/pinentry-loopback" >> ~/.gnupg/gpg-agent.conf || true
+        gpgconf --kill gpg-agent || true

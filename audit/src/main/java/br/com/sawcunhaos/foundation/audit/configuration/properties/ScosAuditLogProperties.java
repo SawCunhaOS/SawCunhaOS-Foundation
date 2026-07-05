@@ -19,17 +19,25 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 
+/**
+ * Properties raiz do módulo de auditoria ({@code scos.audit.*}).
+ *
+ * @since 1.2.0
+ */
 @ConfigurationProperties(prefix = "scos.audit")
 @AutoConfiguration
 @Data
 public class ScosAuditLogProperties {
 
+    /** Nome do sistema de origem gravado em {@code ORIGIN_SYSTEM} de cada registro de auditoria. Padrão: {@code "SFA_AUDIT"}. */
     @Value("${scos.audit.system:SFA_AUDIT}")
     private String system;
 
+    /** Habilita o módulo de auditoria. Sem {@code true}, nenhum bean do módulo é registrado. Padrão: {@code false}. */
     @Value("${scos.audit.enabled:false}")
     private boolean enable;
 
+    /** Habilita a execução automática das migrations Liquibase do módulo no datasource de auditoria. Padrão: {@code true}. */
     @Value("${scos.audit.liquibase.enabled:true}")
     private boolean enableLiquibase;
 }

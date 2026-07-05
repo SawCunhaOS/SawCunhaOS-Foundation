@@ -1,0 +1,13 @@
+# European Union PII patterns. Enabled via: scos.privacy.masking.builtins.enabled: [eu]
+pack: eu
+patterns:
+  - name: iban
+    regex: '\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b'
+    strategy: partial
+    keep-first: 4
+    keep-last: 4
+  - name: vat
+    regex: '\b[A-Z]{2}[A-Z0-9]{8,12}\b'
+    strategy: partial
+    keep-first: 2
+    keep-last: 4

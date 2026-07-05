@@ -61,22 +61,10 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Import GPG key
-        run: |
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent || true
-          
-          # Try to import the key (handle both base64-encoded and plain text formats)
-          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 -d 2>/dev/null | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || \
-          (echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import --no-tty --pinentry-mode loopback 2>&1) || true
-          
-          # List imported keys and set default key
-          gpg --list-secret-keys --keyid-format short
-          
-          # Configure GPG to use loopback for all operations
-          echo "pinentry-program /usr/bin/pinentry-loopback" >> ~/.gnupg/gpg-agent.conf || true
-          gpgconf --kill gpg-agent || true
+        uses: ./.github/actions/setup-gpg
+        with:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Configure Git
         run: |

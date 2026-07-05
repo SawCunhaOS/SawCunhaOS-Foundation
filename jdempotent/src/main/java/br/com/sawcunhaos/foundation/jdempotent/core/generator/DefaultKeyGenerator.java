@@ -18,6 +18,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
@@ -43,7 +44,7 @@ public class DefaultKeyGenerator implements KeyGenerator {
      * @return
      */
     public IdempotencyKey generateIdempotentKey(IdempotentRequestWrapper requestObject, String listenerName, StringBuilder builder, MessageDigest messageDigest) {
-        messageDigest.update(requestObject.toString().getBytes());
+        messageDigest.update(requestObject.toString().getBytes(StandardCharsets.UTF_8));
         byte[] digest = messageDigest.digest();
 
         if (!StringUtils.isBlank(appName)) {

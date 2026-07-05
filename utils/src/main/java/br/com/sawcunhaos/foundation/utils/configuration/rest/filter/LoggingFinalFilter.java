@@ -14,14 +14,11 @@
 package br.com.sawcunhaos.foundation.utils.configuration.rest.filter;
 
 
+import br.com.sawcunhaos.foundation.privacy.SanitizationBodyComponent;
 import br.com.sawcunhaos.foundation.utils.configuration.rest.filter.properties.ScosFilterProperties;
-import br.com.sawcunhaos.foundation.utils.lgpd.SanitizationBodyComponent;
 import br.com.sawcunhaos.foundation.utils.utils.DateUtils;
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,48 +26,83 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
+/**
+ * Final-stage filter ({@code @Order(100)}) that logs the response. Extends
+ * {@link OncePerRequestFilter} to avoid double execution on forward/include.
+ *
+ * <p>PII masking is delegated to the {@code scos-foundation-privacy} body sanitizer; this filter only adapts
+ * the response stream to it.</p>
+ *
+ * <p>It no longer calls {@code MDC.clear()}: cleanup is owned exclusively by the
+ * outermost {@link LoggingInitialFilter} ({@code @Order(0)}), whose
+ * {@code finally} block guarantees clearing even when the chain throws before
+ * reaching this filter.</p>
+ */
 @Slf4j
 @Configuration
 @Order(100)
 @RequiredArgsConstructor
-public class LoggingFinalFilter implements Filter {
+public class LoggingFinalFilter extends OncePerRequestFilter {
 
 	private final ScosFilterProperties scosFilterProperties;
 	private final SanitizationBodyComponent sanitizationBodyComponent;
 
 	@Override
-	public void doFilter(
-			ServletRequest request,
-			ServletResponse response,
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		// Ignora requisições gRPC — usam I/O async que é incompatível
+		// com o MultiReadHttpServletRequest
+		String contentType = request.getContentType();
+		return contentType != null && contentType.startsWith("application/grpc");
+	}
+
+	@Override
+	protected void doFilterInternal(
+			HttpServletRequest request,
+			HttpServletResponse response,
 			FilterChain chain
 	) throws IOException, ServletException {
 
-		HttpServletResponse res = (HttpServletResponse) response;
-		final HttpServletRequest req = (HttpServletRequest) request;
-		ContentCachingResponseWrapper servletResponse = new ContentCachingResponseWrapper(res);
+		ContentCachingResponseWrapper servletResponse = new ContentCachingResponseWrapper(response);
 
 		chain.doFilter(request, servletResponse);
-		if(req.getRequestURI().contains(scosFilterProperties.getURI())) {
+		if(request.getRequestURI().contains(scosFilterProperties.getURI())) {
 			String responseBody = getResponseBody(servletResponse);
             MDC.put("Response-Time", DateUtils.returnDateCurrent());
             MDC.put("Response-Code", servletResponse.getStatus() + "");
             MDC.put("Response-Content-Type", servletResponse.getContentType());
             MDC.put("Response-Body", responseBody);
             log.info("Final API Call");
-            MDC.clear();
 		}
 		servletResponse.copyBodyToResponse();
 	}
 
 	private String getResponseBody(ContentCachingResponseWrapper servletResponse) {
-		String responseBody = "Body view not enabled";
-		if(scosFilterProperties.isShowResponseBody()) {
-			responseBody = sanitizationBodyComponent.sanitizeBody(servletResponse.getContentInputStream());
+		if (!scosFilterProperties.isShowResponseBody()) {
+			return "Body view not enabled";
 		}
-		return responseBody;
+		return sanitizeBody(servletResponse.getContentInputStream());
+	}
+
+	/**
+	 * Reads the stream and applies the privacy body sanitizer; an empty payload is reported with a marker.
+	 */
+	private String sanitizeBody(final InputStream bodyInputStream) {
+		final String body = new BufferedReader(new InputStreamReader(bodyInputStream, StandardCharsets.UTF_8))
+				.lines()
+				.collect(Collectors.joining("\n"));
+		if (body.isEmpty()) {
+			return "Does not have Body";
+		}
+		return sanitizationBodyComponent.sanitize(body);
 	}
 }

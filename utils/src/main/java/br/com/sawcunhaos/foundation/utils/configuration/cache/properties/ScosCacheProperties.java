@@ -29,12 +29,6 @@ import java.util.List;
  * Propriedades de configuração para caches customizados
  * Suporta refresh dinâmico via Spring Cloud Config
  */
-@ConditionalOnProperty(
-        prefix = "spring.cache",
-        name = "enable",
-        havingValue = "true",
-        matchIfMissing = true)
-@Component
 @RefreshScope
 @ConfigurationProperties(prefix = "scos.cache")
 @Validated

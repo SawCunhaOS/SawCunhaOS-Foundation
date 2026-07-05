@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -39,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = AuditTestApplication.class)
 @Testcontainers
 @ActiveProfiles("postgres")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("Tests de Auditoria com PostgreSQL")
 public class AuditPostgresTest {
     @Container
@@ -60,11 +62,20 @@ public class AuditPostgresTest {
     @Autowired
     private ScosAuditLogRepository scosAuditLogRepository;
 
+    @Autowired
+    private br.com.sawcunhaos.foundation.audit.service.ScosAuditQueue auditQueue;
+
     @BeforeEach
-    void setUp() {
-        // Limpar dados antes de cada teste
-        scosAuditLogRepository.deleteAll();
+    void setUp() throws InterruptedException {
+        // Deleting countries fires @Async DELETE audit events; wait for the queue to drain
+        // before wiping the audit table so no in-flight event leaks into the next test.
         countryRepository.deleteAll();
+        long deadline = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < deadline && !auditQueue.isEmpty()) {
+            sleep(50);
+        }
+        sleep(200);
+        scosAuditLogRepository.deleteAll();
     }
 
     @Test

@@ -2,6 +2,11 @@ scos:
   audit:
     system: SCOS_AUDIT
     enabled: true
+    performance:
+      flush-interval-ms: 100      # responsive draining for tests (default 500 in prod)
+      batch-size: 50
+    durability:
+      dlq-reprocess-interval-ms: 3600000   # disable DLQ reprocessing during tests
     liquibase:
       enabled: true
       contexts: test

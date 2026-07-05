@@ -1,0 +1,29 @@
+scos:
+  privacy:
+    masking:
+      builtins:
+        enabled: [generic, br]
+        disabled: []
+      headers:
+        - key: authorization
+          strategy: fixed
+          value: "***"
+      body:
+        - key: cpf
+          strategy: partial
+          keep-first: 0
+          keep-last: 2
+        - key: email
+          strategy: email
+        - key: token
+          strategy: fixed
+          value: "***"
+        - key: internalsecret
+          strategy: redact
+      log-patterns:
+        - literal: "topsecret"
+          strategy: fixed
+          value: "***"
+      audit-encrypt-fields:
+        - cpf
+        - email

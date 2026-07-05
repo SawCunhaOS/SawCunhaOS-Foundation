@@ -1,0 +1,39 @@
+name: Release Notes
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # histórico completo para o git-cliff processar os commits
+
+      - name: Gerar release notes (última versão)
+        id: cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+
+      - name: Criar ou atualizar GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          NOTES_FILE: ${{ steps.cliff.outputs.changelog }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG já existe — atualizando notas"
+            gh release edit "$TAG" --notes-file "$NOTES_FILE"
+          else
+            echo "Criando release $TAG"
+            gh release create "$TAG" --title "$TAG" --notes-file "$NOTES_FILE"
+          fi

@@ -1,0 +1,30 @@
+# Generic, cross-border PII patterns. Enabled via: scos.privacy.masking.builtins.enabled: [generic]
+# Each item: name, plus literal|regex, plus strategy and its params. Disable a single item with
+# scos.privacy.masking.builtins.disabled: [generic.<name>]
+pack: generic
+patterns:
+  - name: email
+    regex: '[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}'
+    strategy: email
+  - name: credit-card
+    regex: '\b(?:\d[ \-]?){13,19}\b'
+    strategy: partial
+    keep-first: 0
+    keep-last: 4
+    luhn: true
+  - name: ipv4
+    regex: '\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b'
+    strategy: fixed
+    value: "***"
+  - name: ipv6
+    regex: '\b(?:[A-Fa-f0-9]{1,4}:){2,7}[A-Fa-f0-9]{1,4}\b'
+    strategy: fixed
+    value: "***"
+  - name: jwt
+    regex: 'eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+'
+    strategy: fixed
+    value: "***"
+  - name: bearer
+    regex: '(?i)bearer\s+[A-Za-z0-9._\-]+'
+    strategy: fixed
+    value: "Bearer ***"

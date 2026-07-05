@@ -16,6 +16,7 @@ package br.com.sawcunhaos.foundation.utils.valueobjects;
 import br.com.caelum.stella.validation.CNPJValidator;
 import br.com.caelum.stella.validation.CPFValidator;
 import br.com.sawcunhaos.foundation.utils.exception.ScosException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 import lombok.Getter;
@@ -32,6 +33,9 @@ public class TaxIdentifier {
     private String type;
 
     protected TaxIdentifier(){}
+
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW",
+            justification = "JPA @Embeddable cannot be final; the class declares no finalizer and holds no sensitive state, so the finalizer-attack vector does not apply. Fail-fast validation is intentional.")
     public TaxIdentifier(@NonNull String taxIdentifier) {
         validate(taxIdentifier);
         this.taxIdentifier = taxIdentifier;

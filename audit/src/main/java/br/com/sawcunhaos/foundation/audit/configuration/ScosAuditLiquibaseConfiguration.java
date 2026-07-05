@@ -17,6 +17,7 @@ import br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditLiqu
 import liquibase.integration.spring.MultiTenantSpringLiquibase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
+@ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ScosAuditLiquibaseProperties.class})
 @RequiredArgsConstructor

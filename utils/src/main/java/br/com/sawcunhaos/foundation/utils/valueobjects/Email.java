@@ -14,6 +14,7 @@
 package br.com.sawcunhaos.foundation.utils.valueobjects;
 
 import br.com.sawcunhaos.foundation.utils.exception.ScosException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
@@ -30,6 +31,8 @@ public class Email {
 
     protected Email() {}
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW",
+            justification = "JPA @Embeddable cannot be final; the class declares no finalizer and holds no sensitive state, so the finalizer-attack vector does not apply. Fail-fast validation is intentional.")
     public Email(@NonNull String email) {
         validate(email);
         this.email = email;

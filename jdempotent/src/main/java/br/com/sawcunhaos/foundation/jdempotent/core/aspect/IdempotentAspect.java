@@ -34,6 +34,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
 import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentId;
 import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentRequestPayload;
 import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +61,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Aspect
 @Slf4j
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+        justification = "The IdempotentRepository is a Spring-injected collaborator stored by reference by design; it is not a value object to be copied.")
 public class IdempotentAspect {
     private AnnotationChain annotationChain;
     private KeyGenerator keyGenerator;

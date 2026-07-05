@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.utils.configuration.feign;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import feign.Response;
 import feign.Util;
 import feign.codec.Decoder;
@@ -27,6 +28,8 @@ import java.lang.reflect.Type;
 public class JacksonDecoderCustom implements Decoder {
     private final ObjectMapper mapper;
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+            justification = "tools.jackson ObjectMapper (Jackson 3) is immutable and thread-safe; the injected instance is shared by design")
     public JacksonDecoderCustom(ObjectMapper mapper) {
         this.mapper = mapper;
     }

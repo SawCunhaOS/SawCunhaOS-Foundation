@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_hash_chain_to_SFA_LOG_AUDIT
+      author: System
+      changes:
+        - addColumn:
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: HASH_CHAIN
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: EVENT_ORDER
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+        - createIndex:
+            indexName: IDX_ILA_ENTITY_ID
+            tableName: SFA_LOG_AUDIT
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: ENTITY
+              - column:
+                  name: ID_ENTITY
+
+  - changeSet:
+      id: create_SFA_AUDIT_DLQ
+      author: System
+      changes:
+        - createTable:
+            tableName: SFA_AUDIT_DLQ
+            dbms: 'mysql, postgresql'
+            columns:
+              - column:
+                  name: ID
+                  autoIncrement: false
+                  type: ${UUIDType}
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: PK_SFA_AUDIT_DLQ
+                    nullable: false
+              - column:
+                  name: PAYLOAD
+                  type: JSONB
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ERROR
+                  type: TEXT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: RETRY_COUNT
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: CREATED_AT
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+              - column:
+                  name: VERSION
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false

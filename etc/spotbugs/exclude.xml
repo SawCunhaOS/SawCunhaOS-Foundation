@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Filtro de exclusão do SpotBugs — suprime falsos positivos de código gerado.
+  O formato de filtro do SpotBugs casa por nome de classe (regex com prefixo ~),
+  não por anotação; os padrões abaixo cobrem o bytecode gerado por Lombok e MapStruct.
+-->
+<FindBugsFilter>
+
+    <!-- Mappers gerados pelo MapStruct -->
+    <Match>
+        <Class name="~.*MapperImpl"/>
+    </Match>
+
+    <!-- Builders gerados pelo Lombok (@Builder) -->
+    <Match>
+        <Class name="~.*\$.*Builder"/>
+    </Match>
+
+    <!-- Classes sintéticas / proxies / bytecode gerado (Lombok, frameworks) -->
+    <Match>
+        <Class name="~.*\$\$.*"/>
+    </Match>
+
+</FindBugsFilter>
