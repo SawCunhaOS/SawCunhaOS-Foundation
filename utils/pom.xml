@@ -160,10 +160,6 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
         </dependency>
@@ -252,7 +248,8 @@
                     <dependency>
                         <groupId>io.github.openfeign.querydsl</groupId>
                         <artifactId>querydsl-apt</artifactId>
-                        <version>${op_querydsl.version}</version>
+                        <version>${querydsl.version}</version>
+                        <scope>compile</scope>
                     </dependency>
                 </dependencies>
             </plugin>

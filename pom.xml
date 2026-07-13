@@ -20,7 +20,7 @@
     <parent>
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-bom</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.1</version>
         <relativePath/>
     </parent>
 
@@ -125,7 +125,7 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- InsideSoftwares -->
+            <!-- ScosBom -->
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-bom</artifactId>
@@ -237,71 +237,6 @@
                             <autoPublish>true</autoPublish>
                             <ignorePublishedComponents>true</ignorePublishedComponents>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Analysis profile -->
-        <profile>
-            <id>analyze</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.14</version>
-                        <executions>
-                            <execution>
-                                <id>default-prepare-agent</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>default-report</id>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.owasp</groupId>
-                        <artifactId>dependency-check-maven</artifactId>
-                        <version>12.2.0</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <configuration>
-                            <configLocation>${maven.multiModuleProjectDirectory}/etc/devops/checkstyle/checkstyle.xml</configLocation>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.github.spotbugs</groupId>
-                        <artifactId>spotbugs-maven-plugin</artifactId>
-                        <version>4.9.8.3</version>
-                        <configuration>
-                            <effort>Default</effort>
-                            <threshold>Medium</threshold>
-                            <excludeFilterFile>${maven.multiModuleProjectDirectory}/etc/spotbugs/exclude.xml</excludeFilterFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
