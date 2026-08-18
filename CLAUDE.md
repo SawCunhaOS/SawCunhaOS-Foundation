@@ -1,8 +1,5 @@
 # Claude Instructions
 - Antes de responder a qualquer pergunta, valide a resposta se esta de acordo com o que foi perguntado.
-- Sempre que tiver no modo openspec explore deve ser criado um arquivo de ideia na pasta `etc/doc/ideia/` com base no template `etc/doc/templates/ideia.md`. O arquivo deve seguir o padrão `YYYYMMDD_titulo-da-funcionalidade.md`.
-- Cada arquivo de ideia deve respeitar o Princípio SRP: uma ideia = uma funcionalidade. Se a exploração revelar múltiplas features independentes, criar um arquivo separado por feature.
-- O comando do openspec propose deve sempre ter um arquivo de ideia criado.
 - NUNCA adivinhe soluções e nem mesmo tentar resolver problemas sem antes perguntar.
 - SEMPRE pergunte para ter todos os detalhes.
 - Sempre responda em PT-BR.
