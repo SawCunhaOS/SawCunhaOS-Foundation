@@ -32,7 +32,6 @@ O **SawCunhaOS-Foundation** é um framework fundamental que fornece componentes 
 - ✅ Tratamento centralizado de exceções (RFC 9457 / `ProblemDetail`)
 - ✅ Sistema de auditoria automatizado (com cifra em repouso de PII opt-in)
 - ✅ Masking de PII de alto desempenho (logs, HTTP, auditoria) — foco LGPD
-- ✅ Segurança (resource server OAuth2/JWT, permissões, CORS)
 - ✅ Controle de idempotência para operações críticas
 - ✅ Utilitários para validação, cache, paginação e mais
 - ✅ Integração com Spring Boot e Spring Cloud

@@ -27,7 +27,6 @@ type(scope): descrição no imperativo
 | `audit`      | `scos-foundation-audit`       | Auditoria, accountability, LGPD              |
 | `privacy`    | `scos-foundation-privacy`     | Masking, anonimização, dados pessoais        |
 | `exception`  | `scos-foundation-exception`   | Tratamento de erros, RFC 9457, handlers      |
-| `security`   | `scos-foundation-security`    | Autenticação, autorização, Jasypt            |
 | `utils`      | `scos-foundation-utils`       | Utilitários compartilhados                   |
 | `jdempotent` | `scos-foundation-jdempotent`  | Idempotência                                 |
 | `ci`         | —                             | Workflows, pipelines, automação CI/CD        |

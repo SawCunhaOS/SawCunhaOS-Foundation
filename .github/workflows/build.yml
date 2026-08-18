@@ -95,14 +95,6 @@ jobs:
         path: jdempotent/target/
         retention-days: 7
 
-    - name: Archive security module artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: maven-build-security-${{ matrix.java-version }}
-        path: security/target/
-        retention-days: 7
-
   security-check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -214,12 +206,4 @@ jobs:
       with:
         name: security-report-jdempotent
         path: jdempotent/target/
-        retention-days: 7
-
-    - name: Publish security module security report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: security-report-security
-        path: security/target/
         retention-days: 7

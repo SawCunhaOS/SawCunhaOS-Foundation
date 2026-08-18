@@ -16,7 +16,6 @@
 - [ ] audit
 - [ ] privacy
 - [ ] exception
-- [ ] security
 - [ ] utils
 - [ ] jdempotent
 - [ ] ci/build
