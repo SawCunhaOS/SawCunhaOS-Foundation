@@ -10,7 +10,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.annotation.audit;
+package br.com.sawcunhaos.foundation.audit.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

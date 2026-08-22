@@ -82,6 +82,13 @@
     </ciManagement>
 
     <modules>
+        <!-- *-api modules come first: they have zero runtime dependencies (leaves of the graph).
+             audit/jdempotent depend on audit-api/jdempotent-api (annotations only, see Story 1.5).
+             validation-api has no dependent yet: its annotations stay in utils until Story 1.9
+             extracts the ConstraintValidator implementations (see deferred-work.md). -->
+        <module>audit-api</module>
+        <module>jdempotent-api</module>
+        <module>validation-api</module>
         <!-- privacy comes before utils: utils depends on privacy (masking beans). -->
         <module>privacy</module>
         <module>utils</module>
@@ -122,6 +129,21 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-jdempotent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-audit-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-jdempotent-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-validation-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

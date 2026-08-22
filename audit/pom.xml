@@ -102,6 +102,11 @@
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-exception</artifactId>
         </dependency>
+        <!-- Story 1.5: @Auditable/@AuditAction agora vêm do módulo de contrato, não de utils. -->
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-audit-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

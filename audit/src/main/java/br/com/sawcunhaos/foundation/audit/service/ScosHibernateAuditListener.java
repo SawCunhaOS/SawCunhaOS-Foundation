@@ -13,7 +13,7 @@
 package br.com.sawcunhaos.foundation.audit.service;
 
 import br.com.sawcunhaos.foundation.audit.specification.ScosAuditService;
-import br.com.sawcunhaos.foundation.utils.annotation.audit.Auditable;
+import br.com.sawcunhaos.foundation.audit.api.Auditable;
 import br.com.sawcunhaos.foundation.utils.specification.ScosUserAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.event.spi.PostDeleteEvent;

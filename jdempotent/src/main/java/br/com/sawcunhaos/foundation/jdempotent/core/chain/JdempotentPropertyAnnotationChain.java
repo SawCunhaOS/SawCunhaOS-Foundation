@@ -15,7 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.core.chain;
 
 import br.com.sawcunhaos.foundation.jdempotent.core.model.ChainData;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentProperty;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentProperty;
 
 import java.lang.reflect.Field;
 

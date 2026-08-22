@@ -31,9 +31,9 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWra
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentId;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentRequestPayload;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentId;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentRequestPayload;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.Setter;
@@ -159,7 +159,7 @@ public class IdempotentAspect {
      * @return
      * @throws Throwable
      */
-    @Around("@annotation(br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource)")
+    @Around("@annotation(br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource)")
     public Object execute(ProceedingJoinPoint pjp) throws Throwable {
         String classAndMethodName = generateLogPrefixForIncomingEvent(pjp);
         IdempotentRequestWrapper requestObject = findIdempotentRequestArg(pjp);

@@ -15,7 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.test.app.controller;
 
 import br.com.sawcunhaos.foundation.jdempotent.redis.test.app.model.PrimeNumberResponse;
 import br.com.sawcunhaos.foundation.jdempotent.redis.test.app.service.PrimeNumberService;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

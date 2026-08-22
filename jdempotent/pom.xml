@@ -143,6 +143,11 @@
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-privacy</artifactId>
         </dependency>
+        <!-- Story 1.5: as 5 anotações @Jdempotent* agora vêm do módulo de contrato, não de utils. -->
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-jdempotent-api</artifactId>
+        </dependency>
 
         <!-- Unit Test Dependencies-->
         <dependency>

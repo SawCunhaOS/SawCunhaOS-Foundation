@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-22-2026 00:00
-last_updated: 08-22-2026 18:30
+last_updated: 08-22-2026 00:00
 project: SawCunhaOS-Foundation
 project_key: NOKEY
 tracking_system: file-system
@@ -41,7 +41,7 @@ development_status:
   1-2-remover-dependências-mortas-e-obsoletas: review
   1-3-migrar-serialização-json-de-gson-para-jackson: review
   1-4-promover-o-perfil-analyze-checkstyle-archunit-para-pluginman: review
-  1-5-criar-módulos-api-e-mover-as-anotações-de-contrato: ready-for-dev
+  1-5-criar-módulos-api-e-mover-as-anotações-de-contrato: review
   1-6-criar-o-módulo-archtest-para-regras-cross-módulo: ready-for-dev
   1-7-extrair-o-módulo-core: ready-for-dev
   1-8-extrair-o-módulo-spring: ready-for-dev

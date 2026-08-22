@@ -13,8 +13,8 @@
 
 package br.com.sawcunhaos.foundation.jdempotent.core.utils;
 
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentIgnore;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentProperty;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentIgnore;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentProperty;
 import lombok.Data;
 
 @Data

@@ -22,7 +22,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapp
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestException;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResource;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

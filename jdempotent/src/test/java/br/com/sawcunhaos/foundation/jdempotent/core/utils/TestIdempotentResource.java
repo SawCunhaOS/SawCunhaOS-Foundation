@@ -14,8 +14,8 @@
 package br.com.sawcunhaos.foundation.jdempotent.core.utils;
 
 
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentRequestPayload;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentRequestPayload;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import org.springframework.stereotype.Component;
 
 @Component

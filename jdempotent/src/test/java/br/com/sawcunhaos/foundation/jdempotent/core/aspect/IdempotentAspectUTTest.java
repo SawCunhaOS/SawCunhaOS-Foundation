@@ -20,7 +20,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResource;
-import br.com.sawcunhaos.foundation.utils.annotation.jdempotent.JdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Assertions;

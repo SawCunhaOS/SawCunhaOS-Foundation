@@ -14,8 +14,8 @@ package br.com.sawcunhaos.foundation.audit.service;
 
 import br.com.sawcunhaos.foundation.audit.domain.entity.Country;
 import br.com.sawcunhaos.foundation.audit.domain.repository.CountryRepository;
-import br.com.sawcunhaos.foundation.utils.annotation.audit.AuditAction;
-import br.com.sawcunhaos.foundation.utils.annotation.audit.Auditable;
+import br.com.sawcunhaos.foundation.audit.api.AuditAction;
+import br.com.sawcunhaos.foundation.audit.api.Auditable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
