@@ -103,17 +103,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <!-- spring-boot-starter-cache stays: ScosRequestGET/POST/PUT/PATCH/DELETE use
+             org.springframework.cache.annotation.Cacheable as a meta-annotation. Redis itself
+             (spring-boot-starter-data-redis, spring-data-redis) moved out with the cache
+             configuration classes (Story 1.10) — no other class here talks to Redis. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -146,10 +142,6 @@
         <dependency>
             <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tools.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-smile</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

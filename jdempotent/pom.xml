@@ -158,6 +158,27 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Test-only: the mock test app (JdempotentTestApplication/PrimeNumbersController/
+             CustomExceptionHandler under src/test) uses @ControllerAdvice/ResponseEntityExceptionHandler,
+             which need spring-webmvc. Previously arrived transitively via scos-foundation-utils's
+             spring-boot-starter-web; now explicit and test-scoped since no main-code class here needs
+             it (Story 1.10 dropped the utils dependency in favor of scos-foundation-cache). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Test-only: JdempotentTestApplication's @ComponentScan("br.com.sawcunhaos.foundation")
+             picks up scos-foundation-cache's ScosCacheConfiguration (@Validated ScosCacheProperties),
+             which needs a Jakarta Bean Validation provider on the classpath at binding time or Spring
+             Boot throws NoProviderFoundException. cache/pom.xml intentionally has no provider (AC #1:
+             cache depends only on core + the 2 starters) — real consumers bring their own, same as
+             validation/pom.xml already does for its own tests. -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
