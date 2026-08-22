@@ -94,10 +94,15 @@
              spring comes right after core: it depends only on core (generic Spring aspects, Story
              1.8) — utils does NOT depend on it (nothing left in utils consumes it after the move).
              validation comes right after spring (Fase 4 of the origin plan: second leaf module out,
-             depends on core + validation-api only, see Story 1.9) — utils does NOT depend on it. -->
+             depends on core + validation-api only, see Story 1.9) — utils does NOT depend on it.
+             cache comes right after validation (Fase 4 of the origin plan: third leaf module out,
+             depends on core + spring-boot-starter-cache + spring-boot-starter-data-redis only, see
+             Story 1.10) — utils does NOT depend on it; jdempotent depends on it directly instead
+             (PolymorphicRedisSerializer, AD-1). -->
         <module>core</module>
         <module>spring</module>
         <module>validation</module>
+        <module>cache</module>
         <module>privacy</module>
         <module>utils</module>
         <module>exception</module>
@@ -131,6 +136,11 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-validation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

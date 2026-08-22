@@ -11,10 +11,10 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.configuration.cache;
+package br.com.sawcunhaos.foundation.cache;
 
-import br.com.sawcunhaos.foundation.utils.configuration.cache.properties.ScosCacheModel;
-import br.com.sawcunhaos.foundation.utils.configuration.cache.properties.ScosCacheProperties;
+import br.com.sawcunhaos.foundation.cache.properties.ScosCacheModel;
+import br.com.sawcunhaos.foundation.cache.properties.ScosCacheProperties;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;

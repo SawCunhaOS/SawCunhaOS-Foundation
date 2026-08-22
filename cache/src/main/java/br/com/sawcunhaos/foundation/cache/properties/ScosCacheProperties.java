@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.configuration.cache.properties;
+package br.com.sawcunhaos.foundation.cache.properties;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

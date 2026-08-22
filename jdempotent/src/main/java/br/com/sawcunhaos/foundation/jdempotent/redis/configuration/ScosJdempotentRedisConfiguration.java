@@ -15,7 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.configuration;
 
 
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
-import br.com.sawcunhaos.foundation.utils.configuration.cache.PolymorphicRedisSerializer;
+import br.com.sawcunhaos.foundation.cache.PolymorphicRedisSerializer;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
