@@ -20,7 +20,7 @@
     <parent>
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-bom</artifactId>
-        <version>1.4.2</version>
+        <version>1.4.3-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -142,6 +142,15 @@
                 <artifactId>reactor-core</artifactId>
                 <version>3.8.6</version>
             </dependency>
+
+            <!-- ArchUnit: mecanismo de imposição das regras de módulo (AD-5). Gerenciamento de
+                 versão apenas — cada módulo que precisar declara a dependência sem versão. -->
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>1.5.0</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -249,6 +258,97 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- Gate mecânico de análise estática: Jacoco, SpotBugs, OWASP dependency-check e Checkstyle.
+             Herdado por todo módulo do reactor (existente e futuro) sem precisar declará-lo
+             individualmente. failOnViolation do Checkstyle continua desligado nesta story — ativação
+             global do gate é escopo exclusivo da Story 4.16. -->
+        <profile>
+            <id>analyze</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jacoco-initialize</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jacoco-site</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jacoco-check</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>INSTRUCTION</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.80</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>findbugs-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <configuration>
+                            <!-- ${project.parent.basedir} não funciona a partir do POM raiz (o pai é o
+                                 scos-bom externo, sem basedir no reactor); usa a raiz do multi-módulo. -->
+                            <configLocation>${maven.multiModuleProjectDirectory}/etc/devops/checkstyle/checkstyle.xml</configLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>aggregate</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
+                    </plugin>
+                </plugins>
+            </reporting>
         </profile>
     </profiles>
 
