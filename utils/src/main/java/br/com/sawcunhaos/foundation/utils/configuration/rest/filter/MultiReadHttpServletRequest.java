@@ -17,7 +17,6 @@ import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
-import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -49,11 +48,9 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
     }
 
     private void cacheInputStream() throws IOException {
-        /* Cache the inputstream in order to read it multiple times. For
-         * convenience, I use apache.commons IOUtils
-         */
+        /* Cache the inputstream in order to read it multiple times. */
         cachedBytes = new ByteArrayOutputStream();
-        IOUtils.copy(super.getInputStream(), cachedBytes);
+        super.getInputStream().transferTo(cachedBytes);
     }
 
 

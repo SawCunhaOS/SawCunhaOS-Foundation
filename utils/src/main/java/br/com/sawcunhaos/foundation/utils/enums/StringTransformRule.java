@@ -13,7 +13,6 @@
 
 package br.com.sawcunhaos.foundation.utils.enums;
 
-import com.google.common.base.CaseFormat;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
@@ -30,7 +29,7 @@ public enum StringTransformRule {
                 return value;
             }
 
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, value.toLowerCase());
+            return org.apache.commons.lang3.StringUtils.uncapitalize(value.toLowerCase());
         }
     },
     UPPER_CASE {

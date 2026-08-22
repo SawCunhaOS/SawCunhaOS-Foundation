@@ -1,6 +1,10 @@
+---
+baseline_commit: 9c022adf4766e410c4943aada62b3d92d5d73cb3
+---
+
 # Story 1.2: Remover dependências mortas e obsoletas
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -18,19 +22,19 @@ Para reduzir a superfície de dependências transitivas antes de mover qualquer 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Remover as 3 dependências com zero uso real (AC: #1)
-  - [ ] Remover `<dependency>org.bouncycastle:bcprov-jdk18on</dependency>` de `utils/pom.xml` (linhas 162-165) — 0 classes usam
-  - [ ] Remover `<dependency>org.yaml:snakeyaml</dependency>` (linhas 158-161) — 0 classes usam
-  - [ ] Remover `<dependency>org.mapstruct:mapstruct</dependency>` (linhas 142-145) — 0 classes usam
-  - [ ] Um commit por dependência removida, cada um com build verde (NFR2) — não agrupar as 3 num único commit
-- [ ] Task 2: Substituir guava por commons-lang3 (AC: #2)
-  - [ ] Localizar o único ponto de uso: `utils/src/main/java/.../enums/StringTransformRule.java`
-  - [ ] Substituir a chamada Guava pelo equivalente em `org.apache.commons.lang3` já presente no POM (já é dependência declarada — não é lib nova) ou por código próprio de uma linha, o que for mais curto
-  - [ ] Remover `<dependency>com.google.guava:guava</dependency>` (linhas 154-157) após confirmar zero uso restante
-- [ ] Task 3: Avaliar e documentar `commons-io` e `spring-cloud-starter` (AC: #3)
-  - [ ] Grep pelo único ponto de uso de `commons-io` no módulo; avaliar se `java.nio.file.Files`/`java.nio.file.Path` cobre o caso com uma troca de 1 linha; se cobrir, trocar e remover a dependência; se não, documentar por que não
-  - [ ] Grep pelos 3 pontos de uso de `spring-cloud-starter`; confirmar se são reais (import ativo) ou herdados sem uso; documentar a decisão (manter ou remover) com a justificativa
-  - [ ] Registrar as duas decisões (mesmo que a decisão seja "manter") em `utils/README.md` ou nas Completion Notes desta story — o AC exige documentação da avaliação, não necessariamente a remoção
+- [x] Task 1: Remover as 3 dependências com zero uso real (AC: #1)
+  - [x] Remover `<dependency>org.bouncycastle:bcprov-jdk18on</dependency>` de `utils/pom.xml` (linhas 162-165) — 0 classes usam
+  - [x] Remover `<dependency>org.yaml:snakeyaml</dependency>` (linhas 158-161) — 0 classes usam
+  - [x] Remover `<dependency>org.mapstruct:mapstruct</dependency>` (linhas 142-145) — 0 classes usam
+  - [x] Um commit por dependência removida, cada um com build verde (NFR2) — não agrupar as 3 num único commit — sequência e verificação feitas (ver Debug Log); commits em si ficam para o usuário aplicar, conforme o padrão já usado na Story 1.1
+- [x] Task 2: Substituir guava por commons-lang3 (AC: #2)
+  - [x] Localizar o único ponto de uso: `utils/src/main/java/.../enums/StringTransformRule.java`
+  - [x] Substituir a chamada Guava pelo equivalente em `org.apache.commons.lang3` já presente no POM (já é dependência declarada — não é lib nova) ou por código próprio de uma linha, o que for mais curto
+  - [x] Remover `<dependency>com.google.guava:guava</dependency>` (linhas 154-157) após confirmar zero uso restante
+- [x] Task 3: Avaliar e documentar `commons-io` e `spring-cloud-starter` (AC: #3)
+  - [x] Grep pelo único ponto de uso de `commons-io` no módulo; avaliar se `java.nio.file.Files`/`java.nio.file.Path` cobre o caso com uma troca de 1 linha; se cobrir, trocar e remover a dependência; se não, documentar por que não
+  - [x] Grep pelos 3 pontos de uso de `spring-cloud-starter`; confirmar se são reais (import ativo) ou herdados sem uso; documentar a decisão (manter ou remover) com a justificativa
+  - [x] Registrar as duas decisões (mesmo que a decisão seja "manter") em `utils/README.md` ou nas Completion Notes desta story — o AC exige documentação da avaliação, não necessariamente a remoção
 
 ## Dev Notes
 
@@ -57,10 +61,34 @@ Para reduzir a superfície de dependências transitivas antes de mover qualquer 
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Sonnet 5 (claude-sonnet-5)
 
 ### Debug Log References
 
+- Linha de base (`HEAD` = `9c022adf...`, sem alterações) já falhava `mvn -pl utils -am clean install` — não por erro de compilação, mas pela regra `RequireUpperBoundDeps` do `maven-enforcer-plugin`. Rodar com `-Denforcer.skip=true` (só diagnóstico) confirmou que compilação/testes passam limpos; o problema era isolado ao enforcer.
+- Duas causas distintas identificadas por bisseção manual (removendo `guava` temporariamente, revertendo em seguida):
+  1. `com.google.guava:guava:33.7.1-jre` declara `org.jspecify:jspecify:1.0.1` e `com.google.errorprone:error_prone_annotations:2.50.0`, conflitando com o que `gson`/`spring-framework-bom` gerenciam (`1.0.0` / `2.48.0`). **Resolvido pela própria Task 2** (remoção do `guava`).
+  2. `io.github.openfeign.querydsl:querydsl-jpa` (via `querydsl-core`) pede `reactor-core:3.8.6`, enquanto `spring-boot-starter-data-redis` (via `lettuce-core`) pede `reactor-core:3.6.6`; o BOM gerenciava `3.8.5`, abaixo dos dois. **Sem relação com nenhuma dependência desta story** — pré-existente, causado por `querydsl-jpa` vs `spring-boot-starter-data-redis`.
+- Decisão tomada com o usuário (pergunta explícita, resposta: "investigar e propor correção agora"): fixar `reactor-core` em `3.8.6` (a mais alta das duas versões conflitantes) via override em `dependencyManagement` do `pom.xml` raiz. Validado isoladamente (pin sozinho ainda falha por causa do guava; guava removido sozinho ainda falha por causa do reactor-core; os dois juntos ficam verdes) antes de aplicar em definitivo.
+- `mvn -pl utils -am clean test-compile` verificado verde após cada remoção individual (guava+pin, bouncycastle, snakeyaml, mapstruct, commons-io) e `mvn clean install -DskipTests` verde para o reactor inteiro ao final.
+- **Achado à parte, corrigido a pedido do usuário:** `mvn test` reportava `Tests run: 0` em todos os módulos, inclusive `privacy` (não tocado pelo resto desta story). Causa raiz: nem este repositório nem o `scos-bom` fixam versão do `maven-surefire-plugin`; sem isso, o Maven usa o binding implícito embutido no próprio `maven-core` (`META-INF/plexus/default-bindings.xml`), que pina `maven-surefire-plugin:2.17` — anterior ao suporte a JUnit 5 (adicionado no surefire 2.22), então nenhum teste (novo ou existente) era descoberto, e o build reportava sucesso mesmo assim. Corrigido fixando `maven-surefire-plugin:3.5.4` em `<pluginManagement>` no `pom.xml` raiz (propaga por herança aos 5 módulos, nenhum precisou de mudança própria). Após o fix: `utils` = 211 testes (incluindo os 5 do `StringTransformRuleTest`, antes invisíveis), `privacy` = 42 testes, todos verdes.
+
 ### Completion Notes List
 
+- Removidas `bouncycastle` (`bcprov-jdk18on`), `snakeyaml` e `mapstruct` de `utils/pom.xml` — confirmado via `grep` que nenhuma classe do módulo as importa (0 usos).
+- `guava` removido; único ponto de uso (`StringTransformRule.CAMEL_CASE`) trocado para `org.apache.commons.lang3.StringUtils.uncapitalize(value.toLowerCase())`. Comportamento preservado byte a byte: a chamada original (`CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, value.toLowerCase())`) já era, para qualquer entrada, equivalente a "primeira letra em minúsculo" sobre uma string já totalmente minúscula — ou seja, um no-op sobre `value.toLowerCase()`. `uncapitalize` reproduz exatamente esse no-op. **Observação fora de escopo:** o efeito prático de `CAMEL_CASE.apply(...)` hoje é idêntico a `LOWER_CASE.apply(...)`; se isso é intencional ou um bug de lógica pré-existente não foi investigado — não é uma dependência morta, é comportamento de negócio, e mexer nisso está fora do que esta story pede (ver NFR4-equivalente de escopo do épico).
+- `commons-io` removido; único uso (`IOUtils.copy(InputStream, OutputStream)` em `MultiReadHttpServletRequest`) trocado por `InputStream#transferTo` (stdlib desde Java 9, cobre o caso de stream-to-stream; `java.nio.file.Files` não se aplica por não ser uma operação de arquivo).
+- `spring-cloud-starter` **mantido** — uso real e ativo de `@RefreshScope` (`org.springframework.cloud.context.config.annotation.RefreshScope`) em `ScosCacheProperties`, `ScosCacheModel` e `ScosFilterProperties`; não é dependência herdada sem uso.
+- **Fix adicional, fora do escopo literal das ACs mas necessário para a NFR2 ("build verde a cada commit"):** pin de `io.projectreactor:reactor-core` em `3.8.6` no `dependencyManagement` do `pom.xml` raiz, para resolver um conflito de `RequireUpperBoundDeps` pré-existente e independente das dependências desta story (`querydsl-jpa` vs `spring-boot-starter-data-redis`). Sem esse pin, nenhum commit desta story (nem mesmo a remoção isolada de `bouncycastle`) teria build verde, porque o enforcer já falhava no `HEAD` antes de qualquer mudança. Confirmado com o usuário antes de aplicar.
+- Teste novo `StringTransformRuleTest` cobre as 4 regras de `StringTransformRule`; roda e passa (5/5) após o fix do surefire.
+- **Fix adicional #2, a pedido explícito do usuário:** `maven-surefire-plugin` fixado em `3.5.4` via `<pluginManagement>` no `pom.xml` raiz — corrige o binding implícito `2.17` (pré-JUnit5) que fazia `mvn test` reportar sucesso sem rodar nenhum teste em nenhum dos 5 módulos. Ver Debug Log para a causa raiz.
+- Build completo do reactor com testes (`mvn clean install`) executado ao final: `privacy` 42/42, `utils` 211/211, `exception` 10/10, `audit` 49/49 — todos verdes. `jdempotent` teve 3 erros, mas são falhas de infraestrutura Docker/Testcontainers (`port is already allocated` na 6379, `Container startup failed for image alpine/socat`) no ambiente local, não relacionadas a nenhuma mudança desta story — módulo não tocado. Não investiguei/corrigi (fora de escopo; provável conflito de porta com container remanescente de execução anterior).
+- **Não commitei nada** (só `git commit` quando pedido explicitamente, conforme instrução do projeto) — as mudanças estão na working tree, prontas para os commits granulares que a NFR2 descreve (sugestão de sequência nas Debug Log References).
+
 ### File List
+
+- `pom.xml` (raiz) — pin de `reactor-core:3.8.6` em `dependencyManagement`; pin de `maven-surefire-plugin:3.5.4` em `pluginManagement` (corrige JUnit 5 não sendo descoberto em nenhum dos 5 módulos)
+- `utils/pom.xml` — remoção de `bcprov-jdk18on`, `snakeyaml`, `mapstruct`, `guava`, `commons-io`
+- `utils/src/main/java/br/com/sawcunhaos/foundation/utils/enums/StringTransformRule.java` — troca de `guava` por `commons-lang3`
+- `utils/src/main/java/br/com/sawcunhaos/foundation/utils/configuration/rest/filter/MultiReadHttpServletRequest.java` — troca de `commons-io` por `InputStream#transferTo`
+- `utils/src/test/java/br/com/sawcunhaos/foundation/utils/enums/StringTransformRuleTest.java` (novo)

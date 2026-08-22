@@ -133,6 +133,15 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- Override: querydsl-jpa (3.8.6) e spring-boot-starter-data-redis/lettuce-core (3.6.6)
+                 pedem versões de reactor-core divergentes do que o scos-bom gerencia (3.8.5), o que
+                 quebra o enforcer RequireUpperBoundDeps. Fixa na mais alta das duas. -->
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>3.8.6</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -149,6 +158,19 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Nenhum módulo nem o scos-bom fixa versão do surefire, então o binding
+                     implícito do Maven cai para 2.17 (default-bindings.xml do maven-core),
+                     anterior ao suporte a JUnit 5 — testes "rodam" sem falhar porque nenhum
+                     é descoberto. Fixar aqui aplica a todos os módulos via herança. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.4</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
