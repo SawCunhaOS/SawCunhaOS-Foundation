@@ -85,6 +85,10 @@
     <dependencies>
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-privacy</artifactId>
         </dependency>
         <dependency>

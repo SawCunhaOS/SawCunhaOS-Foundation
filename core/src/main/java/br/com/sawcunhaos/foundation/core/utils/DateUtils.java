@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.utils;
+package br.com.sawcunhaos.foundation.core.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

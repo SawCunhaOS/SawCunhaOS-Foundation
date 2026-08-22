@@ -11,9 +11,9 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.utils;
+package br.com.sawcunhaos.foundation.core.utils;
 
-import br.com.sawcunhaos.foundation.utils.utils.dto.TestDTO;
+import br.com.sawcunhaos.foundation.core.utils.dto.TestDTO;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

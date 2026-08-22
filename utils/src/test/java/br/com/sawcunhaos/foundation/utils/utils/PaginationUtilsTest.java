@@ -15,7 +15,7 @@ package br.com.sawcunhaos.foundation.utils.utils;
 
 import br.com.sawcunhaos.foundation.utils.dto.request.ScosPaginationFilterDTO;
 import br.com.sawcunhaos.foundation.utils.dto.response.ScosPaginatedDTO;
-import br.com.sawcunhaos.foundation.utils.sort.PropertiesOrder;
+import br.com.sawcunhaos.foundation.core.sort.PropertiesOrder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;

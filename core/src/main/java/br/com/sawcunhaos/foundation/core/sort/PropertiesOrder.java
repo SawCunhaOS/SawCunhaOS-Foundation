@@ -11,8 +11,9 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.specification;
+package br.com.sawcunhaos.foundation.core.sort;
 
-public interface ScosUserAuthentication {
-    String findUserAuthentication();
+public interface PropertiesOrder {
+    String properties();
+    String value(final String name);
 }

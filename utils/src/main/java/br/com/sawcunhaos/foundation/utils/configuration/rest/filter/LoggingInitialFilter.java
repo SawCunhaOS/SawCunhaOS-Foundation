@@ -17,7 +17,7 @@ package br.com.sawcunhaos.foundation.utils.configuration.rest.filter;
 import br.com.sawcunhaos.foundation.privacy.SanitizationBodyComponent;
 import br.com.sawcunhaos.foundation.privacy.SanitizationHeadersComponent;
 import br.com.sawcunhaos.foundation.utils.configuration.rest.filter.properties.ScosFilterProperties;
-import br.com.sawcunhaos.foundation.utils.utils.DateUtils;
+import br.com.sawcunhaos.foundation.core.utils.DateUtils;
 import br.com.sawcunhaos.foundation.utils.utils.IpAddressExtractor;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

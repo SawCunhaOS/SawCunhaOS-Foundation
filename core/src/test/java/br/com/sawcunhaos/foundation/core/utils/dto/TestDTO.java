@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.utils.dto;
+package br.com.sawcunhaos.foundation.core.utils.dto;
 
 import lombok.Builder;
 import lombok.Data;

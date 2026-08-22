@@ -13,8 +13,8 @@
 
 package br.com.sawcunhaos.foundation.utils.aspect;
 
+import br.com.sawcunhaos.foundation.core.utils.StringFieldUtils;
 import br.com.sawcunhaos.foundation.utils.annotation.normalizestrings.NormalizeStrings;
-import br.com.sawcunhaos.foundation.utils.utils.StringFieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,7 +35,7 @@ public class StringProcessingAspect {
         NormalizeStrings annotation = method.getAnnotation(NormalizeStrings.class);
 
         Arrays.stream(joinPoint.getArgs()).forEach(object -> {
-            StringFieldUtils.applyTransformation(object, annotation.function());
+            StringFieldUtils.applyTransformation(object, annotation.function()::apply);
         });
 
         return joinPoint.proceed();

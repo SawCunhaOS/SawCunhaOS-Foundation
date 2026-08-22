@@ -19,7 +19,7 @@ import br.com.sawcunhaos.foundation.audit.specification.ScosAuditService;
 import br.com.sawcunhaos.foundation.privacy.core.MaskingEngine;
 import br.com.sawcunhaos.foundation.privacy.crypto.ScosFieldCipher;
 import br.com.sawcunhaos.foundation.audit.api.Auditable;
-import br.com.sawcunhaos.foundation.utils.specification.ScosUserAuthentication;
+import br.com.sawcunhaos.foundation.core.specification.ScosUserAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.event.spi.AbstractEvent;

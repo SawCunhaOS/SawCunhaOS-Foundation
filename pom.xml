@@ -89,7 +89,9 @@
         <module>audit-api</module>
         <module>jdempotent-api</module>
         <module>validation-api</module>
-        <!-- privacy comes before utils: utils depends on privacy (masking beans). -->
+        <!-- core comes before privacy/utils: utils depends on core (zero-Spring utilities, Story 1.7).
+             privacy comes before utils: utils depends on privacy (masking beans). -->
+        <module>core</module>
         <module>privacy</module>
         <module>utils</module>
         <module>exception</module>
@@ -110,6 +112,11 @@
     <dependencyManagement>
         <dependencies>
             <!-- Projeto -->
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-privacy</artifactId>

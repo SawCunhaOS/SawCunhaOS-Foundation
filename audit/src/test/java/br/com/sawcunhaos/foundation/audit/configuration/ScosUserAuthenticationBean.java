@@ -13,7 +13,7 @@
 
 package br.com.sawcunhaos.foundation.audit.configuration;
 
-import br.com.sawcunhaos.foundation.utils.specification.ScosUserAuthentication;
+import br.com.sawcunhaos.foundation.core.specification.ScosUserAuthentication;
 import org.springframework.stereotype.Service;
 
 @Service("ScosUserAuthentication")
