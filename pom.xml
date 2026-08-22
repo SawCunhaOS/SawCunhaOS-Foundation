@@ -95,6 +95,10 @@
         <module>exception</module>
         <module>audit</module>
         <module>jdempotent</module>
+        <!-- archtest depende de todos os módulos acima em escopo test (AD-5). A ordem de build real
+             é decidida pelo Maven via topologia de dependências, não pela ordem de listagem aqui;
+             listado por último só por legibilidade. -->
+        <module>archtest</module>
     </modules>
 
     <properties>

@@ -42,7 +42,7 @@ development_status:
   1-3-migrar-serialização-json-de-gson-para-jackson: review
   1-4-promover-o-perfil-analyze-checkstyle-archunit-para-pluginman: review
   1-5-criar-módulos-api-e-mover-as-anotações-de-contrato: review
-  1-6-criar-o-módulo-archtest-para-regras-cross-módulo: ready-for-dev
+  1-6-criar-o-módulo-archtest-para-regras-cross-módulo: review
   1-7-extrair-o-módulo-core: ready-for-dev
   1-8-extrair-o-módulo-spring: ready-for-dev
   1-9-extrair-o-módulo-validation: ready-for-dev
