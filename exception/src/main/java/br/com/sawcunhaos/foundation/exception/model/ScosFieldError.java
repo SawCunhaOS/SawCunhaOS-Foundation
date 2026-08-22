@@ -13,7 +13,7 @@
 
 package br.com.sawcunhaos.foundation.exception.model;
 
-import br.com.sawcunhaos.foundation.utils.specification.ExceptionCode;
+import br.com.sawcunhaos.foundation.core.specification.ExceptionCode;
 
 import java.io.Serial;
 import java.io.Serializable;

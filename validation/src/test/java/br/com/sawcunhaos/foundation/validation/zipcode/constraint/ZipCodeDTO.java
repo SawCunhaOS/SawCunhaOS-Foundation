@@ -11,12 +11,11 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.exception.error;
+package br.com.sawcunhaos.foundation.validation.zipcode.constraint;
 
-import br.com.sawcunhaos.foundation.core.exception.ScosException;
-import lombok.NoArgsConstructor;
+import br.com.sawcunhaos.foundation.validation.api.ZipCode;
 
-@NoArgsConstructor
-public class ScosNoContentException extends ScosException {
-
+public record ZipCodeDTO(
+        @ZipCode String zipCode
+) {
 }

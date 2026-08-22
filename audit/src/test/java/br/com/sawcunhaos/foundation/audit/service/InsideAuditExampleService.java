@@ -14,7 +14,7 @@
 package br.com.sawcunhaos.foundation.audit.service;
 
 import br.com.sawcunhaos.foundation.audit.enums.ErrorCode;
-import br.com.sawcunhaos.foundation.utils.exception.ScosException;
+import br.com.sawcunhaos.foundation.core.exception.ScosException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

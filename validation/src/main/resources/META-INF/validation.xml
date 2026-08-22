@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Jakarta Bean Validation bootstrap descriptor.
+
+  scos-foundation-validation-api's annotations (@CPF/@CNPJ/@TaxIdentifier/@ZipCode) declare
+  validatedBy = {} because their ConstraintValidator implementations live here, in
+  scos-foundation-validation, which depends on validation-api (not the other way around) -
+  referencing the validator class back from the annotation would create a module cycle.
+
+  This file restores the annotation <-> validator binding at runtime, for any application that
+  bootstraps Bean Validation via Validation.buildDefaultValidatorFactory() with this module on
+  the classpath. See validation-constraint-mappings.xml and Story 1.9's Dev Notes.
+-->
+<validation-config xmlns="https://jakarta.ee/xml/ns/validation/configuration"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="https://jakarta.ee/xml/ns/validation/configuration https://jakarta.ee/xml/ns/validation/validation-configuration-3.1.xsd"
+                    version="3.1">
+    <constraint-mapping>META-INF/validation-constraint-mappings.xml</constraint-mapping>
+</validation-config>

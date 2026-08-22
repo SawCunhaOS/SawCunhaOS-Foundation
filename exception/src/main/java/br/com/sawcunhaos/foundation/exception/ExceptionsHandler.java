@@ -14,13 +14,13 @@
 package br.com.sawcunhaos.foundation.exception;
 
 
-import br.com.sawcunhaos.foundation.utils.exception.ScosException;
+import br.com.sawcunhaos.foundation.core.exception.ScosException;
 import br.com.sawcunhaos.foundation.exception.error.ScosNoContentException;
 import br.com.sawcunhaos.foundation.exception.error.ScosNoRollbackException;
 import br.com.sawcunhaos.foundation.exception.model.ScosFieldError;
 import br.com.sawcunhaos.foundation.exception.model.ScosProblemDetails;
 import br.com.sawcunhaos.foundation.exception.utils.ExceptionUtils;
-import br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode;
+import br.com.sawcunhaos.foundation.core.enums.ScosExceptionCode;
 import br.com.sawcunhaos.foundation.utils.specification.LocaleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

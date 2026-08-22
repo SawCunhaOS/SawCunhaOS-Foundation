@@ -13,7 +13,7 @@
 
 package br.com.sawcunhaos.foundation.audit.enums;
 
-import br.com.sawcunhaos.foundation.utils.specification.ExceptionCode;
+import br.com.sawcunhaos.foundation.core.specification.ExceptionCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

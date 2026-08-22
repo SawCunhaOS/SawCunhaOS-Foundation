@@ -13,8 +13,8 @@
 
 package br.com.sawcunhaos.foundation.exception;
 
-import br.com.sawcunhaos.foundation.utils.enums.ScosExceptionCode;
-import br.com.sawcunhaos.foundation.utils.exception.ScosException;
+import br.com.sawcunhaos.foundation.core.enums.ScosExceptionCode;
+import br.com.sawcunhaos.foundation.core.exception.ScosException;
 import br.com.sawcunhaos.foundation.utils.specification.LocaleService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

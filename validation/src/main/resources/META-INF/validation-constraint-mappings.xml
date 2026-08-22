@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Binds each scos-foundation-validation-api annotation to its ConstraintValidator here in
+  scos-foundation-validation. Needed because the annotations declare validatedBy = {} (see
+  META-INF/validation.xml for why).
+-->
+<constraint-mappings xmlns="https://jakarta.ee/xml/ns/validation/mapping"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="https://jakarta.ee/xml/ns/validation/mapping https://jakarta.ee/xml/ns/validation/validation-mapping-3.1.xsd"
+                      version="3.1">
+
+    <constraint-definition annotation="br.com.sawcunhaos.foundation.validation.api.CPF">
+        <validated-by include-existing-validators="false">
+            <value>br.com.sawcunhaos.foundation.validation.taxidentifier.constraint.CpfValidator</value>
+        </validated-by>
+    </constraint-definition>
+
+    <constraint-definition annotation="br.com.sawcunhaos.foundation.validation.api.CNPJ">
+        <validated-by include-existing-validators="false">
+            <value>br.com.sawcunhaos.foundation.validation.taxidentifier.constraint.CnpjValidator</value>
+        </validated-by>
+    </constraint-definition>
+
+    <constraint-definition annotation="br.com.sawcunhaos.foundation.validation.api.TaxIdentifier">
+        <validated-by include-existing-validators="false">
+            <value>br.com.sawcunhaos.foundation.validation.taxidentifier.constraint.TaxIdentifierValidator</value>
+        </validated-by>
+    </constraint-definition>
+
+    <constraint-definition annotation="br.com.sawcunhaos.foundation.validation.api.ZipCode">
+        <validated-by include-existing-validators="false">
+            <value>br.com.sawcunhaos.foundation.validation.zipcode.constraint.ZipCodeValidator</value>
+        </validated-by>
+    </constraint-definition>
+
+</constraint-mappings>

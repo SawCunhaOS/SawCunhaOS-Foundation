@@ -84,17 +84,20 @@
     <modules>
         <!-- *-api modules come first: they have zero runtime dependencies (leaves of the graph).
              audit/jdempotent depend on audit-api/jdempotent-api (annotations only, see Story 1.5).
-             validation-api has no dependent yet: its annotations stay in utils until Story 1.9
-             extracts the ConstraintValidator implementations (see deferred-work.md). -->
+             validation-api's annotations moved from utils in Story 1.9, alongside the
+             ConstraintValidator implementations in validation (its dependent, below). -->
         <module>audit-api</module>
         <module>jdempotent-api</module>
         <module>validation-api</module>
         <!-- core comes before privacy/utils: utils depends on core (zero-Spring utilities, Story 1.7).
              privacy comes before utils: utils depends on privacy (masking beans).
              spring comes right after core: it depends only on core (generic Spring aspects, Story
-             1.8) — utils does NOT depend on it (nothing left in utils consumes it after the move). -->
+             1.8) — utils does NOT depend on it (nothing left in utils consumes it after the move).
+             validation comes right after spring (Fase 4 of the origin plan: second leaf module out,
+             depends on core + validation-api only, see Story 1.9) — utils does NOT depend on it. -->
         <module>core</module>
         <module>spring</module>
+        <module>validation</module>
         <module>privacy</module>
         <module>utils</module>
         <module>exception</module>
@@ -123,6 +126,11 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-spring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-validation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

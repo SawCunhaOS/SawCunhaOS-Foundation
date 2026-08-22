@@ -13,8 +13,8 @@
 
 package br.com.sawcunhaos.foundation.exception.error;
 
-import br.com.sawcunhaos.foundation.utils.exception.ScosException;
-import br.com.sawcunhaos.foundation.utils.specification.ExceptionCode;
+import br.com.sawcunhaos.foundation.core.exception.ScosException;
+import br.com.sawcunhaos.foundation.core.specification.ExceptionCode;
 import lombok.Getter;
 import lombok.ToString;
 
