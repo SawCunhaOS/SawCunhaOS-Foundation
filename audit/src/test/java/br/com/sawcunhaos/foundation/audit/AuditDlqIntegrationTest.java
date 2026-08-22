@@ -17,10 +17,10 @@ import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditDlqLog;
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditLog;
 import br.com.sawcunhaos.foundation.audit.service.ScosAuditDlqJob;
 import br.com.sawcunhaos.foundation.audit.service.ScosAuditLogService;
-import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -37,6 +37,9 @@ class AuditDlqIntegrationTest extends AbstractAuditIntegrationTest {
 
     @Autowired
     private ScosAuditLogService logService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("DLQ job deve mover registros da DLQ para SFA_LOG_AUDIT")
@@ -58,7 +61,7 @@ class AuditDlqIntegrationTest extends AbstractAuditIntegrationTest {
                 .build();
 
         ScosAuditDlqLog dlqEntry = ScosAuditDlqLog.builder()
-                .payload(GsonUtils.getInstance().toJson(auditLog))
+                .payload(objectMapper.writeValueAsString(auditLog))
                 .error("Simulated failure")
                 .retryCount(0)
                 .createdAt(OffsetDateTime.now())

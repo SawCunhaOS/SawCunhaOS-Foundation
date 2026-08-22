@@ -20,7 +20,6 @@ import br.com.sawcunhaos.foundation.privacy.core.MaskingEngine;
 import br.com.sawcunhaos.foundation.privacy.crypto.ScosFieldCipher;
 import br.com.sawcunhaos.foundation.utils.annotation.audit.Auditable;
 import br.com.sawcunhaos.foundation.utils.specification.ScosUserAuthentication;
-import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.event.spi.AbstractEvent;
@@ -33,6 +32,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.InvalidClassException;
 import java.time.LocalDateTime;
@@ -50,6 +50,7 @@ public class ScosAuditServiceBean implements ScosAuditService {
     private final ScosAuditBatchConsumer batchConsumer;
     private final ScosAuditLogProperties scosAuditLogProperties;
     private final ObjectProvider<MaskingEngine> maskingEngineProvider;
+    private final ObjectMapper objectMapper;
 
     @Async("ScosAuditLogAsyncExecutor")
     public void saveAuditLog(final AbstractEvent abstractEvent, final String user, final String ipAddress, final String xRequestId) {
@@ -160,7 +161,10 @@ public class ScosAuditServiceBean implements ScosAuditService {
             }
             stateMap.put(name, value);
         }
-        return GsonUtils.getInstance().toJson(stateMap);
+        // Null policy: Jackson includes null map values by default (unlike Gson, which omits them
+        // unless serializeNulls() is set — the old GsonUtils instance did set it). No explicit
+        // @JsonInclude needed here since the default already matches; see audit/README.md.
+        return objectMapper.writeValueAsString(stateMap);
     }
 
 }

@@ -39,6 +39,28 @@ All notable changes to SCOS Foundation are documented here. The format is based 
 - **Grants**: to enforce append-only policy, revoke `UPDATE` and `DELETE` on `SFA_LOG_AUDIT` for the
   application role: `REVOKE UPDATE, DELETE ON SFA_LOG_AUDIT FROM <your_app_role>;`
 
+### **BREAKING** — Gson removed, Jackson-only JSON (`scos-foundation-utils` / `audit` / `privacy`)
+
+- **Wire format change**: `java.time` values (`LocalDateTime`/`OffsetDateTime`/etc.) are now serialized by
+  Jackson's native `java.time` support (`jackson-datatype-jsr310`), not by the 3 custom Gson
+  `TypeAdapter`s removed in this release (`LocalDateAdapter`, `LocalDateTimeAdapter`, `LocalTimeAdapter`).
+  Any consumer parsing these date/time fields as raw text should verify compatibility with Jackson's
+  default `java.time` representation before upgrading.
+- `GsonUtils` (in `scos-foundation-utils`) is removed — no replacement; callers use Jackson's
+  `ObjectMapper` (Spring-managed where available) directly.
+- `gson` dropped from the dependency tree of `scos-foundation-utils` and `scos-foundation-privacy`.
+- `privacy/core/JsonMasker` now depends on Jackson (`tools.jackson.core:jackson-databind`), added directly
+  to `scos-foundation-privacy`'s own POM — the module still does not depend on `utils`.
+- `scos-foundation-audit`'s hash-chain input (`ScosAuditHashService.canonicalizeJson`), the DLQ payload
+  (`ScosAuditBatchConsumer`/`ScosAuditDlqJob`), and the entity-state snapshot
+  (`ScosAuditServiceBean.createJsonObject`) all move from Gson to Jackson. Any hash-chain already
+  persisted before this release does not verify against the new serializer (the JSON bytes the hash is
+  computed over changed) — reprocess or discard existing chains before upgrading, do not migrate on top
+  of them.
+- Null policy preserved explicitly: `ScosAuditLog` is annotated `@JsonInclude(JsonInclude.Include.ALWAYS)`
+  so the DLQ payload keeps including null fields, matching the old `GsonUtils` (`serializeNulls()`)
+  instance. See `audit/README.md`.
+
 ### Added — `scos-foundation-privacy` module
 
 - New base-layer module **`scos-foundation-privacy`** providing a high-performance, multithread-safe

@@ -14,11 +14,10 @@ package br.com.sawcunhaos.foundation.audit.service;
 
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditLog;
 import br.com.sawcunhaos.foundation.audit.domain.repository.ScosAuditLogRepository;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +38,7 @@ import java.util.Objects;
 public class ScosAuditHashService {
 
     private static final String GENESIS = "GENESIS";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ScosAuditLogRepository repository;
 
@@ -69,33 +69,32 @@ public class ScosAuditHashService {
     static String canonicalizeJson(String json) {
         if (json == null || json.isBlank()) return "";
         try {
-            JsonElement element = JsonParser.parseString(json);
+            JsonNode element = MAPPER.readTree(json);
             StringBuilder sb = new StringBuilder();
             canonicalize(element, sb);
             return sb.toString();
-        } catch (Exception e) {
+        } catch (JacksonException e) {
             return json;
         }
     }
 
-    private static void canonicalize(JsonElement element, StringBuilder sb) {
-        if (element.isJsonObject()) {
-            JsonObject obj = element.getAsJsonObject();
-            List<String> keys = new ArrayList<>(obj.keySet());
+    private static void canonicalize(JsonNode element, StringBuilder sb) {
+        if (element.isObject()) {
+            List<String> keys = new ArrayList<>();
+            for (var entry : element.properties()) keys.add(entry.getKey());
             Collections.sort(keys);
             sb.append('{');
             for (int i = 0; i < keys.size(); i++) {
                 if (i > 0) sb.append(',');
                 sb.append('"').append(keys.get(i)).append("\":");
-                canonicalize(obj.get(keys.get(i)), sb);
+                canonicalize(element.get(keys.get(i)), sb);
             }
             sb.append('}');
-        } else if (element.isJsonArray()) {
+        } else if (element.isArray()) {
             sb.append('[');
-            var array = element.getAsJsonArray();
-            for (int i = 0; i < array.size(); i++) {
+            for (int i = 0; i < element.size(); i++) {
                 if (i > 0) sb.append(',');
-                canonicalize(array.get(i), sb);
+                canonicalize(element.get(i), sb);
             }
             sb.append(']');
         } else {

@@ -180,6 +180,29 @@ boolean integra = integrityService.verifyChain("SFA_PEDIDO", "abc-123");
 
 ---
 
+## Serialização JSON (Jackson) e política de nulos
+
+Desde a 1.2.0, todos os pontos de serialização/desserialização JSON do módulo usam Jackson
+(`tools.jackson`), não mais Gson — `GsonUtils` foi removido do `utils`.
+
+**Política de nulos**: os payloads de auditoria sempre incluem campos nulos explicitamente,
+igual ao comportamento anterior (a instância `GsonUtils` usava `serializeNulls()`):
+
+- `ScosAuditLog` está anotado com `@JsonInclude(JsonInclude.Include.ALWAYS)` — usado na íntegra
+  ao serializar o payload da DLQ (`ScosAuditBatchConsumer.routeToDlq`).
+- O snapshot do estado da entidade (`entityOld`/`entityNew`, um `Map<String,Object>` serializado em
+  `ScosAuditServiceBean.createJsonObject`) depende do default do Jackson para `Map`, que já inclui
+  valores nulos sem configuração adicional.
+
+Por que isso importa: um campo ausente e um campo `null` explícito têm significados diferentes numa
+trilha de auditoria — omitir viraria uma lacuna silenciosa na reconstrução do estado.
+
+**Mudança de formato de wire**: datas (`LocalDateTime`/`OffsetDateTime`) agora são serializadas pelo
+suporte nativo do Jackson a `java.time` (`jackson-datatype-jsr310`), não mais pelos 3 adapters Gson
+customizados removidos nesta versão — ver CHANGELOG.
+
+---
+
 ## Grants append-only (recomendado)
 
 Para impedir que a aplicação modifique ou delete registros de auditoria:

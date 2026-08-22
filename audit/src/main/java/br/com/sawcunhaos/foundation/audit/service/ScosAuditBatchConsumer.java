@@ -18,7 +18,6 @@ import br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditPerf
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditDlqLog;
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditLog;
 import br.com.sawcunhaos.foundation.audit.domain.repository.ScosAuditDlqRepository;
-import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -29,6 +28,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -47,6 +47,7 @@ public class ScosAuditBatchConsumer {
     private final ScosAuditPerformanceProperties performanceProps;
     private final ScosAuditDurabilityProperties durabilityProps;
     private final ScosAuditImmutabilityProperties immutabilityProps;
+    private final ObjectMapper objectMapper;
 
     private static final AtomicLong EVENT_ORDER_SEQ = new AtomicLong(0);
 
@@ -68,6 +69,7 @@ public class ScosAuditBatchConsumer {
             ScosAuditPerformanceProperties performanceProps,
             ScosAuditDurabilityProperties durabilityProps,
             ScosAuditImmutabilityProperties immutabilityProps,
+            ObjectMapper objectMapper,
             ObjectProvider<MeterRegistry> meterRegistryProvider) {
         this.queue = queue;
         this.logService = logService;
@@ -76,6 +78,7 @@ public class ScosAuditBatchConsumer {
         this.performanceProps = performanceProps;
         this.durabilityProps = durabilityProps;
         this.immutabilityProps = immutabilityProps;
+        this.objectMapper = objectMapper;
 
         MeterRegistry registry = meterRegistryProvider.getIfAvailable();
         if (registry != null) {
@@ -193,7 +196,7 @@ public class ScosAuditBatchConsumer {
         for (ScosAuditLog auditEntry : batch) {
             try {
                 ScosAuditDlqLog dlq = ScosAuditDlqLog.builder()
-                        .payload(GsonUtils.getInstance().toJson(auditEntry))
+                        .payload(objectMapper.writeValueAsString(auditEntry))
                         .error(error)
                         .retryCount(0)
                         .createdAt(OffsetDateTime.now())

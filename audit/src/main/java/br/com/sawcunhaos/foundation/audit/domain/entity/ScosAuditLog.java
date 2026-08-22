@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.audit.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,6 +49,9 @@ import java.util.UUID;
 @Getter
 @Table(name = "SFA_LOG_AUDIT")
 @Entity
+// Explicit null policy for the DLQ payload (Jackson serializes the whole entity there): always
+// include null fields, matching the old GsonUtils instance (serializeNulls()) — see audit/README.md.
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class ScosAuditLog {
 
     /** Identificador único do registro de auditoria (UUID gerado automaticamente). */

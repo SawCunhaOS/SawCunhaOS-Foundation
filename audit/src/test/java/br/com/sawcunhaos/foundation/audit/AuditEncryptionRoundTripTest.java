@@ -22,8 +22,6 @@ import br.com.sawcunhaos.foundation.privacy.core.MaskingEngine;
 import br.com.sawcunhaos.foundation.privacy.crypto.JasyptCryptoKeyProvider;
 import br.com.sawcunhaos.foundation.privacy.crypto.ScosFieldCipher;
 import br.com.sawcunhaos.foundation.privacy.specification.DataMaskingValues;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +38,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Set;
 
@@ -81,6 +81,9 @@ class AuditEncryptionRoundTripTest {
     @Autowired
     private ScosAuditLogRepository scosAuditLogRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setUp() {
         countryRepository.deleteAll();
@@ -106,9 +109,9 @@ class AuditEncryptionRoundTripTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("INSERT audit log não encontrado"));
 
-        JsonObject snapshot = JsonParser.parseString(log.getEntityNew()).getAsJsonObject();
-        String storedName = snapshot.get("name").getAsString();
-        String storedAcronym = snapshot.get("acronym").getAsString();
+        JsonNode snapshot = objectMapper.readTree(log.getEntityNew());
+        String storedName = snapshot.get("name").asString();
+        String storedAcronym = snapshot.get("acronym").asString();
 
         assertTrue(storedName.startsWith(ScosFieldCipher.PREFIX), "name deve estar cifrado em repouso");
         assertEquals("SEC", storedAcronym, "campo não opt-in deve permanecer em claro");

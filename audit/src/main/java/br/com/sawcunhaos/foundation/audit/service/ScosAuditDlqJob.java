@@ -15,7 +15,6 @@ package br.com.sawcunhaos.foundation.audit.service;
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditDlqLog;
 import br.com.sawcunhaos.foundation.audit.domain.entity.ScosAuditLog;
 import br.com.sawcunhaos.foundation.audit.domain.repository.ScosAuditDlqRepository;
-import br.com.sawcunhaos.foundation.utils.utils.GsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +37,7 @@ public class ScosAuditDlqJob {
 
     private final ScosAuditDlqRepository dlqRepository;
     private final ScosAuditLogService logService;
+    private final ObjectMapper objectMapper;
 
     @Scheduled(fixedDelayString = "${scos.audit.durability.dlq-reprocess-interval-ms:60000}")
     public void reprocess() {
@@ -56,7 +57,7 @@ public class ScosAuditDlqJob {
         if (dlqEntry == null) return;
 
         try {
-            ScosAuditLog auditLog = GsonUtils.getInstance().fromJson(dlqEntry.getPayload(), ScosAuditLog.class);
+            ScosAuditLog auditLog = objectMapper.readValue(dlqEntry.getPayload(), ScosAuditLog.class);
             auditLog.setId(null);
             logService.saveBatch(List.of(auditLog));
             dlqRepository.delete(dlqEntry);

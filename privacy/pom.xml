@@ -91,11 +91,11 @@
         <!-- Core (no Spring): usable outside the SCOS layer               -->
         <!-- ============================================================= -->
 
-        <!-- Own Gson: the engine only operates over JsonElement, so the   -->
+        <!-- Own Jackson: the engine only operates over JsonNode, so the   -->
         <!-- privacy module does NOT depend on utils (avoids utils<->privacy cycle). -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- Explicit SnakeYAML so the standalone (non-Spring) usage works -->

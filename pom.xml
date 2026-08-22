@@ -20,7 +20,7 @@
     <parent>
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-bom</artifactId>
-        <version>1.4.1</version>
+        <version>1.4.2</version>
         <relativePath/>
     </parent>
 
@@ -158,19 +158,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <!-- Nenhum módulo nem o scos-bom fixa versão do surefire, então o binding
-                     implícito do Maven cai para 2.17 (default-bindings.xml do maven-core),
-                     anterior ao suporte a JUnit 5 — testes "rodam" sem falhar porque nenhum
-                     é descoberto. Fixar aqui aplica a todos os módulos via herança. -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.4</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
