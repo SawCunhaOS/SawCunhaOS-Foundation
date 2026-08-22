@@ -11,9 +11,9 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.annotation.normalizestrings;
+package br.com.sawcunhaos.foundation.spring.annotation.normalizestrings;
 
-import br.com.sawcunhaos.foundation.utils.enums.StringTransformRule;
+import br.com.sawcunhaos.foundation.spring.enums.StringTransformRule;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

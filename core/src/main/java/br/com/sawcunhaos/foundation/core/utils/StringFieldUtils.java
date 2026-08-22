@@ -26,10 +26,12 @@ import java.util.stream.Collectors;
 public final class StringFieldUtils {
 
     // Structural note (Story 1.7, AC #1): the original signature took the Spring-coupled
-    // br.com.sawcunhaos.foundation.utils.enums.StringTransformRule enum. core cannot depend on
-    // utils (utils depends on core, and a cycle is unbuildable), so the parameter is generalized
-    // to UnaryOperator<String>. Callers holding a StringTransformRule pass `rule::apply` — same
-    // behavior, no cycle. See StringProcessingAspect in utils for the call-site update.
+    // StringTransformRule enum (at the time in br.com.sawcunhaos.foundation.utils.enums; moved to
+    // br.com.sawcunhaos.foundation.spring.enums in Story 1.8, still Spring-coupled). core cannot
+    // depend on spring or utils (both depend on core, and a cycle is unbuildable), so the parameter
+    // is generalized to UnaryOperator<String>. Callers holding a StringTransformRule pass
+    // `rule::apply` — same behavior, no cycle. See StringProcessingAspect (now in spring) for the
+    // call-site update.
     public static void applyTransformation(Object object, UnaryOperator<String> transform) {
         if (object == null || transform == null) {
             return;

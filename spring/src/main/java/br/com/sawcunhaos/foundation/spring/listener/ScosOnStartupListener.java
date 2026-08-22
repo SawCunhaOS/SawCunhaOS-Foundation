@@ -11,9 +11,9 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.listener;
+package br.com.sawcunhaos.foundation.spring.listener;
 
-import br.com.sawcunhaos.foundation.utils.specification.ScosStartupListener;
+import br.com.sawcunhaos.foundation.spring.specification.ScosStartupListener;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

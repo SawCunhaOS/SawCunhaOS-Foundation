@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.specification;
+package br.com.sawcunhaos.foundation.spring.specification;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 

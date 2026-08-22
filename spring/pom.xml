@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ /*
+  ~  * Copyright 2026 SawCunha Open System - SawCunhaOS-Foundation
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  */
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.com.sawcunhaos</groupId>
+        <artifactId>scos-foundation</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>scos-foundation-spring</artifactId>
+    <name>SCOS Foundation Spring</name>
+    <description>Generic Spring-aspect module (ScosRule, ScosRuleService, NormalizeStrings,
+        StringProcessingAspect, ScosOnStartupListener, ScosStartupListener) so consumers of ScosRule
+        don't inherit JPA/Servlet. Depends only on core + spring-context/spring-aop. Enforced by a
+        local ArchUnit rule (AC #2).</description>
+    <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation</url>
+        <connection>scm:git:git://github.com/SawCunhaOS/SawCunhaOS-Foundation.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/SawCunhaOS/SawCunhaOS-Foundation.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>sawcunha</id>
+            <name>Sawcunha Community</name>
+            <email>community@sawcunha.io</email>
+            <url>https://github.com/sawcunha</url>
+            <organization>SawCunha Open System</organization>
+            <organizationUrl>https://github.com/SawCunhaOS</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>-3</timezone>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>SawCunha Open System</name>
+        <url>https://github.com/SawCunhaOS</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>GitHub Actions</system>
+        <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation/actions</url>
+    </ciManagement>
+
+    <properties>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-core</artifactId>
+        </dependency>
+
+        <!-- Only runtime dependencies allowed (AC #1 / Dev Notes): spring-context, spring-aop.
+             No jakarta.persistence, jakarta.servlet or org.springframework.data. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+        </dependency>
+
+        <!-- ScosStartupListener/ScosOnStartupListener key off ApplicationReadyEvent, which lives in
+             spring-boot itself (not spring-context/spring-aop). Not called out in the Dev Notes'
+             dependency list, but unavoidable: the class already existed with this import (see Story
+             1.7 AC #4) and AC #1 here only forbids jakarta.servlet/persistence + spring.data. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+
+        <!-- StringProcessingAspect uses the @Aspect/@Around AspectJ annotation style (Spring AOP's
+             proxy-based execution still needs the annotation classes on the compile classpath). -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+
+        <!-- ScosOnStartupListener uses lombok's @Log4j2. -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+
+        <!-- ArchUnit is test scope, version managed by the parent (Story 1.4). -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

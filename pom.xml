@@ -90,8 +90,11 @@
         <module>jdempotent-api</module>
         <module>validation-api</module>
         <!-- core comes before privacy/utils: utils depends on core (zero-Spring utilities, Story 1.7).
-             privacy comes before utils: utils depends on privacy (masking beans). -->
+             privacy comes before utils: utils depends on privacy (masking beans).
+             spring comes right after core: it depends only on core (generic Spring aspects, Story
+             1.8) — utils does NOT depend on it (nothing left in utils consumes it after the move). -->
         <module>core</module>
+        <module>spring</module>
         <module>privacy</module>
         <module>utils</module>
         <module>exception</module>
@@ -115,6 +118,11 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

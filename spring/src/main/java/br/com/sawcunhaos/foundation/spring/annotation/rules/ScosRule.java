@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.annotation.rules;
+package br.com.sawcunhaos.foundation.spring.annotation.rules;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AliasFor;

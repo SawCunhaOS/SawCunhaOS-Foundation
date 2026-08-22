@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.enums;
+package br.com.sawcunhaos.foundation.spring.enums;
 
 import org.junit.jupiter.api.Test;
 

@@ -11,10 +11,10 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.aspect;
+package br.com.sawcunhaos.foundation.spring.aspect;
 
 import br.com.sawcunhaos.foundation.core.utils.StringFieldUtils;
-import br.com.sawcunhaos.foundation.utils.annotation.normalizestrings.NormalizeStrings;
+import br.com.sawcunhaos.foundation.spring.annotation.normalizestrings.NormalizeStrings;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,7 +28,7 @@ import java.util.Arrays;
 @Component
 public class StringProcessingAspect {
 
-    @Around("@annotation(br.com.sawcunhaos.foundation.utils.annotation.normalizestrings.NormalizeStrings)")
+    @Around("@annotation(br.com.sawcunhaos.foundation.spring.annotation.normalizestrings.NormalizeStrings)")
     public Object handleNormalizeStrings(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
