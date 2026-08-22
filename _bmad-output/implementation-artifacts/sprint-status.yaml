@@ -45,7 +45,7 @@ development_status:
   1-6-criar-o-módulo-archtest-para-regras-cross-módulo: review
   1-7-extrair-o-módulo-core: review
   1-8-extrair-o-módulo-spring: review
-  1-9-extrair-o-módulo-validation: ready-for-dev
+  1-9-extrair-o-módulo-validation: review
   1-10-extrair-o-módulo-cache: ready-for-dev
   1-11-extrair-o-módulo-jpa: ready-for-dev
   1-12-extrair-o-módulo-web: ready-for-dev
