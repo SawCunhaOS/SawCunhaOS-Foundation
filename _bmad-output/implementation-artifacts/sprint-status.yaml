@@ -1,0 +1,107 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 08-22-2026 00:00
+last_updated: 08-22-2026 14:00
+project: SawCunhaOS-Foundation
+project_key: NOKEY
+tracking_system: file-system
+story_location: 
+  /home/sawcunha/Projetos/SCOS/SawCunhaOS-Foundation/_bmad-output/implementation-artifacts
+development_status:
+  epic-1: in-progress
+  1-1-congelar-o-inventário-classe-módulo: ready-for-dev
+  1-2-remover-dependências-mortas-e-obsoletas: ready-for-dev
+  1-3-migrar-serialização-json-de-gson-para-jackson: ready-for-dev
+  1-4-promover-o-perfil-analyze-checkstyle-archunit-para-pluginman: ready-for-dev
+  1-5-criar-módulos-api-e-mover-as-anotações-de-contrato: ready-for-dev
+  1-6-criar-o-módulo-archtest-para-regras-cross-módulo: ready-for-dev
+  1-7-extrair-o-módulo-core: ready-for-dev
+  1-8-extrair-o-módulo-spring: ready-for-dev
+  1-9-extrair-o-módulo-validation: ready-for-dev
+  1-10-extrair-o-módulo-cache: ready-for-dev
+  1-11-extrair-o-módulo-jpa: ready-for-dev
+  1-12-extrair-o-módulo-web: ready-for-dev
+  1-13-extrair-o-módulo-feign: ready-for-dev
+  1-14-impor-regras-archunit-cross-módulo-e-remover-utils-do-reacto: ready-for-dev
+  1-15-emitir-log-de-inicialização-por-módulo-de-implementação: ready-for-dev
+  epic-1-retrospective: optional
+
+  epic-2: in-progress
+  2-1-corrigir-o-handler-de-acesso-negado-403: ready-for-dev
+  2-2-corrigir-o-handler-de-validação-para-parâmetro-simples-400: ready-for-dev
+  2-3-retornar-501-para-funcionalidade-não-implementada: ready-for-dev
+  2-4-padronizar-log-por-faixa-de-status-http: ready-for-dev
+  2-5-corrigir-a-resolução-de-título-de-erro-para-jackson-3: ready-for-dev
+  2-6-corrigir-resolvetitle-para-não-usar-try-catch-como-controle: ready-for-dev
+  2-7-unificar-o-formato-de-erro-em-handleexceptioninternal-inclui: ready-for-dev
+  2-8-mover-o-contrato-de-domínio-do-exception-para-o-core: ready-for-dev
+  2-9-mover-a-tradução-http-do-exception-para-o-web-e-registrar-vi: ready-for-dev
+  2-10-consolidar-a-constante-mdc_request_id-no-core: ready-for-dev
+  epic-2-retrospective: optional
+
+  epic-3: in-progress
+  3-1-corrigir-a-inicialização-do-redisconnectionfactory: ready-for-dev
+  3-2-migrar-hashing-de-md5-para-sha-256: ready-for-dev
+  3-3-resolver-campos-anotados-em-toda-a-hierarquia-de-classes: ready-for-dev
+  3-4-registrar-idempotentaspect-sem-duplicidade-e-sem-threadlocal: ready-for-dev
+  3-5-tornar-a-aquisição-do-lock-atômica-tryacquire-lease: ready-for-dev
+  3-6-detectar-colisão-de-payload-sob-a-mesma-chave: ready-for-dev
+  3-7-garantir-fail-open-com-circuit-breaker-quando-o-redis-está-i: ready-for-dev
+  3-8-tornar-a-política-de-falha-por-exceção-de-negócio-declarável: ready-for-dev
+  3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci: ready-for-dev
+  3-10-tornar-o-namespace-de-prefixo-de-chave-configurável: ready-for-dev
+  3-11-expor-métricas-de-idempotência: ready-for-dev
+  3-12-introduzir-idempotencykeyresolver-com-composição-de-chave-de: ready-for-dev
+  3-13-suportar-header-idempotency-key-como-fonte-de-chave: ready-for-dev
+  3-14-migrar-configuração-para-configurationproperties: ready-for-dev
+  3-15-corrigir-ttl-e-equals-hashcode: ready-for-dev
+  3-16-adicionar-allowlist-de-tipos-no-polymorphicredisserializer: ready-for-dev
+  3-17-substituir-construtores-telescópicos-por-builder-e-documenta: ready-for-dev
+  epic-3-retrospective: optional
+
+  epic-4: in-progress
+  4-1-diagnosticar-o-gate-mecânico-de-javadoc-via-checkstyle: ready-for-dev
+  4-2-documentar-o-módulo-core: ready-for-dev
+  4-3-documentar-o-módulo-audit-api: ready-for-dev
+  4-4-documentar-o-módulo-jdempotent-api: ready-for-dev
+  4-5-documentar-o-módulo-validation-api: ready-for-dev
+  4-6-documentar-o-módulo-archtest: ready-for-dev
+  4-7-documentar-o-módulo-spring: ready-for-dev
+  4-8-documentar-o-módulo-validation: ready-for-dev
+  4-9-documentar-o-módulo-cache: ready-for-dev
+  4-10-documentar-o-módulo-jpa: ready-for-dev
+  4-11-documentar-o-módulo-web: ready-for-dev
+  4-12-documentar-o-módulo-feign: ready-for-dev
+  4-13-documentar-o-módulo-jdempotent: ready-for-dev
+  4-14-documentar-o-módulo-audit: ready-for-dev
+  4-15-documentar-o-módulo-privacy: ready-for-dev
+  4-16-ativar-globalmente-o-gate-mecânico-de-checkstyle: ready-for-dev
+  epic-4-retrospective: optional
