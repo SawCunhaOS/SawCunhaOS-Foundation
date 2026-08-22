@@ -1,6 +1,10 @@
+---
+baseline_commit: 3e99221db78565ca0a8a6b7b2a8cd70ece24938c
+---
+
 # Story 1.1: Congelar o inventário classe→módulo
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -18,16 +22,16 @@ Para que nenhuma migração posterior deixe uma classe sem módulo de destino.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Confirmar a contagem real de classes em `utils/src/main/java` bate com 71 (AC: #1)
-  - [ ] Rodar `find utils/src/main/java -name "*.java" | wc -l` e reconciliar qualquer divergência com a tabela da Seção 3 do plano de origem antes de congelar
-- [ ] Task 2: Consolidar o inventário classe→módulo num artefato único e citável (AC: #1, #3)
-  - [ ] Criar `_bmad-output/implementation-artifacts/inventario-classe-modulo.md` com uma tabela `classe completa (FQN atual) → módulo destino → pacote destino`, cobrindo as 71 classes sem omissão
-  - [ ] Basear a tabela nas Seções 3 e "Todas as anotações, por destino" de `etc/doc/plano/plano-decomposicao-utils.md` (já congela `core`, `spring`, `web`, `cache`, `jpa`, `validation`, `audit-api`, `jdempotent-api`, `validation-api`) e na tabela de exemplos do addendum do PRD
-  - [ ] Confirmar explicitamente os dois pontos que o plano original registra como lacuna resolvida na Fase 0: `annotation/rules/*` (`ScosRule`, `ScosRuleService`) → `spring`; `listener/ScosOnStartupListener` → `spring` (a interface `ScosStartupListener` fica em `core`)
-- [ ] Task 3: Validar que nenhum destino usa nome genérico (AC: #2)
-  - [ ] Checar que nenhuma linha da tabela aponta para um sub-pacote `util`/`common`/`utils.utils` dentro de `core` ou de qualquer módulo novo
-- [ ] Task 4: Tornar o inventário referência única (AC: #3)
-  - [ ] Adicionar ao topo do arquivo uma nota "fonte congelada — Fase 0, Story 1.1" e linkar de volta para o plano de origem e o addendum, para que Stories 1.5–1.13 apontem para este arquivo único em vez de recitarem a tabela
+- [x] Task 1: Confirmar a contagem real de classes em `utils/src/main/java` bate com 71 (AC: #1)
+  - [x] Rodar `find utils/src/main/java -name "*.java" | wc -l` e reconciliar qualquer divergência com a tabela da Seção 3 do plano de origem antes de congelar
+- [x] Task 2: Consolidar o inventário classe→módulo num artefato único e citável (AC: #1, #3)
+  - [x] Criar `_bmad-output/implementation-artifacts/inventario-classe-modulo.md` com uma tabela `classe completa (FQN atual) → módulo destino → pacote destino`, cobrindo as 71 classes sem omissão
+  - [x] Basear a tabela nas Seções 3 e "Todas as anotações, por destino" de `etc/doc/plano/plano-decomposicao-utils.md` (já congela `core`, `spring`, `web`, `cache`, `jpa`, `validation`, `audit-api`, `jdempotent-api`, `validation-api`) e na tabela de exemplos do addendum do PRD
+  - [x] Confirmar explicitamente os dois pontos que o plano original registra como lacuna resolvida na Fase 0: `annotation/rules/*` (`ScosRule`, `ScosRuleService`) → `spring`; `listener/ScosOnStartupListener` → `spring` (a interface `ScosStartupListener` fica em `core`)
+- [x] Task 3: Validar que nenhum destino usa nome genérico (AC: #2)
+  - [x] Checar que nenhuma linha da tabela aponta para um sub-pacote `util`/`common`/`utils.utils` dentro de `core` ou de qualquer módulo novo
+- [x] Task 4: Tornar o inventário referência única (AC: #3)
+  - [x] Adicionar ao topo do arquivo uma nota "fonte congelada — Fase 0, Story 1.1" e linkar de volta para o plano de origem e o addendum, para que Stories 1.5–1.13 apontem para este arquivo único em vez de recitarem a tabela
 
 ## Dev Notes
 
@@ -54,10 +58,19 @@ Para que nenhuma migração posterior deixe uma classe sem módulo de destino.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Sonnet 5 (claude-sonnet-5)
 
 ### Debug Log References
 
+- `find utils/src/main/java -name "*.java" | wc -l` → 72 (não 71). Divergência reconciliada: o plano de origem (Seção 3, "Todas as anotações, por destino") omite `ScosRequestPATCH`, que existe no código atual como irmã de `ScosRequestGET/POST/PUT/DELETE/Mapping`. Congelada com o mesmo destino delas (`web`).
+
 ### Completion Notes List
 
+- Inventário criado em `_bmad-output/implementation-artifacts/inventario-classe-modulo.md` cobrindo as 72 classes reais de `utils/src/main/java` (71 do plano de origem + `ScosRequestPATCH`, reconciliada — ver Debug Log).
+- Nenhuma classe ficou sem disposição explícita: as 4 classes que a Story 1.3 vai remover (3 adapters `java.time` do Gson + `GsonUtils`) recebem a disposição explícita `REMOVIDO — Story 1.3` em vez de ficarem ausentes da tabela, preservando a garantia de "nenhuma classe sem destino" da Fase 0 do plano de origem.
+- Validado que nenhuma linha da tabela usa pacote genérico `util`/`common`/`utils.utils`: classes antes soltas em `utils.utils` foram realocadas para a raiz do pacote do módulo destino (ex.: `DateUtils` → `br.com.sawcunhaos.foundation.core`) em vez de recriar um pacote-saco.
+- Story puramente documental, conforme NFR4 e Dev Notes: nenhum arquivo Java foi movido ou alterado.
+
 ### File List
+
+- `_bmad-output/implementation-artifacts/inventario-classe-modulo.md` (novo)
