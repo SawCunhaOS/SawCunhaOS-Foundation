@@ -50,7 +50,7 @@ development_status:
   1-11-extrair-o-módulo-jpa: review
   1-12-extrair-o-módulo-web: review
   1-13-extrair-o-módulo-feign: review
-  1-14-impor-regras-archunit-cross-módulo-e-remover-utils-do-reacto: ready-for-dev
+  1-14-impor-regras-archunit-cross-módulo-e-remover-utils-do-reacto: done
   1-15-emitir-log-de-inicialização-por-módulo-de-implementação: ready-for-dev
   epic-1-retrospective: optional
 

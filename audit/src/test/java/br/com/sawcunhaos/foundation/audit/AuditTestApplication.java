@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootConfiguration
 @AutoConfigurationPackage
 @SpringBootApplication
-@ComponentScan({"*ignore*", "br.com.sawcunhaos.foundation.audit", "br.com.sawcunhaos.foundation.utils.configuration.hibernate"})
+@ComponentScan({"*ignore*", "br.com.sawcunhaos.foundation.audit"})
 public class AuditTestApplication {
 
 	public static void main(String[] args) {
