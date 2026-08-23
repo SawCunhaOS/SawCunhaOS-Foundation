@@ -84,16 +84,11 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>br.com.sawcunhaos</groupId>
-            <artifactId>scos-foundation-utils</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>br.com.insidesoftwares.jdempotent</groupId>
-                    <artifactId>redis</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!-- Story 1.14: scos-foundation-utils removed from the reactor entirely. Its only
+             remaining consumer in this module was a test-only LocaleService implementor, now
+             repointed to core.specification.LocaleService (already available transitively via
+             scos-foundation-jpa/-exception below, both of which depend on scos-foundation-core;
+             scos-foundation-privacy does NOT depend on core). -->
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-privacy</artifactId>
@@ -108,10 +103,19 @@
             <artifactId>scos-foundation-audit-api</artifactId>
         </dependency>
         <!-- Story 1.11: ScosAuditLiquibaseProperties extends BaseLiquibaseProperties, moved from
-             utils to jpa. scos-foundation-utils stays (still used in tests). -->
+             utils to jpa. -->
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-jpa</artifactId>
+        </dependency>
+        <!-- ScosLogDataSourceConfiguration/ScosAuditBatchConsumer @Autowired(required = false) a
+             MeterRegistry (io.micrometer.core.instrument.*) — previously arrived transitively via
+             scos-foundation-utils's spring-boot-starter-actuator (which also autoconfigures the
+             MeterRegistry bean itself, not just the classes); now explicit since Story 1.14 removed
+             utils from the reactor. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

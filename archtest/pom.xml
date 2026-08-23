@@ -86,15 +86,51 @@
 
     <dependencies>
         <!-- scope=test em tudo (AC #1): archtest não tem código de produção, só enxerga o classpath
-             inteiro do reactor para checar regras cross-módulo. Nada depende de archtest de volta. -->
+             inteiro do reactor para checar regras cross-módulo. Nada depende de archtest de volta.
+             Story 1.14: lista de módulos completada para cobrir a regra "nada depende de web" (AC #1
+             daquela story) — core/spring/validation/cache/jpa/feign/web adicionados; scos-foundation-utils
+             removido (módulo extinto do reactor). -->
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
-            <artifactId>scos-foundation-privacy</artifactId>
+            <artifactId>scos-foundation-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
-            <artifactId>scos-foundation-utils</artifactId>
+            <artifactId>scos-foundation-spring</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-validation</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-cache</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-jpa</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- web itself must be on the classpath too, even though nothing here is allowed to depend
+             on it — ArchUnit needs web's own classes present to recognize its package as a real
+             target for the "nothing depends on web" rule below. -->
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-web</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-feign</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-privacy</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

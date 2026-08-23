@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ /*
+  ~  * Copyright 2026 SawCunha Open System - SawCunhaOS-Foundation
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  */
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.com.sawcunhaos</groupId>
+        <artifactId>scos-foundation</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>scos-foundation-codegen</artifactId>
+    <name>SCOS Foundation Codegen</name>
+    <description>Resource-only module hosting OpenAPI Generator custom Mustache templates (api/apiController/apiDelegate/responseType/pojo/model/etc.) used by consuming services to generate controllers, delegates and DTOs consistent with the foundation's @Scos* annotations. No Java code, no runtime dependency — a consumer points its openapi-generator-maven-plugin templateDirectory at this jar's extracted src/main/resources/mustaches/. See etc/doc/ideia/rfc9457-exception-compliance.md for the documented generation behavior of each template.</description>
+    <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation</url>
+        <connection>scm:git:git://github.com/SawCunhaOS/SawCunhaOS-Foundation.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/SawCunhaOS/SawCunhaOS-Foundation.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>sawcunha</id>
+            <name>Sawcunha Community</name>
+            <email>community@sawcunha.io</email>
+            <url>https://github.com/sawcunha</url>
+            <organization>SawCunha Open System</organization>
+            <organizationUrl>https://github.com/SawCunhaOS</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>-3</timezone>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>SawCunha Open System</name>
+        <url>https://github.com/SawCunhaOS</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>GitHub Actions</system>
+        <url>https://github.com/SawCunhaOS/SawCunhaOS-Foundation/actions</url>
+    </ciManagement>
+
+    <properties>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>

@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.specification;
+package br.com.sawcunhaos.foundation.core.specification;
 
 import java.util.List;
 import java.util.Locale;

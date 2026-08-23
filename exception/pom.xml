@@ -84,9 +84,13 @@
     </properties>
 
     <dependencies>
+        <!-- Story 1.14: scos-foundation-utils removed from the reactor. ExceptionsHandler uses
+             core.exception.ScosException, core.enums.ScosExceptionCode, and
+             core.specification.LocaleService directly — previously arrived transitively via
+             scos-foundation-utils (which itself depends on core), now explicit. -->
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
-            <artifactId>scos-foundation-utils</artifactId>
+            <artifactId>scos-foundation-core</artifactId>
         </dependency>
         <!-- ExceptionsHandler uses jakarta.servlet.http.HttpServletRequest and Spring MVC types
              (@ExceptionHandler, ResponseEntity). Previously arrived transitively via

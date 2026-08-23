@@ -85,10 +85,15 @@
         <!-- *-api modules come first: they have zero runtime dependencies (leaves of the graph).
              audit/jdempotent depend on audit-api/jdempotent-api (annotations only, see Story 1.5).
              validation-api's annotations moved from utils in Story 1.9, alongside the
-             ConstraintValidator implementations in validation (its dependent, below). -->
+             ConstraintValidator implementations in validation (its dependent, below).
+             codegen is also a dependency-free leaf (Story 1.14) — resource-only jar with no Java
+             code, hosting the OpenAPI Generator Mustache templates rescued from utils/ (originally
+             concluded dead code by mistake, corrected during Story 1.14's review — see its Debug
+             Log); nothing in this reactor depends on it, it's a jar consumed externally. -->
         <module>audit-api</module>
         <module>jdempotent-api</module>
         <module>validation-api</module>
+        <module>codegen</module>
         <!-- core comes before privacy/utils: utils depends on core (zero-Spring utilities, Story 1.7).
              privacy comes before utils: utils depends on privacy (masking beans).
              spring comes right after core: it depends only on core (generic Spring aspects, Story
@@ -108,9 +113,10 @@
              NOT depend on it.
              feign is independent of the Fase 4 sequence above (Story 1.13 depends only on core +
              feign-core, same shape as spring) — listed last among this Fase-4-plus-feign leaf group
-             purely by story number, not because it depends on any of them. (privacy/utils/exception/
+             purely by story number, not because it depends on any of them. (privacy/exception/
              audit/jdempotent/archtest below are pre-existing or downstream modules, not part of this
-             leaf-extraction group.) -->
+             leaf-extraction group. utils itself is gone — Story 1.14 emptied it of all classes across
+             Stories 1.7-1.13 and removed it from the reactor entirely.) -->
         <module>core</module>
         <module>spring</module>
         <module>validation</module>
@@ -119,7 +125,6 @@
         <module>web</module>
         <module>feign</module>
         <module>privacy</module>
-        <module>utils</module>
         <module>exception</module>
         <module>audit</module>
         <module>jdempotent</module>
@@ -180,11 +185,6 @@
             </dependency>
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
-                <artifactId>scos-foundation-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-exception</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -211,6 +211,11 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-validation-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-codegen</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

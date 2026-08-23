@@ -15,7 +15,7 @@ package br.com.sawcunhaos.foundation.exception;
 
 import br.com.sawcunhaos.foundation.core.enums.ScosExceptionCode;
 import br.com.sawcunhaos.foundation.core.exception.ScosException;
-import br.com.sawcunhaos.foundation.utils.specification.LocaleService;
+import br.com.sawcunhaos.foundation.core.specification.LocaleService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

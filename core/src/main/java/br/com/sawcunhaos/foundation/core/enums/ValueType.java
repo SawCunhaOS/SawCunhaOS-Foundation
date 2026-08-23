@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.enums;
+package br.com.sawcunhaos.foundation.core.enums;
 
 public enum ValueType {
     STRING, DOUBLE, NUMBER, INT, DATE, DATE_TIME, BOOLEAN;
