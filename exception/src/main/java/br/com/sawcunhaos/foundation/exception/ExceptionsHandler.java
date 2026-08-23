@@ -26,7 +26,7 @@ import br.com.sawcunhaos.foundation.core.specification.LocaleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -68,7 +68,7 @@ import static br.com.sawcunhaos.foundation.exception.utils.ExceptionUtils.getArg
  * {@code instance}, {@code requestId} and {@code timestamp}.</p>
  */
 @ControllerAdvice
-@Log4j2
+@Slf4j
 @RequiredArgsConstructor
 public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
@@ -81,7 +81,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 			HttpStatusCode status,
 			WebRequest request
 	) {
-		log.error("handleSecurity - handleHttpMessageNotReadable: ", ex);
+		log.warn("handleSecurity - handleHttpMessageNotReadable: {}", ex.getMessage());
 
 		String field = "", typesEnum = "";
 		String patternField = "(\\[\\\"[\\w,\\s]+\\\"\\])";
@@ -113,7 +113,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 			HttpStatusCode status,
 			WebRequest request
 	) {
-		log.error("handleSecurity - handleMethodArgumentNotValid: ", ex);
+		log.warn("handleSecurity - handleMethodArgumentNotValid: {}", ex.getMessage());
 
 		List<ScosFieldError> errors = new ArrayList<>();
 		ex.getBindingResult().getFieldErrors().forEach(
@@ -144,7 +144,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 			HttpStatusCode status,
 			WebRequest request
 	) {
-		log.error("handleSecurity - handleHandlerMethodValidationException: ", ex);
+		log.warn("handleSecurity - handleHandlerMethodValidationException: {}", ex.getMessage());
 
 		List<ScosFieldError> errors = new ArrayList<>();
 		// getBeanResults(): violações em parâmetro anotado @Valid (bean), expõe getFieldErrors()
@@ -188,7 +188,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 			ConstraintViolationException exception,
 			HttpServletRequest request
 	) {
-		log.error("handleSecurity - ConstraintViolationException: ", exception);
+		log.warn("handleSecurity - ConstraintViolationException: {}", exception.getMessage());
 
 		List<ScosFieldError> errors = new ArrayList<>();
 		exception.getConstraintViolations().forEach(
@@ -221,43 +221,45 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ScosException.class)
 	protected ResponseEntity<ProblemDetail> handleScosException(ScosException exception, HttpServletRequest request){
-		log.error("handleSecurity - ScosException: ", exception);
+		HttpStatus status = resolveHttpCode(exception.getHttpCode());
+		logByStatus(status, "ScosException", exception);
 		String detail = localeService.getMessage(exception.getCode(), exception.getArgs());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
-						resolveHttpCode(exception.getHttpCode()), exception.getCode(), resolveTitle(exception.getTitle()),
+						status, exception.getCode(), resolveTitle(exception.getTitle()),
 						detail, request.getRequestURI()
 				)
 		);
-		return ResponseEntity.status(resolveHttpCode(exception.getHttpCode())).body(problem);
+		return ResponseEntity.status(status).body(problem);
 	}
 
 	@ExceptionHandler(ScosNoRollbackException.class)
 	protected ResponseEntity<ProblemDetail> handleScosNoRollbackException(
 			ScosNoRollbackException exception, HttpServletRequest request
 	){
-		log.error("handleSecurity - ScosNoRollbackException: ", exception);
+		HttpStatus status = resolveHttpCode(exception.getHttpCode());
+		logByStatus(status, "ScosNoRollbackException", exception);
 		String detail = localeService.getMessage(exception.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
-						resolveHttpCode(exception.getHttpCode()), exception.getCode(), resolveTitle(exception.getTitle()),
+						status, exception.getCode(), resolveTitle(exception.getTitle()),
 						detail, request.getRequestURI()
 				)
 		);
-		return ResponseEntity.status(resolveHttpCode(exception.getHttpCode())).body(problem);
+		return ResponseEntity.status(status).body(problem);
 	}
 
 	@ExceptionHandler(ScosNoContentException.class)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	protected void handleScosNoContentException(ScosNoContentException exception){
-		log.error("handleSecurity - ScosNoContentException: ", exception);
+		log.debug("handleSecurity - ScosNoContentException: ", exception);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
 	protected ResponseEntity<ProblemDetail> handleAccessDeniedException(
 			AccessDeniedException ex, HttpServletRequest request
 	) {
-		log.error("handleSecurity - AccessDeniedException: ", ex);
+		log.warn("handleSecurity - AccessDeniedException: {}", ex.getMessage());
 		String detail = localeService.getMessage(ScosExceptionCode.ACCESS_DENIED.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
@@ -271,7 +273,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<ProblemDetail> handleAccessDeniedException(
             AuthorizationDeniedException ex, HttpServletRequest request
 	) {
-		log.error("handleSecurity - AuthorizationDeniedException: ", ex);
+		log.warn("handleSecurity - AuthorizationDeniedException: {}", ex.getMessage());
 		String detail = localeService.getMessage(ScosExceptionCode.ACCESS_DENIED.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
@@ -322,6 +324,21 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	private String requestUri(WebRequest request) {
 		return ((ServletWebRequest) request).getRequest().getRequestURI();
+	}
+
+	/**
+	 * Decides the log level for a {@link ScosException}/{@link ScosNoRollbackException},
+	 * whose HTTP status is dynamic ({@code resolveHttpCode(exception.getHttpCode())}):
+	 * {@code WARN} without stack trace for {@code 4xx} (including the fallback status
+	 * {@link #resolveHttpCode(int)} returns for an unresolvable code, {@code 400}),
+	 * {@code ERROR} with stack trace for {@code 5xx}.
+	 */
+	private void logByStatus(HttpStatus status, String context, Throwable ex) {
+		if (status.is4xxClientError()) {
+			log.warn("handleSecurity - {}: {}", context, ex.getMessage());
+		} else {
+			log.error("handleSecurity - {}: ", context, ex);
+		}
 	}
 
 	private HttpStatus resolveHttpCode(int httpCode) {
