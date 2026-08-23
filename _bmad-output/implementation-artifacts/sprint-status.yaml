@@ -59,7 +59,7 @@ development_status:
   2-2-corrigir-o-handler-de-validação-para-parâmetro-simples-400: review
   2-3-retornar-501-para-funcionalidade-não-implementada: review
   2-4-padronizar-log-por-faixa-de-status-http: review
-  2-5-corrigir-a-resolução-de-título-de-erro-para-jackson-3: ready-for-dev
+  2-5-corrigir-a-resolução-de-título-de-erro-para-jackson-3: review
   2-6-corrigir-resolvetitle-para-não-usar-try-catch-como-controle: ready-for-dev
   2-7-unificar-o-formato-de-erro-em-handleexceptioninternal-inclui: ready-for-dev
   2-8-mover-o-contrato-de-domínio-do-exception-para-o-core: ready-for-dev

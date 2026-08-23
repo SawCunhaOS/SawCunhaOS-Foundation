@@ -43,11 +43,13 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static br.com.sawcunhaos.foundation.exception.utils.ExceptionUtils.getArgsValidation;
 
@@ -84,18 +86,26 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		log.warn("handleSecurity - handleHttpMessageNotReadable: {}", ex.getMessage());
 
 		String field = "", typesEnum = "";
-		String patternField = "(\\[\\\"[\\w,\\s]+\\\"\\])";
-		String patternType = "(\\[[\\w,\\s]+\\])";
-
-		Pattern pattern = Pattern.compile(patternField);
-		Matcher matcher = pattern.matcher(ex.getMessage());
-		if(matcher.find()){
-			field = matcher.group().replaceAll("([\\[\\\"\\]])","");
-		}
-		pattern = Pattern.compile(patternType);
-		matcher = pattern.matcher(ex.getMessage());
-		if(matcher.find()){
-			typesEnum = matcher.group();
+		// Jackson 3 (tools.jackson.databind.exc): InvalidFormatException IS-A
+		// MismatchedInputException, so this one check covers both. Navigates the
+		// structured cause (getPath()/getTargetType()) instead of regexing
+		// ex.getMessage(), which was fragile (e.g. it matched the FIRST bracketed
+		// segment in a nested reference chain, not the leaf field that actually failed).
+		if (ex.getCause() instanceof MismatchedInputException mie) {
+			List<JacksonException.Reference> path = mie.getPath();
+			if (!path.isEmpty()) {
+				String propertyName = path.get(path.size() - 1).getPropertyName();
+				field = propertyName != null ? propertyName : "";
+			}
+			Class<?> targetType = mie.getTargetType();
+			if (targetType != null && targetType.isEnum()) {
+				// Enum::name, not Object::toString: an enum overriding toString() for a
+				// human-readable label would otherwise report the wrong literal — Jackson
+				// matches enum deserialization against the constant name, not toString().
+				typesEnum = Arrays.stream(targetType.getEnumConstants())
+						.map(constant -> ((Enum<?>) constant).name())
+						.collect(Collectors.joining(", ", "[", "]"));
+			}
 		}
 
 		String message = localeService.getMessage(ScosExceptionCode.ATTRIBUTE_NOT_VALID.getCode(), field, typesEnum);
