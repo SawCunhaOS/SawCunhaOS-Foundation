@@ -413,7 +413,7 @@ spring:
           implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
           physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         type:
-          json_format_mapper: br.com.sawcunhaos.foundation.utils.configuration.hibernate.JacksonCustomJsonFormatMapper
+          json_format_mapper: br.com.sawcunhaos.foundation.jpa.hibernate.JacksonCustomJsonFormatMapper
   aop:
     proxy-target-class: true
     auto: true

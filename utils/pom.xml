@@ -95,14 +95,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
         <!-- spring-boot-starter-cache stays: ScosRequestGET/POST/PUT/PATCH/DELETE use
              org.springframework.cache.annotation.Cacheable as a meta-annotation. Redis itself
              (spring-boot-starter-data-redis, spring-data-redis) moved out with the cache
@@ -149,11 +141,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.openfeign.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
@@ -196,29 +183,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>io.github.openfeign.querydsl</groupId>
-                        <artifactId>querydsl-apt</artifactId>
-                        <version>${querydsl.version}</version>
-                        <scope>compile</scope>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

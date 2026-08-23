@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.enums;
+package br.com.sawcunhaos.foundation.core.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

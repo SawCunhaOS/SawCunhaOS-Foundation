@@ -47,7 +47,7 @@ development_status:
   1-8-extrair-o-módulo-spring: review
   1-9-extrair-o-módulo-validation: review
   1-10-extrair-o-módulo-cache: review
-  1-11-extrair-o-módulo-jpa: ready-for-dev
+  1-11-extrair-o-módulo-jpa: review
   1-12-extrair-o-módulo-web: ready-for-dev
   1-13-extrair-o-módulo-feign: ready-for-dev
   1-14-impor-regras-archunit-cross-módulo-e-remover-utils-do-reacto: ready-for-dev
