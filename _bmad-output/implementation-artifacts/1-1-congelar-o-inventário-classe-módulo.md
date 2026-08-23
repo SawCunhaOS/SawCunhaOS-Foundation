@@ -4,7 +4,7 @@ baseline_commit: 3e99221db78565ca0a8a6b7b2a8cd70ece24938c
 
 # Story 1.1: Congelar o inventário classe→módulo
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -63,6 +63,7 @@ Claude Sonnet 5 (claude-sonnet-5)
 ### Debug Log References
 
 - `find utils/src/main/java -name "*.java" | wc -l` → 72 (não 71). Divergência reconciliada: o plano de origem (Seção 3, "Todas as anotações, por destino") omite `ScosRequestPATCH`, que existe no código atual como irmã de `ScosRequestGET/POST/PUT/DELETE/Mapping`. Congelada com o mesmo destino delas (`web`).
+- **Revisão retroativa (fechamento do Épico 1, 2026-08-23)**: esta story nunca tinha passado pela etapa de revisão adversarial do workflow. Rodada agora, cobrindo as Stories 1.1-1.4 juntas. Achado real: a linha 71 desta Completion Notes ("`DateUtils` → `br.com.sawcunhaos.foundation.core`") está desatualizada — a classe real hoje vive em `br.com.sawcunhaos.foundation.core.utils`, não na raiz do pacote `core`, junto com `HashUtils`/`StringFieldUtils`. Mesma categoria de divergência já registrada em `deferred-work.md` desde a Story 1.8 para `ScosStartupListener`/`StringTransformRule` — agora ampliada com mais 3 classes, e uma entrada nova adicionada em `deferred-work.md` especificamente para esta story. Não é um erro desta story em si (o inventário foi congelado corretamente para o estado da época); é o inventário divergindo da implementação real ao longo de stories posteriores, sem mecanismo de imposição que os mantenha sincronizados.
 
 ### Completion Notes List
 
@@ -74,3 +75,11 @@ Claude Sonnet 5 (claude-sonnet-5)
 ### File List
 
 - `_bmad-output/implementation-artifacts/inventario-classe-modulo.md` (novo)
+
+## Suggested Review Order
+
+**O achado da revisão retroativa**
+
+- Divergência real entre o inventário congelado e a implementação atual (`DateUtils`/`HashUtils`/`StringFieldUtils` em `core.utils`, não `core`).
+  [`inventario-classe-modulo.md`](../../_bmad-output/implementation-artifacts/inventario-classe-modulo.md)
+  [`core/src/main/java/br/com/sawcunhaos/foundation/core/utils/DateUtils.java`](../../core/src/main/java/br/com/sawcunhaos/foundation/core/utils/DateUtils.java)

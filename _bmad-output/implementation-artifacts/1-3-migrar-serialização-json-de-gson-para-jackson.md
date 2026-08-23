@@ -4,7 +4,7 @@ baseline_commit: 3b440bb5401e9fbf0a94159c00bc9cdb832e40dc
 
 # Story 1.3: Migrar serialização JSON de Gson para Jackson
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -94,7 +94,11 @@ Claude Sonnet 5 (claude-sonnet-5)
 - **Task 0 (pré-condição bloqueante):** perguntei diretamente ao usuário se existe hash-chain persistida em ambiente piloto — não tenho visibilidade sobre ambientes fora do repositório para verificar sozinho. Resposta: não existe. Só então iniciei as Tasks 1-7.
 - **Task 3 / AC9 reconciliado:** a story presumia `catch (JsonSyntaxException ...)` nos 4 pontos de uso do `audit`. Grep confirmou que nenhum dos 4 captura essa exceção por nome — todos já usam `catch (Exception e)` amplo (cobrindo I/O e persistência, não só JSON) ou não têm catch local (propagam para o catch amplo do chamador). Além disso, `tools.jackson.core.JacksonException` (Jackson 3, groupId `tools.jackson.core`, confirmado via `javap` no jar) **estende `RuntimeException`, não é checked** — diferente da premissa da story (que descreve o Jackson 2 `JsonProcessingException`, checked). Confirmei isso lendo `JacksonEncoderCustom.java` já existente no repo, que captura `JacksonException` sem declarar `throws`. Consequência: não há propagação de exceção checked a ajustar em nenhum dos 4 pontos; só estreitei o catch já-local de `ScosAuditHashService.canonicalizeJson` (o único que envolvia exclusivamente a chamada JSON) de `Exception` para `JacksonException`.
 - **Task 5 / AC6:** grep por `TypeAdapter`/`JsonSerializer`/`JsonDeserializer`/`@JsonAdapter` em todo o repo não encontrou nenhum além dos 3 adapters de `java.time` já conhecidos (Task 1). Além disso, `Cpf`/`Cnpj`/`Email`/`TaxIdentifier` nunca são passados ao Gson diretamente em código de produção — `ScosAuditServiceBean.createJsonObject` chama `.toString()` em cada valor de propriedade antes de montar o `stateMap` serializado, e `ScosAuditLog` (única entidade inteira serializada) não tem nenhum desses value objects como campo. Ainda assim adicionei teste de serialização Jackson para os 4 (AC6 pede confirmação explícita, e é blindagem barata para quando forem usados diretamente).
-- **`privacy` precisa de Jackson como dependência própria** (Task 2): o módulo deliberadamente não depende de `utils` (evita ciclo `utils↔privacy`, documentado no próprio `privacy/pom.xml`). Adicionei `tools.jackson.core:jackson-databind` diretamente ao `privacy/pom.xml` — gerenciado pelo `jackson-bom` já importado no `pom.xml` raiz (não precisa de versão explícita). Isso é consequência direta da instrução da própria story (Task 2 pede Jackson em `JsonMasker`), não uma dependência nova fora de escopo.
+- **`privacy` precisa de Jackson como dependência própria** (Task 2): o módulo deliberadamente não depende de `utils` (evita ciclo `utils↔privacy`, documentado no próprio `privacy/pom.xml`). Adicionei `tools.jackson.core:jackson-databind` diretamente ao `privacy/pom.xml` — gerenciado pelo `jackson-bom` já importado no `pom.xml` raiz (não precisa de versão explícita). Isso é consequência direta da instrução da própria story (Task 2 pede Jackson em `JsonMasker`), não uma dependência nova fora de escopo. **Correção pós-revisão retroativa (ver abaixo): essa frase está errada** — este `pom.xml` raiz não importa nenhum `jackson-bom` diretamente; a versão do Jackson resolve transitivamente via `tools.jackson:jackson-bom:3.2.2`, importado pelo BOM externo (`scos-bom`), não por este repositório.
+- **Revisão retroativa (fechamento do Épico 1, 2026-08-23)**: esta story nunca tinha passado pela etapa de revisão adversarial do workflow. Rodada agora. Dois achados reais, confirmados por dois revisores independentemente:
+  1. **Mudança não documentada no `pom.xml` raiz.** O diff desta story também alterou `pom.xml` raiz — bump do `<parent><version>` do BOM externo (`scos-bom`) de `1.4.1` para `1.4.2`, e **remoção do pin de `maven-surefire-plugin:3.5.4`** que a Story 1.2 tinha acabado de introduzir para corrigir a descoberta de testes JUnit5 em todo o reactor. Nenhuma das duas mudanças aparece no File List, Debug Log ou Completion Notes originais desta story. Funciona hoje só porque o `scos-bom` 1.4.2 passou a fixar o mesmo plugin por conta própria (confirmado no repositório irmão `sawcunha-open-system-bom`) — mas essa dependência não está registrada em lugar nenhum, e ninguém revisando só este repositório teria como saber que a remoção era segura. Ver `deferred-work.md` para o registro completo do risco. Não revertido nesta revisão retroativa (a remoção é hoje inofensiva na prática, e reverter agora reintroduziria um pin redundante); documentado para fechar a lacuna de rastreabilidade.
+  2. **Risco de perda de precisão numérica não testado.** `JsonMasker` e `ScosAuditHashService.canonicalizeJson` usam `ObjectMapper` sem `USE_BIG_DECIMAL_FOR_FLOATS` — números não-inteiros são parseados como `double`, não `BigDecimal`, podendo alterar/perder precisão silenciosamente (afeta qualquer campo numérico, não só os mascarados, já que `JsonMasker` re-serializa a árvore inteira). Os testes desta story só usam valores que sobrevivem sem perda a um round-trip por `double`. Registrado em `deferred-work.md` como risco de fidelidade de dados que merece story própria com cobertura dedicada — não é um patch trivial (mudar esse comportamento tem efeitos colaterais próprios em formatação).
+  - Achado investigado e rejeitado: o estreitamento do catch em `ScosAuditHashService.canonicalizeJson` (`Exception`→`JacksonException`) foi apontado como risco pelo Blind Hunter, mas a inspeção direta do método `canonicalize()` não encontrou nenhum caminho de código real que lance uma `RuntimeException` que não seja `JacksonException` (a API `JsonNode` do Jackson é null-safe; as chaves iteradas vêm diretamente das propriedades do próprio nó). O único outro modo de falha plausível, `StackOverflowError` em JSON patologicamente aninhado, é um `Error`, não uma `Exception`, e nunca foi capturado pelo catch antigo (`catch (Exception e)`) nem seria pelo novo — não é uma regressão desta story. A mudança é, na prática, uma melhoria deliberada (falhar alto em bugs reais de `canonicalize()` em vez de mascará-los silenciosamente como "JSON malformado").
 - Build completo (`privacy`+`utils`+`audit`, com testes reais, incluindo Testcontainers/PostgreSQL) rodado ao final: `privacy` 50/50, `utils` 209/209, `exception` 10/10 (não tocado), `audit` 54/54 — todos verdes, `BUILD SUCCESS`, enforcer incluído (não usei `-DskipTests` nem `-Denforcer.skip`).
 
 ### Completion Notes List
@@ -122,6 +126,7 @@ Claude Sonnet 5 (claude-sonnet-5)
 - `utils/src/test/java/br/com/sawcunhaos/foundation/utils/adapter/LocalTimeAdapterTest.java`
 
 **Modificados:**
+- `pom.xml` (raiz) — bump do `<parent><version>` de `1.4.1` para `1.4.2`; remoção do pin `maven-surefire-plugin:3.5.4` (adicionado pela Story 1.2) — **omitido do File List original, adicionado retroativamente na revisão de fechamento do Épico 1; ver Debug Log**
 - `utils/pom.xml` (remoção de `gson`)
 - `privacy/pom.xml` (remoção de `gson`, adição de `tools.jackson.core:jackson-databind`)
 - `privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/JsonMasker.java`
@@ -139,3 +144,21 @@ Claude Sonnet 5 (claude-sonnet-5)
 - `privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/JsonMaskerTest.java`
 - `utils/src/test/java/br/com/sawcunhaos/foundation/utils/valueobjects/ValueObjectJacksonSerializationTest.java`
 - `audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashServiceCanonicalizationTest.java`
+
+## Suggested Review Order
+
+**A lacuna de rastreabilidade encontrada na revisão retroativa**
+
+- `pom.xml` raiz foi modificado silenciosamente por este diff (bump de parent + remoção do pin de surefire), nunca documentado até esta revisão.
+  [`pom.xml`](../../pom.xml)
+
+**O risco de dados real, adiado para story própria**
+
+- `JsonMasker`/`ScosAuditHashService` sem `USE_BIG_DECIMAL_FOR_FLOATS` — perda de precisão numérica silenciosa possível.
+  [`JsonMasker.java`](../../privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/JsonMasker.java)
+  [`ScosAuditHashService.java`](../../audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashService.java)
+
+**O achado investigado e descartado**
+
+- Estreitamento do catch (`Exception`→`JacksonException`) em `canonicalizeJson` — melhoria deliberada, não regressão (ver Debug Log).
+  [`ScosAuditHashService.java:76`](../../audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashService.java#L76)

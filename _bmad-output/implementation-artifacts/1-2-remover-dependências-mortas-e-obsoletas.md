@@ -4,7 +4,7 @@ baseline_commit: 9c022adf4766e410c4943aada62b3d92d5d73cb3
 
 # Story 1.2: Remover dependências mortas e obsoletas
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -84,6 +84,7 @@ Claude Sonnet 5 (claude-sonnet-5)
 - **Fix adicional #2, a pedido explícito do usuário:** `maven-surefire-plugin` fixado em `3.5.4` via `<pluginManagement>` no `pom.xml` raiz — corrige o binding implícito `2.17` (pré-JUnit5) que fazia `mvn test` reportar sucesso sem rodar nenhum teste em nenhum dos 5 módulos. Ver Debug Log para a causa raiz.
 - Build completo do reactor com testes (`mvn clean install`) executado ao final: `privacy` 42/42, `utils` 211/211, `exception` 10/10, `audit` 49/49 — todos verdes. `jdempotent` teve 3 erros, mas são falhas de infraestrutura Docker/Testcontainers (`port is already allocated` na 6379, `Container startup failed for image alpine/socat`) no ambiente local, não relacionadas a nenhuma mudança desta story — módulo não tocado. Não investiguei/corrigi (fora de escopo; provável conflito de porta com container remanescente de execução anterior).
 - **Não commitei nada** (só `git commit` quando pedido explicitamente, conforme instrução do projeto) — as mudanças estão na working tree, prontas para os commits granulares que a NFR2 descreve (sugestão de sequência nas Debug Log References).
+- **Revisão retroativa (fechamento do Épico 1, 2026-08-23)**: esta story nunca tinha passado pela etapa de revisão adversarial do workflow. Rodada agora. Achado do Blind Hunter: a Task 1 pedia "um commit por dependência removida", e quando o commit desta story acabou sendo feito (fora desta sessão, ver `git log` — commit único `3b440bb feat: Implementacao Story 1.2`), não seguiu a sequência granular sugerida acima nas Debug Log References — tudo foi para um commit só. Isso já estava disclosed no próprio texto desta nota ("prontas para os commits granulares... quando pedido"), não é uma omissão nova; registrado aqui só para deixar explícito que o checkbox `[x]` da Task 1 se refere à remoção técnica das dependências (feita e verificada), não à granularidade de commit pedida pela NFR2 (não seguida). Não corrigido — reescrever o histórico do git de um commit já mesclado é uma operação destrutiva fora do escopo de decidir sozinho nesta revisão.
 
 ### File List
 
@@ -92,3 +93,17 @@ Claude Sonnet 5 (claude-sonnet-5)
 - `utils/src/main/java/br/com/sawcunhaos/foundation/utils/enums/StringTransformRule.java` — troca de `guava` por `commons-lang3`
 - `utils/src/main/java/br/com/sawcunhaos/foundation/utils/configuration/rest/filter/MultiReadHttpServletRequest.java` — troca de `commons-io` por `InputStream#transferTo`
 - `utils/src/test/java/br/com/sawcunhaos/foundation/utils/enums/StringTransformRuleTest.java` (novo)
+
+## Suggested Review Order
+
+**Os dois fixes fora do escopo literal, necessários para build verde**
+
+- Pin de `reactor-core:3.8.6` (compatibilidade reativa com Lettuce nunca exercitada especificamente — ver `deferred-work.md`).
+  [`pom.xml`](../../pom.xml)
+- Pin de `maven-surefire-plugin:3.5.4` (achado crítico: 0 testes descobertos em todo o reactor antes deste fix).
+  [`pom.xml`](../../pom.xml)
+
+**A troca de dependência com comportamento pré-existente preservado (incluindo um bug conhecido)**
+
+- `StringTransformRule.CAMEL_CASE` — `uncapitalize` reproduz um no-op pré-existente do Guava, não corrigido (fora de escopo).
+  [`StringTransformRuleTest.java`](../../utils/src/test/java/br/com/sawcunhaos/foundation/utils/enums/StringTransformRuleTest.java)
