@@ -146,13 +146,28 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		log.error("handleSecurity - handleHandlerMethodValidationException: ", ex);
 
 		List<ScosFieldError> errors = new ArrayList<>();
-		ex.getBeanResults().get(0).getFieldErrors().forEach(
-				e -> errors.add(ScosFieldError.of(
-						e.getField(),
-						localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
-						e.getDefaultMessage()
-				))
+		// getBeanResults(): violações em parâmetro anotado @Valid (bean), expõe getFieldErrors()
+		ex.getBeanResults().forEach(
+				beanResult -> beanResult.getFieldErrors().forEach(
+						e -> errors.add(ScosFieldError.of(
+								e.getField(),
+								localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
+								e.getDefaultMessage()
+						))
+				)
 		);
+		// getValueResults(): violações em parâmetro simples anotado direto (ex.: @RequestParam @Min(1) int page),
+		// sem getFieldErrors() — expõe o parâmetro e a lista de MessageSourceResolvable das violações
+		ex.getValueResults().forEach(valueResult -> {
+			String field = valueResult.getMethodParameter().getParameterName();
+			valueResult.getResolvableErrors().forEach(
+					e -> errors.add(ScosFieldError.of(
+							field != null ? field : String.valueOf(valueResult.getMethodParameter().getParameterIndex()),
+							localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
+							e.getDefaultMessage()
+					))
+			);
+		});
 
 		String message = localeService.getMessage(
 				ScosExceptionCode.ATTRIBUTE_NOT_VALID.getCode(),

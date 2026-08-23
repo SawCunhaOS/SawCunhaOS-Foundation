@@ -23,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -31,8 +33,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
 
@@ -124,5 +129,80 @@ class ExceptionsHandlerValidationTest {
         assertEquals(1, errors.size());
         assertEquals("#/address/street", errors.get(0).pointer());
         assertTrue(problem.getProperties().containsKey("timestamp"));
+    }
+
+    /**
+     * Reproduces the real bug: a violation on a simple parameter annotated
+     * directly (e.g. {@code @RequestParam @Min(1) int page}) lands only in
+     * {@code getValueResults()} — {@code getBeanResults()} stays empty, so
+     * {@code ex.getBeanResults().get(0)} threw {@code IndexOutOfBoundsException}
+     * (escaping the {@code @ExceptionHandler} as an unhandled 500) before the fix.
+     */
+    private HandlerMethodValidationException simpleParameterViolation(
+            String parameterName, MessageSourceResolvable... resolvableErrors
+    ) {
+        HandlerMethodValidationException ex = mock(HandlerMethodValidationException.class);
+        when(ex.getBeanResults()).thenReturn(List.<ParameterErrors>of());
+
+        MethodParameter methodParameter = mock(MethodParameter.class);
+        when(methodParameter.getParameterName()).thenReturn(parameterName);
+        when(methodParameter.getParameterIndex()).thenReturn(0);
+
+        ParameterValidationResult valueResult = mock(ParameterValidationResult.class);
+        when(valueResult.getMethodParameter()).thenReturn(methodParameter);
+        when(valueResult.getResolvableErrors()).thenReturn(List.of(resolvableErrors));
+
+        when(ex.getValueResults()).thenReturn(List.of(valueResult));
+        return ex;
+    }
+
+    @Test
+    @DisplayName("simple parameter violation (getBeanResults empty) responds 400 instead of throwing IndexOutOfBoundsException")
+    void simpleParameterViolationRespondsBadRequest() {
+        when(localeService.getMessage(eq("SCOS-005"), anyList())).thenReturn("deve ser maior ou igual a 1");
+        when(localeService.getMessage(eq("SCOS-001"), any(Object[].class))).thenReturn("Um ou mais campos estão inválidos.");
+
+        MessageSourceResolvable resolvable = mock(MessageSourceResolvable.class);
+        when(resolvable.getDefaultMessage()).thenReturn("SCOS-005");
+        when(resolvable.getArguments()).thenReturn(new Object[0]);
+
+        HandlerMethodValidationException ex = simpleParameterViolation("page", resolvable);
+        ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("GET", "/api/items"));
+
+        ResponseEntity<Object> response = handler.handleHandlerMethodValidationException(
+                ex, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+
+        assertNotNull(problem);
+        assertEquals(400, problem.getStatus());
+
+        List<ScosFieldError> errors = errorsOf(problem);
+        assertEquals(1, errors.size());
+        assertEquals("#/page", errors.get(0).pointer());
+        assertEquals("deve ser maior ou igual a 1", errors.get(0).detail());
+    }
+
+    @Test
+    @DisplayName("simple parameter violation falls back to parameter index when the parameter name isn't resolvable")
+    void simpleParameterViolationFallsBackToIndexWhenNameUnresolvable() {
+        when(localeService.getMessage(eq("SCOS-005"), anyList())).thenReturn("deve ser maior ou igual a 1");
+        when(localeService.getMessage(eq("SCOS-001"), any(Object[].class))).thenReturn("Um ou mais campos estão inválidos.");
+
+        MessageSourceResolvable resolvable = mock(MessageSourceResolvable.class);
+        when(resolvable.getDefaultMessage()).thenReturn("SCOS-005");
+        when(resolvable.getArguments()).thenReturn(new Object[0]);
+
+        // null parameter name simulates a build without debug info (-parameters not enabled),
+        // where Spring can't resolve the real parameter name.
+        HandlerMethodValidationException ex = simpleParameterViolation(null, resolvable);
+        ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("GET", "/api/items"));
+
+        ResponseEntity<Object> response = handler.handleHandlerMethodValidationException(
+                ex, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+
+        List<ScosFieldError> errors = errorsOf(problem);
+        assertEquals(1, errors.size());
+        assertEquals("#/0", errors.get(0).pointer());
     }
 }
