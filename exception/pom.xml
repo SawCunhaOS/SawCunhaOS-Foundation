@@ -88,6 +88,14 @@
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-utils</artifactId>
         </dependency>
+        <!-- ExceptionsHandler uses jakarta.servlet.http.HttpServletRequest and Spring MVC types
+             (@ExceptionHandler, ResponseEntity). Previously arrived transitively via
+             scos-foundation-utils's spring-boot-starter-web; now explicit since Story 1.12 removed
+             that transitive path (utils no longer needs spring-boot-starter-web itself). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
