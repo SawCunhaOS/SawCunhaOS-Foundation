@@ -20,7 +20,7 @@
     <parent>
         <groupId>br.com.sawcunhaos</groupId>
         <artifactId>scos-bom</artifactId>
-        <version>1.4.3-SNAPSHOT</version>
+        <version>1.4.4-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -223,7 +223,7 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-bom</artifactId>
-                <version>${pom.parent.version}</version>
+                <version>1.4.4-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

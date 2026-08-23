@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static br.com.sawcunhaos.foundation.core.enums.Constant.REQUEST_ID_HEADER;
+
 /**
  * First filter in the chain ({@code @Order(0)}). Establishes per-request MDC
  * context and the initial request log.
@@ -68,8 +70,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LoggingInitialFilter extends OncePerRequestFilter {
 
-	public static final String REQUEST_ID_HEADER = "X-Request-ID";
-
 	private final ScosFilterProperties scosFilterProperties;
 	private final SanitizationHeadersComponent sanitizationHeadersComponent;
 	private final SanitizationBodyComponent sanitizationBodyComponent;
@@ -93,9 +93,9 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
 		final MultiReadHttpServletRequest req = new MultiReadHttpServletRequest(request);
 
 		try {
-			MDC.put(REQUEST_ID_HEADER, resolveRequestId(req));
+			MDC.put(REQUEST_ID_HEADER.getValue(), resolveRequestId(req));
 			MDC.put("IS_IP", getClientIp(req));
-			response.setHeader(REQUEST_ID_HEADER, MDC.get(REQUEST_ID_HEADER));
+			response.setHeader(REQUEST_ID_HEADER.getValue(), MDC.get(REQUEST_ID_HEADER.getValue()));
 
 			if (req.getRequestURI().contains(scosFilterProperties.getURI())) {
 				String headers = getRequestHeaders(req);
@@ -156,7 +156,7 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
      * when the client supplies one, otherwise generates a fresh UUID v4.
      */
     private String resolveRequestId(HttpServletRequest servletRequest) {
-        String xRequestId = servletRequest.getHeader(REQUEST_ID_HEADER);
+        String xRequestId = servletRequest.getHeader(REQUEST_ID_HEADER.getValue());
         if (xRequestId == null || xRequestId.isEmpty()) {
             xRequestId = UUID.randomUUID().toString();
         }
