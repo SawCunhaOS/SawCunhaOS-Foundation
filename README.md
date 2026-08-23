@@ -256,10 +256,14 @@ Módulo para tratamento centralizado de exceções e padronização de respostas
   - `MethodNotImplementedException`: Para métodos não implementados
 
 - **Handler Global**
-  - `ExceptionsHandler`: Tratamento automático de todas as exceções
+  - `ExceptionsHandler`: Tratamento automático de todas as exceções, incluindo 404 de rota
+    inexistente, método HTTP não suportado e `Accept` inválido (`handleExceptionInternal`)
   - Respostas de erro em conformidade com a RFC 9457 (`ProblemDetail`,
     `Content-Type: application/problem+json`)
   - Suporte a internacionalização de mensagens
+  - ⚠️ **Pré-requisito para 404 de rota inexistente unificado**: a aplicação consumidora precisa
+    ligar `spring.mvc.throw-exception-if-no-handler-found=true`. Ver `exception/README.md` para
+    detalhes (por que este módulo não pode ligar essa propriedade sozinho, e o que acontece sem ela).
 
 - **Modelos de Resposta**
   - `ProblemDetail` (Spring 7, nativo): corpo de erro RFC 9457 com

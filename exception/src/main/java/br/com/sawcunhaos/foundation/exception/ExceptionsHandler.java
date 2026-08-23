@@ -24,6 +24,7 @@ import br.com.sawcunhaos.foundation.exception.utils.ExceptionUtils;
 import br.com.sawcunhaos.foundation.core.enums.ScosExceptionCode;
 import br.com.sawcunhaos.foundation.core.specification.LocaleService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -191,6 +192,53 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 				)
 		);
 		return ResponseEntity.status(status).body(problem);
+	}
+
+	/**
+	 * Catch-all hook of {@link ResponseEntityExceptionHandler}: every exception it
+	 * handles internally that does NOT have a more specific {@code @Override} in
+	 * this class (e.g. {@code NoResourceFoundException} for an unmatched route,
+	 * {@code HttpRequestMethodNotSupportedException}, {@code HttpMediaTypeNotAcceptableException})
+	 * funnels through here. Without this override, those cases fell back to Spring's
+	 * default rendering instead of {@link ScosProblemDetails}. Reuses the {@code statusCode}
+	 * and {@code ex.getMessage()} Spring already resolved instead of re-deriving them.
+	 */
+	@Override
+	protected ResponseEntity<Object> handleExceptionInternal(
+			Exception ex,
+			Object body,
+			HttpHeaders headers,
+			HttpStatusCode statusCode,
+			WebRequest request
+	) {
+		// Mirrors the isCommitted() guard in ResponseEntityExceptionHandler's own default
+		// implementation, which this override replaces entirely: writing a body to an
+		// already-committed response throws IllegalStateException.
+		if (request instanceof ServletWebRequest servletWebRequest) {
+			HttpServletResponse response = servletWebRequest.getResponse();
+			if (response != null && response.isCommitted()) {
+				log.warn("handleSecurity - handleExceptionInternal: response already committed, ignoring {}", ex.toString());
+				return null;
+			}
+		}
+
+		HttpStatus status = HttpStatus.resolve(statusCode.value());
+		if (status != null) {
+			logByStatus(status, "handleExceptionInternal", ex);
+		} else {
+			log.warn("handleSecurity - handleExceptionInternal: {}", ex.getMessage());
+		}
+
+		String title = status != null ? status.getReasonPhrase() : ScosExceptionCode.GENERIC.getTitle();
+		String rawDetail = ex.getMessage();
+		String detail = (rawDetail != null && !rawDetail.isBlank()) ? rawDetail : title;
+
+		ProblemDetail problem = enrich(
+				ScosProblemDetails.of(
+						statusCode, ScosExceptionCode.GENERIC.getCode(), title, detail, requestUri(request)
+				)
+		);
+		return ResponseEntity.status(statusCode).headers(headers).body(problem);
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)

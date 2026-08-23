@@ -34,7 +34,13 @@ public enum ScosExceptionCode implements ExceptionCode {
     ATTRIBUTE_NOT_VALID("SCOS-001", "Validation Error"),
     /** Invalid enum value while deserializing the request body (HTTP 400). */
     ENUM_ERROR("SCOS-002", "Validation Error"),
-    /** Generic, uncategorized error fallback (HTTP 500). */
+    /**
+     * Generic, uncategorized error fallback. Used both for the top-level unhandled-exception
+     * fallback (HTTP 500, {@code handleGenericException}) and, since Story 2.7, for
+     * {@code ExceptionsHandler#handleExceptionInternal}'s catch-all of any Spring MVC exception
+     * without a more specific handler (e.g. 404/405/406) — the actual HTTP status in that second
+     * case comes from Spring, not from this code's own semantics.
+     */
     GENERIC("SCOS-003", "Internal Server Error"),
     /** Authenticated principal lacks permission for the resource (HTTP 403). */
     ACCESS_DENIED("SCOS-004", "Access Denied"),
