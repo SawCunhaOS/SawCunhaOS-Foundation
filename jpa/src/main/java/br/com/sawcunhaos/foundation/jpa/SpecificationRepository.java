@@ -11,9 +11,9 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.utils;
+package br.com.sawcunhaos.foundation.jpa;
 
-import br.com.sawcunhaos.foundation.utils.enums.SpecificationFunction;
+import br.com.sawcunhaos.foundation.core.enums.SpecificationFunction;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;

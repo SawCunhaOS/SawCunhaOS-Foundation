@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.configuration.hibernate;
+package br.com.sawcunhaos.foundation.jpa.hibernate;
 
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

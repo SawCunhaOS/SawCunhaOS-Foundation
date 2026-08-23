@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.entity;
+package br.com.sawcunhaos.foundation.jpa.entity;
 
 import com.querydsl.core.annotations.QueryEmbeddable;
 import jakarta.persistence.Column;

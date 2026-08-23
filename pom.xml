@@ -98,11 +98,16 @@
              cache comes right after validation (Fase 4 of the origin plan: third leaf module out,
              depends on core + spring-boot-starter-cache + spring-boot-starter-data-redis only, see
              Story 1.10) — utils does NOT depend on it; jdempotent depends on it directly instead
-             (PolymorphicRedisSerializer, AD-1). -->
+             (PolymorphicRedisSerializer, AD-1).
+             jpa comes right after cache (Fase 4 of the origin plan: fourth leaf module out, first
+             leaf depending on another leaf — core + validation + spring-boot-starter-data-jpa +
+             querydsl-jpa + liquibase-core (optional) + jackson-databind, see Story 1.11) — utils
+             does NOT depend on it; audit depends on it directly instead (BaseLiquibaseProperties). -->
         <module>core</module>
         <module>spring</module>
         <module>validation</module>
         <module>cache</module>
+        <module>jpa</module>
         <module>privacy</module>
         <module>utils</module>
         <module>exception</module>
@@ -141,6 +146,11 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.sawcunhaos</groupId>
+                <artifactId>scos-foundation-jpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

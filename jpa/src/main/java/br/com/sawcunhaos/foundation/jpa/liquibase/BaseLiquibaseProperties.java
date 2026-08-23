@@ -11,7 +11,7 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.utils.configuration.liquibase;
+package br.com.sawcunhaos.foundation.jpa.liquibase;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

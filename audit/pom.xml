@@ -107,6 +107,12 @@
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-audit-api</artifactId>
         </dependency>
+        <!-- Story 1.11: ScosAuditLiquibaseProperties extends BaseLiquibaseProperties, moved from
+             utils to jpa. scos-foundation-utils stays (still used in tests). -->
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-jpa</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
