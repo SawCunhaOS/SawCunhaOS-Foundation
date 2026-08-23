@@ -125,7 +125,6 @@
         <module>web</module>
         <module>feign</module>
         <module>privacy</module>
-        <module>exception</module>
         <module>audit</module>
         <module>jdempotent</module>
         <!-- archtest depende de todos os módulos acima em escopo test (AD-5). A ordem de build real
@@ -181,11 +180,6 @@
             <dependency>
                 <groupId>br.com.sawcunhaos</groupId>
                 <artifactId>scos-foundation-privacy</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>br.com.sawcunhaos</groupId>
-                <artifactId>scos-foundation-exception</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

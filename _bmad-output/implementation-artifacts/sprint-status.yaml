@@ -63,7 +63,7 @@ development_status:
   2-6-corrigir-resolvetitle-para-não-usar-try-catch-como-controle: review
   2-7-unificar-o-formato-de-erro-em-handleexceptioninternal-inclui: review
   2-8-mover-o-contrato-de-domínio-do-exception-para-o-core: review
-  2-9-mover-a-tradução-http-do-exception-para-o-web-e-registrar-vi: ready-for-dev
+  2-9-mover-a-tradução-http-do-exception-para-o-web-e-registrar-vi: review
   2-10-consolidar-a-constante-mdc_request_id-no-core: ready-for-dev
   epic-2-retrospective: optional
 

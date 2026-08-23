@@ -132,6 +132,25 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Story 2.9: moved here with ExceptionsHandler/ExceptionUtils, which use
+             AccessDeniedException/AuthorizationDeniedException. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <!-- Story 2.9: moved here with ExceptionsHandler/ExceptionUtils, which use
+             jakarta.validation.* (ConstraintViolationException and friends). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- Story 2.9: moved here with ValidationAnnotationCountListener, which uses
+             @CPF/@CNPJ/@TaxIdentifier/@ZipCode. -->
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-validation-api</artifactId>
+        </dependency>
+
         <!-- ArchUnit is test scope, version managed by the parent (Story 1.4). -->
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
@@ -158,6 +177,25 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Story 2.9: needed for @WebMvcTest (full Boot-autoconfigured MVC context), required by
+             ExceptionsHandlerHandleExceptionInternalTest to exercise
+             spring.mvc.throw-exception-if-no-handler-found — WebMvcAutoConfiguration only runs in an
+             autoconfigured context, not a raw MockMvcBuilders.standaloneSetup() one. Same pattern
+             already used by jdempotent/pom.xml and privacy/pom.xml, no exclusions. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Story 2.9: on Spring Boot 4.x, @WebMvcTest itself was split out of
+             spring-boot-test-autoconfigure into this dedicated slice module (not needed pre-4.0,
+             where spring-boot-starter-test alone was enough) — without it, @WebMvcTest doesn't
+             resolve even though spring-boot-starter-test is present. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

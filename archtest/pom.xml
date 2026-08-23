@@ -135,11 +135,6 @@
         </dependency>
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
-            <artifactId>scos-foundation-exception</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-audit</artifactId>
             <scope>test</scope>
         </dependency>
