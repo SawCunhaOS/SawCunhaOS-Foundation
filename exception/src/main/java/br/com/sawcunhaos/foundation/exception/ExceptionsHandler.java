@@ -357,11 +357,13 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return httpStatus != null ? httpStatus : HttpStatus.BAD_REQUEST;
 	}
 
+	/**
+	 * Resolves {@code title} (the {@code ScosException}'s own title, from
+	 * {@code ExceptionCode.getTitle()}) as an i18n key, translating it when a
+	 * bundle entry exists. When it doesn't, {@code title} itself is the default —
+	 * never a hardcoded literal that would mask a missing translation.
+	 */
 	private String resolveTitle(String title) {
-		try {
-            return localeService.getMessage(title);
-		} catch (Exception e) {
-			return "Business Error";
-		}
+		return localeService.getMessageOrDefault(title, title);
 	}
 }

@@ -54,6 +54,7 @@ class ExceptionsHandlerScosExceptionTest {
     @DisplayName("ScosException -> ProblemDetail 400 with code/type/title/detail/instance")
     void businessExceptionBecomesProblemDetail() {
         when(localeService.getMessage(anyString(), any(Object[].class))).thenReturn("CPF informado é inválido.");
+        when(localeService.getMessageOrDefault(anyString(), anyString())).thenReturn("CPF informado é inválido.");
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/persons");
         ScosException exception = new ScosException(ScosExceptionCode.CPF_INVALID, "cpf");
 

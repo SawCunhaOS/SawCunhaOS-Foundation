@@ -60,7 +60,7 @@ development_status:
   2-3-retornar-501-para-funcionalidade-não-implementada: review
   2-4-padronizar-log-por-faixa-de-status-http: review
   2-5-corrigir-a-resolução-de-título-de-erro-para-jackson-3: review
-  2-6-corrigir-resolvetitle-para-não-usar-try-catch-como-controle: ready-for-dev
+  2-6-corrigir-resolvetitle-para-não-usar-try-catch-como-controle: review
   2-7-unificar-o-formato-de-erro-em-handleexceptioninternal-inclui: ready-for-dev
   2-8-mover-o-contrato-de-domínio-do-exception-para-o-core: ready-for-dev
   2-9-mover-a-tradução-http-do-exception-para-o-web-e-registrar-vi: ready-for-dev
