@@ -88,12 +88,12 @@
             <artifactId>scos-foundation-core</artifactId>
         </dependency>
         <!-- The 4 dependencies below (logging/actuator/validation/lombok, plus commons-lang3
-             further down) have no confirmed consumer left in this module's 4 remaining classes
-             (JacksonEncoderCustom, JacksonDecoderCustom, ValueType, LocaleService) as of Story 1.12
-             — but their orphan status predates this story, so it wasn't this story's job to remove
-             them (only dependencies this story's own move directly orphaned were cleaned up; see
-             deferred-work.md). Candidates for cleanup whenever utils/pom.xml is next touched
-             (likely Story 1.14, which removes utils from the reactor entirely). -->
+             further down) have no confirmed consumer left in this module's 2 remaining classes
+             (ValueType, LocaleService) as of Story 1.13 — but their orphan status predates this
+             story, so it wasn't this story's job to remove them (only dependencies this story's own
+             move directly orphaned were cleaned up; see deferred-work.md). Candidates for cleanup
+             whenever utils/pom.xml is next touched (likely Story 1.14, which removes utils from the
+             reactor entirely). -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
@@ -105,17 +105,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-core</artifactId>
-        </dependency>
-        <!-- JacksonEncoderCustom/JacksonDecoderCustom (Feign codecs) use tools.jackson.databind
-             directly; previously arrived transitively via jackson-dataformat-xml (used by
-             JacksonXmlUtils, moved to web in Story 1.12), now explicit. -->
-        <dependency>
-            <groupId>tools.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
