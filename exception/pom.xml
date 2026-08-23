@@ -113,6 +113,15 @@
             <artifactId>spring-boot-starter-validation</artifactId>
             <scope>compile</scope>
         </dependency>
+        <!-- Story 1.15 (AC #1): ValidationAnnotationCountListener counts @CPF/@CNPJ/@TaxIdentifier/
+             @ZipCode usages on the consuming app's classpath. Not added to scos-foundation-validation
+             itself — that module deliberately has no Spring/AspectJ dependency (Story 1.9); exception
+             already depends on spring-boot-starter-validation and handles Bean Validation failures
+             (MethodArgumentNotValidException), so the observability listener lives here instead. -->
+        <dependency>
+            <groupId>br.com.sawcunhaos</groupId>
+            <artifactId>scos-foundation-validation-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>

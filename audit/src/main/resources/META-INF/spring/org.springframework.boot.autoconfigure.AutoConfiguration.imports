@@ -14,3 +14,4 @@
 br.com.sawcunhaos.foundation.audit.configuration.ScosAuditConfiguration
 br.com.sawcunhaos.foundation.audit.configuration.ScosLogDataSourceConfiguration
 br.com.sawcunhaos.foundation.audit.configuration.properties.ScosAuditLogProperties
+br.com.sawcunhaos.foundation.audit.listener.AuditableAnnotationCountListener

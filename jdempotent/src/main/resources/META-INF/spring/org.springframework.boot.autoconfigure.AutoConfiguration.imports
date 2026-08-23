@@ -2,3 +2,4 @@ br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisP
 br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisConfiguration
 br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisEnvironmentPostProcessor
 br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentConfig
+br.com.sawcunhaos.foundation.jdempotent.core.listener.JdempotentAnnotationCountListener
