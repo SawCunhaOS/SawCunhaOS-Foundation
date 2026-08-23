@@ -14,7 +14,7 @@
 package br.com.sawcunhaos.foundation.exception;
 
 import br.com.sawcunhaos.foundation.core.specification.LocaleService;
-import br.com.sawcunhaos.foundation.exception.error.MethodNotImplementedException;
+import br.com.sawcunhaos.foundation.core.exception.MethodNotImplementedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

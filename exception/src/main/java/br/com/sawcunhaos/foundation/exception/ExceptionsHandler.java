@@ -15,9 +15,9 @@ package br.com.sawcunhaos.foundation.exception;
 
 
 import br.com.sawcunhaos.foundation.core.exception.ScosException;
-import br.com.sawcunhaos.foundation.exception.error.MethodNotImplementedException;
-import br.com.sawcunhaos.foundation.exception.error.ScosNoContentException;
-import br.com.sawcunhaos.foundation.exception.error.ScosNoRollbackException;
+import br.com.sawcunhaos.foundation.core.exception.MethodNotImplementedException;
+import br.com.sawcunhaos.foundation.core.exception.ScosNoContentException;
+import br.com.sawcunhaos.foundation.core.exception.ScosNoRollbackException;
 import br.com.sawcunhaos.foundation.exception.model.ScosFieldError;
 import br.com.sawcunhaos.foundation.exception.model.ScosProblemDetails;
 import br.com.sawcunhaos.foundation.exception.utils.ExceptionUtils;

@@ -11,11 +11,12 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.exception.error;
+package br.com.sawcunhaos.foundation.core.exception;
 
-import br.com.sawcunhaos.foundation.core.exception.ScosException;
 import lombok.NoArgsConstructor;
 
+// Story 2.8: moved here from `exception` alongside ScosException/ExceptionCode/ScosExceptionCode
+// so the domain exception hierarchy has no Spring dependency (Story 2.8's own AC #1).
 @NoArgsConstructor
 public class ScosNoContentException extends ScosException {
 

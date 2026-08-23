@@ -11,20 +11,16 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.exception.error;
+package br.com.sawcunhaos.foundation.core.exception;
 
-import br.com.sawcunhaos.foundation.core.exception.ScosException;
 import br.com.sawcunhaos.foundation.core.specification.ExceptionCode;
 import lombok.Getter;
-import lombok.ToString;
 
+// Story 2.8: moved here from `exception`, same reasoning as ScosNoContentException.
 @Getter
-@ToString
-public class ScosSecurityException extends ScosException {
-	public ScosSecurityException(ExceptionCode code) {
+public class ScosNoRollbackException extends ScosException {
+
+	public ScosNoRollbackException(ExceptionCode code) {
 		super(code);
-	}
-	public ScosSecurityException(ExceptionCode code, Object... args) {
-		super(code, args);
 	}
 }

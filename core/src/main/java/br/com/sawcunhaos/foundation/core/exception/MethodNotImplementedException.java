@@ -11,8 +11,9 @@
  *
  */
 
-package br.com.sawcunhaos.foundation.exception.error;
+package br.com.sawcunhaos.foundation.core.exception;
 
+// Story 2.8: moved here from `exception`, same reasoning as ScosNoContentException.
 public class MethodNotImplementedException extends RuntimeException {
 
     public MethodNotImplementedException() {

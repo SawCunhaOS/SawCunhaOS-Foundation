@@ -87,15 +87,34 @@
         <!-- Story 1.14: scos-foundation-utils removed from the reactor entirely. Its only
              remaining consumer in this module was a test-only LocaleService implementor, now
              repointed to core.specification.LocaleService (already available transitively via
-             scos-foundation-jpa/-exception below, both of which depend on scos-foundation-core;
+             scos-foundation-jpa below, which depends on scos-foundation-core;
              scos-foundation-privacy does NOT depend on core). -->
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
             <artifactId>scos-foundation-privacy</artifactId>
         </dependency>
+        <!-- Story 2.8: explicit dependency. scos-foundation-jpa (below) already depends on
+             scos-foundation-core directly, so this transitive path was never actually broken —
+             but relying on it implicitly (via jpa, or previously also via scos-foundation-exception,
+             removed below) is fragile: either could stop depending on core later without audit
+             noticing. Made explicit now, ahead of Story 2.9 removing the exception module. -->
         <dependency>
             <groupId>br.com.sawcunhaos</groupId>
-            <artifactId>scos-foundation-exception</artifactId>
+            <artifactId>scos-foundation-core</artifactId>
+        </dependency>
+        <!-- Story 2.8: ScosAuditBatchConsumer/-DlqJob/-ServiceBean @Autowired an ObjectMapper —
+             previously satisfied only as a side effect of scos-foundation-exception pulling in
+             spring-boot-starter-web. On Spring Boot 4.1.1, spring-boot-starter-jackson alone does
+             NOT produce an ObjectMapper/JsonMapper bean — JacksonAutoConfiguration
+             (org.springframework.boot.jackson.autoconfigure) only exposes JsonFactory/mixin/
+             customizer beans, no @Bean ObjectMapper method (confirmed reading its sources jar);
+             the actual mapper bean is built by spring-boot-web's own HTTP-message-converter
+             autoconfiguration from those customizers. Depend on spring-boot-starter-web directly
+             instead — same effective dependency footprint audit already had transitively via
+             scos-foundation-exception, just explicit now that that path is removed below. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <!-- Story 1.5: @Auditable/@AuditAction agora vêm do módulo de contrato, não de utils. -->
         <dependency>
