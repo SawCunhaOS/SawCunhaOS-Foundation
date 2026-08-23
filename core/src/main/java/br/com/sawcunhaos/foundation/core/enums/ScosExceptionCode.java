@@ -49,6 +49,8 @@ public enum ScosExceptionCode implements ExceptionCode {
     CNPJ_INVALID("SCOS-008", "Validation Error"),
     /** E-mail is invalid (HTTP 400). */
     EMAIL_INVALID("SCOS-009", "Validation Error"),
+    /** Route or functionality is not implemented (HTTP 501). */
+    NOT_IMPLEMENTED("SCOS-010", "Not Implemented"),
 
     ;
 

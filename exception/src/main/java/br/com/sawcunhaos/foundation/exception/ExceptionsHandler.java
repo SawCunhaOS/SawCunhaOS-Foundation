@@ -15,6 +15,7 @@ package br.com.sawcunhaos.foundation.exception;
 
 
 import br.com.sawcunhaos.foundation.core.exception.ScosException;
+import br.com.sawcunhaos.foundation.exception.error.MethodNotImplementedException;
 import br.com.sawcunhaos.foundation.exception.error.ScosNoContentException;
 import br.com.sawcunhaos.foundation.exception.error.ScosNoRollbackException;
 import br.com.sawcunhaos.foundation.exception.model.ScosFieldError;
@@ -281,6 +282,20 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 	}
 
 
+
+	@ExceptionHandler(MethodNotImplementedException.class)
+	protected ResponseEntity<ProblemDetail> handleMethodNotImplementedException(
+			MethodNotImplementedException ex, HttpServletRequest request
+	) {
+		log.error("handleSecurity - MethodNotImplementedException: ", ex);
+		String detail = localeService.getMessage(ScosExceptionCode.NOT_IMPLEMENTED.getCode());
+		ProblemDetail problem = enrich(
+				ScosProblemDetails.of(
+						HttpStatus.NOT_IMPLEMENTED, ScosExceptionCode.NOT_IMPLEMENTED, detail, request.getRequestURI()
+				)
+		);
+		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(problem);
+	}
 
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<ProblemDetail> handleGenericException(Exception ex, HttpServletRequest request) {
