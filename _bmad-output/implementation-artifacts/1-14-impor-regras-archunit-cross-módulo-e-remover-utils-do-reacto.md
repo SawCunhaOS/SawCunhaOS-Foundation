@@ -97,8 +97,8 @@ claude-sonnet-5
 - `codegen/src/main/resources/mustaches/*.mustache` (13 arquivos, movidos de `utils`)
 - `core/src/main/java/br/com/sawcunhaos/foundation/core/specification/LocaleService.java` (movido de `utils`)
 - `core/src/main/java/br/com/sawcunhaos/foundation/core/enums/ValueType.java` (movido de `utils`)
-- `core/src/main/resources/scos_utils_messages.properties` (movido de `utils`)
-- `core/src/main/resources/scos_utils_messages_en.properties` (movido de `utils`)
+- `../../core/src/main/resources/scos_message/scos_utils_messages.properties` (movido de `utils`)
+- `../../core/src/main/resources/scos_message/scos_utils_messages_en.properties` (movido de `utils`)
 - `exception/pom.xml` — adicionada dependência explícita `scos-foundation-core`; removida `scos-foundation-utils`
 - `exception/src/main/java/br/com/sawcunhaos/foundation/exception/ExceptionsHandler.java` — import de `LocaleService` repontado para `core`
 - `exception/src/test/java/br/com/sawcunhaos/foundation/exception/ExceptionsHandlerInternalErrorTest.java` — import repontado

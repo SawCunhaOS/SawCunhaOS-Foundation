@@ -75,8 +75,8 @@ Claude Sonnet 5 (claude-sonnet-5)
 ### File List
 
 - `core/src/main/java/br/com/sawcunhaos/foundation/core/enums/ScosExceptionCode.java` — novo enum constant `NOT_IMPLEMENTED("SCOS-010", "Not Implemented")`.
-- `core/src/main/resources/scos_utils_messages.properties` — nova entrada `SCOS-010` (revisão).
-- `core/src/main/resources/scos_utils_messages_en.properties` — nova entrada `SCOS-010` (revisão).
+- `../../core/src/main/resources/scos_message/scos_utils_messages.properties` — nova entrada `SCOS-010` (revisão).
+- `../../core/src/main/resources/scos_message/scos_utils_messages_en.properties` — nova entrada `SCOS-010` (revisão).
 - `exception/src/main/java/br/com/sawcunhaos/foundation/exception/ExceptionsHandler.java` — novo `@ExceptionHandler(MethodNotImplementedException.class)` (`handleMethodNotImplementedException`) + import de `MethodNotImplementedException`.
 - `exception/src/test/java/br/com/sawcunhaos/foundation/exception/ExceptionsHandlerMethodNotImplementedTest.java` — novo, teste unitário confirmando `501`/`SCOS-010`/`Not Implemented`/`detail`/`instance` no `ProblemDetail`, mesmo padrão de `ExceptionsHandlerAccessDeniedTest`/`ExceptionsHandlerScosExceptionTest`.
 
