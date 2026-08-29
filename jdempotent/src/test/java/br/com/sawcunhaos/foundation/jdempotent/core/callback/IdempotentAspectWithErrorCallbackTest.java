@@ -39,13 +39,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-        IdempotentAspectWithErrorCallbackITTest.class,
+        IdempotentAspectWithErrorCallbackTest.class,
         TestAopWithErrorCallbackContext.class,
         TestIdempotentResource.class,
         DefaultKeyGenerator.class,
         InMemoryIdempotentRepository.class
 })
-class IdempotentAspectWithErrorCallbackITTest {
+class IdempotentAspectWithErrorCallbackTest {
 
     @Autowired
     private TestIdempotentResource testIdempotentResource;

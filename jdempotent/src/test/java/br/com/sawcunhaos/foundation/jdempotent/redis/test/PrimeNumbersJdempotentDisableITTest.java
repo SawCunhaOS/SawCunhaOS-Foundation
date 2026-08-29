@@ -13,7 +13,6 @@
 
 package br.com.sawcunhaos.foundation.jdempotent.redis.test;
 
-
 import br.com.sawcunhaos.foundation.jdempotent.redis.test.app.JdempotentTestApplication;
 import br.com.sawcunhaos.foundation.jdempotent.core.aspect.IdempotentAspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
@@ -21,7 +20,6 @@ import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempoten
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +27,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -41,15 +38,16 @@ import java.time.Duration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasKey;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         classes = {
             JdempotentTestApplication.class
         })
+@TestPropertySource(properties = "scos.jdempotent.enabled=false")
 @Testcontainers
-class PrimeNumbersJdempotentEnableTest {
+class PrimeNumbersJdempotentDisableITTest {
 
     @Container
     public ComposeContainer environment =
@@ -61,14 +59,12 @@ class PrimeNumbersJdempotentEnableTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-    @Autowired
+    @Autowired(required = false)
     private IdempotentAspect idempotentAspect;
-    @Autowired
+    @Autowired(required = false)
     private ScosJdempotentRedisProperties scosJdempotentRedisProperties;
     @LocalServerPort
     private int port;
-
-    private static final IdempotencyKey KEY_DEFAULT_PRIME_NUMBER = new IdempotencyKey("PrimeNumber.generatePrimeNumber-25c01e4fc78fc1df544d8b77bb4773f");
 
     @BeforeEach
     public void initialiseRestAssuredMockMvcWebApplicationContext() {
@@ -87,36 +83,9 @@ class PrimeNumbersJdempotentEnableTest {
                     .contentType(ContentType.JSON)
                     .body("$", hasKey("primesNumber"));
 
-        assertTrue(idempotentAspect.getIdempotentRepository().contains(KEY_DEFAULT_PRIME_NUMBER));
+        assertNull(idempotentAspect);
+        assertNull(scosJdempotentRedisProperties);
 
-        given()
-                .when()
-                    .get("/prime-number")
-                .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .contentType(ContentType.JSON)
-                    .body("$", hasKey("primesNumber"));
     }
 
-    @Test
-    void deveChamarAPIEAdicionarNaIdempotencyOResultadoENaSegundaChamadaNaoRetornaOResultado() {
-        ReflectionTestUtils.setField(scosJdempotentRedisProperties, "persistReqRes", false);
-
-        given()
-                .when()
-                    .get("/prime-number")
-                .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .contentType(ContentType.JSON)
-                    .body("$", hasKey("primesNumber"));
-
-        assertTrue(idempotentAspect.getIdempotentRepository().contains(KEY_DEFAULT_PRIME_NUMBER));
-
-        given()
-                .when()
-                    .get("/prime-number")
-                .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .contentType(StringUtils.EMPTY);
-    }
 }

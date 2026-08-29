@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = {
         TestIdempotentResource.class,
-        IdempotentAspectITTest.class,
+        IdempotentAspectTest.class,
         TestAopContext.class
 })
 class IdempotentAspectUTTest {

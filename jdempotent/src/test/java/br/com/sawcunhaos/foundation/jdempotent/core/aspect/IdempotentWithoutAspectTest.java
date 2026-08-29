@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestIdempotentResource.class})
-class IdempotentWithoutAspectITTest {
+class IdempotentWithoutAspectTest {
 
     @Autowired
     private TestIdempotentResource testIdempotentResource;

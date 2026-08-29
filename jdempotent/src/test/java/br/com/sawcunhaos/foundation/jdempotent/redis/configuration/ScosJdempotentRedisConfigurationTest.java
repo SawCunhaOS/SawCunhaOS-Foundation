@@ -81,4 +81,24 @@ class ScosJdempotentRedisConfigurationTest {
                     assertThat(factory.isClusterAware()).isFalse();
                 });
     }
+
+    /**
+     * Cobre a Story 3.18/AD-8: configuração malformada (tipo inválido, sem depender de rede)
+     * deve falhar a subida do contexto com causa raiz identificável, nunca silenciosamente.
+     * Não cobre "Redis alcançável mas fora do ar" — esse é fail-open (AD-2 herdado).
+     * Ver {@code _bmad-output/planning-artifacts/architecture/architecture-SawCunhaOS-Foundation-2026-08-29/ARCHITECTURE-SPINE.md}.
+     */
+    @Test
+    void contextoFalhaComConfigClusterMalformada() {
+        runner.withPropertyValues(
+                        "spring.data.redis.cluster.nodes[0]=localhost:7000",
+                        "spring.data.redis.cluster.max-redirects=not-a-number")
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure())
+                            .rootCause()
+                            .hasMessageContaining("not-a-number");
+                });
+    }
 }

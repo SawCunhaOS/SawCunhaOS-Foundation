@@ -44,6 +44,9 @@ jobs:
     - name: Run tests
       run: mvn -B test
 
+    - name: Run jdempotent integration tests
+      run: mvn -B -pl jdempotent -am verify
+
     - name: Build package
       run: mvn -B package -DskipTests
 
