@@ -90,26 +90,6 @@ public class IdempotentAspect {
             };
 
 
-    private static final ThreadLocal<MessageDigest> messageDigests =
-            new ThreadLocal<>() {
-                @Override
-                protected MessageDigest initialValue() {
-                    try {
-                        return MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value());
-                    } catch (NoSuchAlgorithmException e) {
-                        log.warn("This algorithm not supported.", e);
-                    }
-                    return null;
-                }
-
-                @Override
-                public MessageDigest get() {
-                    MessageDigest messageDigest = super.get();
-                    messageDigest.reset();
-                    return messageDigest;
-                }
-            };
-
     public IdempotentAspect() {
         this.idempotentRepository = new InMemoryIdempotentRepository();
         this.keyGenerator = new DefaultKeyGenerator();
@@ -168,7 +148,13 @@ public class IdempotentAspect {
         String classAndMethodName = generateLogPrefixForIncomingEvent(pjp);
         IdempotentRequestWrapper requestObject = findIdempotentRequestArg(pjp);
         String listenerName = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).cachePrefix();
-        IdempotencyKey idempotencyKey = keyGenerator.generateIdempotentKey(requestObject, listenerName, stringBuilders.get(), messageDigests.get());
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Algorithm not supported: " + CryptographyAlgorithm.SHA256.value(), e);
+        }
+        IdempotencyKey idempotencyKey = keyGenerator.generateIdempotentKey(requestObject, listenerName, stringBuilders.get(), messageDigest);
         Long customTtl = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttl();
         TimeUnit timeUnit = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttlTimeUnit();
 
