@@ -23,6 +23,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.chain.JdempotentPropertyAnno
 import br.com.sawcunhaos.foundation.jdempotent.core.constant.CryptographyAlgorithm;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentRepository;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgressException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.KeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.ChainData;
@@ -31,6 +32,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWra
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentId;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentRequestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
@@ -50,11 +52,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -157,18 +162,26 @@ public class IdempotentAspect {
         IdempotencyKey idempotencyKey = keyGenerator.generateIdempotentKey(requestObject, listenerName, stringBuilders.get(), messageDigest);
         Long customTtl = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttl();
         TimeUnit timeUnit = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttlTimeUnit();
+        Duration ttl = Duration.of(customTtl, timeUnit.toChronoUnit());
+        // Story 3.6 will compare this against the payload hash already stored under the
+        // key (Lease#getExistingPayloadHash) to tell a genuine duplicate call apart from a
+        // different payload colliding on the same idempotency key (409 vs 422).
+        String payloadHash = HexFormat.of().formatHex(messageDigest.digest(requestObject.toString().getBytes(StandardCharsets.UTF_8)));
 
         log.debug(classAndMethodName + "starting for {}", requestObject);
 
-        if (idempotentRepository.contains(idempotencyKey)) {
-            Object response = retrieveResponse(idempotencyKey);
-            log.debug(classAndMethodName + "ended up reading from cache for {}", requestObject);
-            return response;
+        Lease lease = idempotentRepository.tryAcquire(idempotencyKey, payloadHash, ttl);
+        if (!lease.isAcquired()) {
+            if (lease.hasCachedResponse()) {
+                log.debug(classAndMethodName + "ended up reading from cache for {}", requestObject);
+                return lease.getExistingResponse().getResponse();
+            }
+            log.debug(classAndMethodName + "already in progress for {}", requestObject);
+            throw new IdempotentInProgressException(idempotencyKey);
         }
 
         log.debug(classAndMethodName + "saved to cache with {}", idempotencyKey);
         setJdempotentId(pjp.getArgs(),idempotencyKey.getKeyValue());
-        idempotentRepository.store(idempotencyKey, requestObject, customTtl, timeUnit);
         Object result;
         try {
             result = pjp.proceed();
@@ -205,20 +218,6 @@ public class IdempotentAspect {
         builder.append(methodName);
         builder.append("() ");
         return builder.toString();
-    }
-
-    /**
-     * Retrieve response from cache
-     *
-     * @param key
-     * @return
-     */
-    private Object retrieveResponse(IdempotencyKey key) {
-        IdempotentResponseWrapper response = idempotentRepository.getResponse(key);
-        if (response != null) {
-            return response.getResponse();
-        }
-        return null;
     }
 
     /**

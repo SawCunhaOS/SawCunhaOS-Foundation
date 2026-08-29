@@ -19,6 +19,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisProperties;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,6 +82,53 @@ public class RedisIdempotentRepository implements IdempotentRepository {
         } catch (Exception e) {
             log.error("Error storing idempotent request in Redis: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Atomic lock acquisition (Story 3.5): {@code SET key value NX PX <ttl_ms>} is a
+     * single Redis command, so exactly one concurrent caller for the same key can
+     * ever see {@code acquired == true} — this is what replaces the racy
+     * {@code contains() -> store()} sequence. Spring Data's {@code setIfAbsent(key, value, ttl)}
+     * is that exact command; a hand-rolled Lua script is not needed here because this
+     * story does not require comparing {@code payloadHash} atomically with the SET
+     * itself (that only becomes necessary if Story 3.6 needs cross-field atomicity).
+     *
+     * <p>The follow-up {@code GET} used to populate {@link Lease#getExistingPayloadHash()}
+     * / {@link Lease#getExistingResponse()} on conflict is NOT part of that atomic
+     * operation: by the time it runs the key's owner may already have released or
+     * refreshed it. That is fine for this story's AC (exclusivity of the lock is what
+     * matters), it can only make the returned "existing" data slightly stale/absent,
+     * which Story 3.6 will have to account for if it tightens this further.</p>
+     */
+    @Override
+    public Lease tryAcquire(IdempotencyKey idempotencyKey, String payloadHash, Duration ttl) {
+        Duration effectiveTtl = (ttl == null || ttl.isZero() || ttl.isNegative())
+                ? Duration.ofHours(redisProperties.getExpirationTimeHour())
+                : ttl;
+        try {
+            IdempotentRequestResponseWrapper placeholder = prepareValue(null, payloadHash);
+            Boolean acquired = valueOperations.setIfAbsent(idempotencyKey.getKeyValue(), placeholder, effectiveTtl);
+            if (Boolean.TRUE.equals(acquired)) {
+                return Lease.acquired(idempotencyKey, payloadHash, effectiveTtl);
+            }
+            IdempotentRequestResponseWrapper existing = valueOperations.get(idempotencyKey.getKeyValue());
+            String existingPayloadHash = existing != null ? existing.getPayloadHash() : null;
+            IdempotentResponseWrapper existingResponse = existing != null ? existing.getResponse() : null;
+            return Lease.inProgress(idempotencyKey, payloadHash, effectiveTtl, existingPayloadHash, existingResponse);
+        } catch (Exception e) {
+            log.error("Error acquiring idempotent lease in Redis: {}", e.getMessage());
+            // NOTE: fail-open on Redis errors, mirrors contains()/store() above which already
+            // swallow exceptions and let the caller proceed rather than blocking on a Redis outage.
+            return Lease.acquired(idempotencyKey, payloadHash, effectiveTtl);
+        }
+    }
+
+    private IdempotentRequestResponseWrapper prepareValue(IdempotentRequestWrapper request, String payloadHash) {
+        IdempotentRequestResponseWrapper wrapper = redisProperties.getPersistReqRes()
+                ? new IdempotentRequestResponseWrapper(request)
+                : new IdempotentRequestResponseWrapper(null);
+        wrapper.setPayloadHash(payloadHash);
+        return wrapper;
     }
 
     @Override

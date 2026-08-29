@@ -35,6 +35,13 @@ public class IdempotentRequestResponseWrapper implements Serializable {
     private IdempotentRequestWrapper request;
     private IdempotentResponseWrapper response = null;
 
+    /**
+     * Hash of the payload that acquired the lease for this key (Story 3.5).
+     * Populated by {@code tryAcquire}; used by Story 3.6 to tell a genuine
+     * duplicate call apart from a different payload colliding on the same key.
+     */
+    private String payloadHash;
+
     public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request) {
         this.request = request;
     }
@@ -42,6 +49,11 @@ public class IdempotentRequestResponseWrapper implements Serializable {
     public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request, IdempotentResponseWrapper response) {
         this.request = request;
         this.response = response;
+    }
+
+    public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request, String payloadHash) {
+        this.request = request;
+        this.payloadHash = payloadHash;
     }
 
     @Override

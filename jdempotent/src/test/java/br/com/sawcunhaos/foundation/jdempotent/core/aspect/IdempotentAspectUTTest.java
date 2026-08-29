@@ -15,9 +15,12 @@ package br.com.sawcunhaos.foundation.jdempotent.core.aspect;
 
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentRepository;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgressException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResource;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
@@ -34,6 +37,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,13 +78,14 @@ class IdempotentAspectUTTest {
         IdempotentTestPayload payload = new IdempotentTestPayload("payload");
         TestIdempotentResource testIdempotentResource = mock(TestIdempotentResource.class);
 
-        when(defaultKeyGenerator.generateIdempotentKey(any(),any(),any(),any())).thenReturn(new IdempotencyKey("123"));
+        IdempotencyKey key = new IdempotencyKey("123");
+        when(defaultKeyGenerator.generateIdempotentKey(any(),any(),any(),any())).thenReturn(key);
         when(joinPoint.getSignature()).thenReturn(signature);
         when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
         when(signature.getMethod()).thenReturn(method);
         when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
         when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
-        when(idempotentRepository.contains(any())).thenReturn(false);
+        when(idempotentRepository.tryAcquire(any(), any(), any())).thenReturn(Lease.acquired(key, "hash", Duration.ZERO));
 
         //when
         idempotentAspect.execute(joinPoint);
@@ -89,7 +94,7 @@ class IdempotentAspectUTTest {
         verify(joinPoint, times(4)).getSignature();
         verify(signature, times(3)).getMethod();
         verify(joinPoint).getTarget();
-        verify(idempotentRepository, times(1)).store(any(), any(), any(), any());
+        verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
         verify(joinPoint).proceed();
         verify(idempotentRepository, times(1)).setResponse(any(), any(), any(), any(), any());
     }
@@ -109,17 +114,50 @@ class IdempotentAspectUTTest {
         when(signature.getMethod()).thenReturn(method);
         when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
         when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
-        when(idempotentRepository.contains(any())).thenReturn(true);
+        IdempotencyKey key = new IdempotencyKey("123");
+        IdempotentResponseWrapper cachedResponse = new IdempotentResponseWrapper("cached-result");
+        when(idempotentRepository.tryAcquire(any(), any(), any()))
+                .thenReturn(Lease.inProgress(key, "hash", Duration.ZERO, "hash", cachedResponse));
 
         //when
-        idempotentAspect.execute(joinPoint);
+        Object result = idempotentAspect.execute(joinPoint);
 
         //then
         verify(joinPoint, times(4)).getSignature();
         verify(signature, times(3)).getMethod();
         verify(joinPoint).getTarget();
         verify(joinPoint, times(0)).proceed();
-        verify(idempotentRepository, times(1)).getResponse(any());
+        verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
+        assertEquals("cached-result", result);
+    }
+
+    @Test
+    void given_actual_payload_when_lease_not_acquired_and_no_cached_response_then_throw_in_progress_exception() throws Throwable {
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        Method method = TestIdempotentResource.class.getMethod("idempotentMethod", IdempotentTestPayload.class);
+        IdempotentTestPayload payload = new IdempotentTestPayload("payload");
+        TestIdempotentResource testIdempotentResource = mock(TestIdempotentResource.class);
+
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+        when(signature.getMethod()).thenReturn(method);
+        when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
+        when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
+        IdempotencyKey key = new IdempotencyKey("123");
+        when(idempotentRepository.tryAcquire(any(), any(), any()))
+                .thenReturn(Lease.inProgress(key, "hash", Duration.ZERO, "hash", null));
+
+        //when
+        Assertions.assertThrows(
+                IdempotentInProgressException.class,
+                () -> idempotentAspect.execute(joinPoint)
+        );
+
+        //then
+        verify(joinPoint, times(0)).proceed();
+        verify(idempotentRepository, times(0)).setResponse(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -136,7 +174,6 @@ class IdempotentAspectUTTest {
         when(signature.getMethod()).thenReturn(method);
         when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
         when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
-        when(idempotentRepository.contains(any())).thenReturn(false);
 
         //when
         Assertions.assertThrows(
@@ -193,7 +230,6 @@ class IdempotentAspectUTTest {
         when(signature.getMethod()).thenReturn(method);
         when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
         when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
-        when(idempotentRepository.contains(any())).thenReturn(false);
 
         Assertions.assertThrows(
                 NullPointerException.class,

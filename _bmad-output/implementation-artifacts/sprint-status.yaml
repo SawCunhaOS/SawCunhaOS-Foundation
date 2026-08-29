@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-22-2026 00:00
-last_updated: 08-29-2026 16:47
+last_updated: 08-29-2026 17:10
 project: SawCunhaOS-Foundation
 project_key: NOKEY
 tracking_system: file-system
@@ -72,7 +72,7 @@ development_status:
   3-2-migrar-hashing-de-md5-para-sha-256: review
   3-3-resolver-campos-anotados-em-toda-a-hierarquia-de-classes: review
   3-4-registrar-idempotentaspect-sem-duplicidade-e-sem-threadlocal: review
-  3-5-tornar-a-aquisição-do-lock-atômica-tryacquire-lease: ready-for-dev
+  3-5-tornar-a-aquisição-do-lock-atômica-tryacquire-lease: review
   3-6-detectar-colisão-de-payload-sob-a-mesma-chave: ready-for-dev
   3-7-garantir-fail-open-com-circuit-breaker-quando-o-redis-está-i: 
     ready-for-dev

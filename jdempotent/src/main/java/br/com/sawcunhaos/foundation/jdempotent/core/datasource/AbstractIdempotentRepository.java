@@ -17,7 +17,9 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -54,6 +56,27 @@ public abstract class AbstractIdempotentRepository implements IdempotentReposito
     @Override
     public void remove(IdempotencyKey key) {
         getMap().remove(key);
+    }
+
+    /**
+     * {@code ConcurrentHashMap.putIfAbsent} is a single atomic operation: exactly one
+     * concurrent caller inserts the placeholder entry and gets {@code acquired == true},
+     * every other concurrent caller observes the entry the winner just inserted (or an
+     * already-finished one) and gets it back via the {@link Lease}.
+     *
+     * <p>NOTE: {@code ttl} is not enforced here (entries never expire), same as the
+     * pre-existing {@code store()}/{@code setResponse()} for this in-memory implementation
+     * — add a scheduled evictor if a long-lived in-memory idempotency window becomes a
+     * real requirement.</p>
+     */
+    @Override
+    public Lease tryAcquire(IdempotencyKey key, String payloadHash, Duration ttl) {
+        IdempotentRequestResponseWrapper placeholder = new IdempotentRequestResponseWrapper(null, payloadHash);
+        IdempotentRequestResponseWrapper existing = getMap().putIfAbsent(key, placeholder);
+        if (existing == null) {
+            return Lease.acquired(key, payloadHash, ttl);
+        }
+        return Lease.inProgress(key, payloadHash, ttl, existing.getPayloadHash(), existing.getResponse());
     }
 
 
