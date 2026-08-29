@@ -89,7 +89,7 @@ spring:
 ## Marcando entidades como auditáveis
 
 ```java
-import br.com.sawcunhaos.foundation.utils.annotation.audit.Auditable;
+import br.com.sawcunhaos.foundation.audit.api.Auditable;
 
 @Entity
 @Table(name = "SFA_PEDIDO")
@@ -108,8 +108,8 @@ Isso é suficiente. Toda operação C/U/D na entidade será capturada em `SFA_LO
 ## Auditando leituras de PII (`@Auditable` em métodos)
 
 ```java
-import br.com.sawcunhaos.foundation.utils.annotation.audit.AuditAction;
-import br.com.sawcunhaos.foundation.utils.annotation.audit.Auditable;
+import br.com.sawcunhaos.foundation.audit.api.AuditAction;
+import br.com.sawcunhaos.foundation.audit.api.Auditable;
 
 @Service
 public class PedidoService {

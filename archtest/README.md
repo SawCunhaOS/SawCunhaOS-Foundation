@@ -11,5 +11,10 @@ continuam nascendo dentro do próprio módulo protegido, no mesmo commit que o c
 
 ## Regras existentes
 
-Nenhuma ainda. Este módulo nasce vazio de regras — só a estrutura, pronta para receber a primeira
-regra cross-módulo (Story 1.14).
+- `nothingDependsOnWeb` — nenhum módulo do reactor (exceto o próprio `web`) pode importar `web`.
+- `noCyclesBetweenModules` — nenhum ciclo entre módulos do reactor (slices = primeiro segmento de
+  pacote sob `br.com.sawcunhaos.foundation`, um por módulo Maven).
+
+Ver `ArchitectureTest.java`. Um módulo novo do reactor só é coberto por estas regras se for
+adicionado como dependência de teste no `pom.xml` deste módulo — ausência da lista o torna invisível
+às regras, não isento delas.
