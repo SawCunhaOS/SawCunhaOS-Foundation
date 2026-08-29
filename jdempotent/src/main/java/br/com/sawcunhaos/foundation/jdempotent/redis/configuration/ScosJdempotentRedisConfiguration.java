@@ -28,8 +28,11 @@ import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -55,9 +58,44 @@ public class ScosJdempotentRedisConfiguration {
 
     @Bean(name = "JdempotentLettuceConnectionFactory")
     public LettuceConnectionFactory lettuceConnectionFactory() {
-        log.info("Configurando Jdempotent Redis Sentinel Connection Factory");
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .commandTimeout(Duration.ofSeconds(5))  // Timeout de comando
+                .clientOptions(ClientOptions.builder()
+                        .socketOptions(SocketOptions.builder()
+                                .connectTimeout(Duration.ofSeconds(3))  // Timeout de conexão
+                                .keepAlive(true)
+                                .build())
+                        .timeoutOptions(TimeoutOptions.enabled())
+                        .autoReconnect(true)  // Reconexão automática
+                        .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+                        .build())
+                .build();
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfiguration(), clientConfig);
+        factory.setShareNativeConnection(true);  // Compartilha conexão entre threads
+        factory.setValidateConnection(false);     // Não valida a cada operação (performance)
 
-        // Configuração do Sentinel
+        return factory;
+    }
+
+    /**
+     * Resolve a topologia de conexão (standalone/sentinel/cluster) a partir das mesmas
+     * {@code spring.data.redis.*} que o {@code RedisAutoConfiguration} nativo do Boot usa,
+     * em vez de assumir Sentinel incondicionalmente (causa do NPE em {@code getSentinel()}
+     * quando a aplicação não configura o bloco {@code sentinel:}).
+     */
+    private RedisConfiguration redisConfiguration() {
+        if (Objects.nonNull(redisProperties.getSentinel())) {
+            return sentinelConfiguration();
+        }
+        if (Objects.nonNull(redisProperties.getCluster())) {
+            return clusterConfiguration();
+        }
+        return standaloneConfiguration();
+    }
+
+    private RedisSentinelConfiguration sentinelConfiguration() {
+        log.info("Configurando Jdempotent Redis Connection Factory (topologia: Sentinel)");
+
         RedisSentinelConfiguration sentinelConfig = new RedisSentinelConfiguration()
                 .master(redisProperties.getSentinel().getMaster());
 
@@ -73,24 +111,37 @@ public class ScosJdempotentRedisConfiguration {
         }
 
         sentinelConfig.setDatabase(redisProperties.getDatabase());
+        return sentinelConfig;
+    }
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofSeconds(5))  // Timeout de comando
-                .clientOptions(ClientOptions.builder()
-                        .socketOptions(SocketOptions.builder()
-                                .connectTimeout(Duration.ofSeconds(3))  // Timeout de conexão
-                                .keepAlive(true)
-                                .build())
-                        .timeoutOptions(TimeoutOptions.enabled())
-                        .autoReconnect(true)  // Reconexão automática
-                        .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-                        .build())
-                .build();
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(sentinelConfig, clientConfig);
-        factory.setShareNativeConnection(true);  // Compartilha conexão entre threads
-        factory.setValidateConnection(false);     // Não valida a cada operação (performance)
+    private RedisClusterConfiguration clusterConfiguration() {
+        log.info("Configurando Jdempotent Redis Connection Factory (topologia: Cluster)");
 
-        return factory;
+        RedisClusterConfiguration clusterConfig = new RedisClusterConfiguration(redisProperties.getCluster().getNodes());
+
+        if (Objects.nonNull(redisProperties.getCluster().getMaxRedirects())) {
+            clusterConfig.setMaxRedirects(redisProperties.getCluster().getMaxRedirects());
+        }
+
+        if (Objects.nonNull(redisProperties.getPassword())) {
+            clusterConfig.setPassword(RedisPassword.of(redisProperties.getPassword()));
+        }
+
+        return clusterConfig;
+    }
+
+    private RedisStandaloneConfiguration standaloneConfiguration() {
+        log.info("Configurando Jdempotent Redis Connection Factory (topologia: Standalone)");
+
+        RedisStandaloneConfiguration standaloneConfig =
+                new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort());
+
+        if (Objects.nonNull(redisProperties.getPassword())) {
+            standaloneConfig.setPassword(RedisPassword.of(redisProperties.getPassword()));
+        }
+
+        standaloneConfig.setDatabase(redisProperties.getDatabase());
+        return standaloneConfig;
     }
 
     @Bean("JdempotentRedisTemplate")
