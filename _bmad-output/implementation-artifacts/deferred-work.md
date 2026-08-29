@@ -185,3 +185,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/3-1-corrigir-a-inicialização-do-redisconnectionfactory.md`
   summary: Nenhuma das três topologias (`sentinelConfiguration()`, `clusterConfiguration()`, `standaloneConfiguration()`) em `ScosJdempotentRedisConfiguration` conecta `redisProperties.getSsl()` ao `LettuceClientConfiguration` — deployments de cluster/sentinel em produção comumente exigem TLS.
   evidence: Achado pelo Blind Hunter durante a revisão desta story. Comportamento pré-existente (o `LettuceClientConfiguration` já não tratava SSL antes desta story) e explicitamente fora do escopo por NFR4 (Dev Notes da story restringem a mudança à fonte de topologia, preservando a configuração de resiliência do Lettuce).
+
+- source_spec: `_bmad-output/implementation-artifacts/3-2-migrar-hashing-de-md5-para-sha-256.md`
+  summary: Chaves de idempotência já persistidas (ex.: Redis) sob MD5 não batem com as novas chaves SHA-256 geradas após o deploy desta mudança, desabilitando silenciosamente a proteção de deduplicação durante a janela de rollout.
+  evidence: Achado pelo Blind Hunter e pelo Edge Case Hunter, de forma independente, durante a revisão desta story. As Dev Notes desta story descartam explicitamente introduzir seleção dinâmica/versionamento de algoritmo ("escopo especulativo não pedido") e o NFR4 restringe a mudança a uma troca mecânica de algoritmo/formatação — a estratégia de rollout seguro (versionar a chave, aceitar a janela por causa do TTL, comunicar o deploy) é uma decisão de produto/arquitetura fora do escopo desta story pontual.

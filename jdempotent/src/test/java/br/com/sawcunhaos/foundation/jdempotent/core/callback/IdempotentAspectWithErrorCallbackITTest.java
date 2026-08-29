@@ -67,7 +67,7 @@ class IdempotentAspectWithErrorCallbackITTest {
         IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
         wrapper.getNonIgnoredFields().put("name", "another");
         wrapper.getNonIgnoredFields().put("transactionId", null);
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         testIdempotentResource.idempotentMethodReturnArg(test);
@@ -84,7 +84,7 @@ class IdempotentAspectWithErrorCallbackITTest {
         IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
         wrapper.getNonIgnoredFields().put("name", "test");
         wrapper.getNonIgnoredFields().put("transactionId", null);
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         TestException testException = Assertions.assertThrows(

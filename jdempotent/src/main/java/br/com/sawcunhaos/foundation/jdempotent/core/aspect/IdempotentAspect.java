@@ -91,7 +91,7 @@ public class IdempotentAspect {
                 @Override
                 protected MessageDigest initialValue() {
                     try {
-                        return MessageDigest.getInstance(CryptographyAlgorithm.MD5.value());
+                        return MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value());
                     } catch (NoSuchAlgorithmException e) {
                         log.warn("This algorithm not supported.", e);
                     }

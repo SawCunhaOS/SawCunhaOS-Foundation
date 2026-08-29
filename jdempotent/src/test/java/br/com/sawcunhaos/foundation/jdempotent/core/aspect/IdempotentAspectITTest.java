@@ -86,7 +86,7 @@ class IdempotentAspectITTest {
         wrapper.getNonIgnoredFields().put("name", null);
         wrapper.getNonIgnoredFields().put("transactionId", null);
 
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         testIdempotentResource.idempotentMethod(test);
@@ -105,7 +105,7 @@ class IdempotentAspectITTest {
         wrapper.getNonIgnoredFields().put("name", null);
         wrapper.getNonIgnoredFields().put("transactionId", null);
 
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         testIdempotentResource.idempotentMethodWithThreeParameter(test, test1, test2);
@@ -122,7 +122,7 @@ class IdempotentAspectITTest {
         IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
         wrapper.getNonIgnoredFields().put("name", "invalid");
 
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         TestException illegalStateException = Assertions.assertThrows(
@@ -144,7 +144,7 @@ class IdempotentAspectITTest {
         IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
         wrapper.getNonIgnoredFields().put("name", null);
         wrapper.getNonIgnoredFields().put("transactionId", null);
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         testIdempotentResource.idempotentMethodWithThreeParamaterAndMultipleJdempotentRequestPayloadAnnotation(test, test1, test2);
@@ -190,7 +190,7 @@ class IdempotentAspectITTest {
         wrapper.getNonIgnoredFields().put("name", null);
         wrapper.getNonIgnoredFields().put("transactionId", null);
 
-        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         testIdempotentResource.idempotentMethod(test);
@@ -206,7 +206,7 @@ class IdempotentAspectITTest {
         IdempotentTestPayload test = new IdempotentTestPayload();
         IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
         wrapper.getNonIgnoredFields().put(idempotencyKey, idempotencyKey);
-        IdempotencyKey key = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.MD5.value()));
+        IdempotencyKey key = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
 
         //when
         testIdempotentResource.idempotencyKeyAsString(idempotencyKey);

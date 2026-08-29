@@ -513,7 +513,7 @@ Módulo para garantir idempotência em operações críticas, prevenindo execuç
   - `@JdempotentIgnore`: Ignora campos específicos
 
 - **Configurações**
-  - Algoritmos de hash: MD5, SHA-1, SHA-256
+  - Hashing de chave: SHA-256 (fixo, via `HexFormat`)
   - Tempo de expiração configurável
   - Repositórios: Redis ou In-Memory
 

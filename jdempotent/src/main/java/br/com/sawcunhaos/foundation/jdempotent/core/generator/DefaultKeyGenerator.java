@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.HexFormat;
 
 /**
  *
@@ -57,9 +58,7 @@ public class DefaultKeyGenerator implements KeyGenerator {
             builder.append("-");
         }
 
-        for (byte b : digest) {
-            builder.append(Integer.toHexString(0xFF & b));
-        }
+        builder.append(HexFormat.of().formatHex(digest));
 
         return new IdempotencyKey(builder.toString());
     }
