@@ -128,11 +128,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
 		List<ScosFieldError> errors = new ArrayList<>();
 		ex.getBindingResult().getFieldErrors().forEach(
-				e -> errors.add(ScosFieldError.of(
-						e.getField(),
-						localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
-						e.getDefaultMessage()
-				))
+				e -> errors.add(toFieldError(e.getField(), e.getDefaultMessage(), e.getArguments()))
 		);
 
 		String message = localeService.getMessage(
@@ -161,23 +157,16 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		// getBeanResults(): violações em parâmetro anotado @Valid (bean), expõe getFieldErrors()
 		ex.getBeanResults().forEach(
 				beanResult -> beanResult.getFieldErrors().forEach(
-						e -> errors.add(ScosFieldError.of(
-								e.getField(),
-								localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
-								e.getDefaultMessage()
-						))
+						e -> errors.add(toFieldError(e.getField(), e.getDefaultMessage(), e.getArguments()))
 				)
 		);
 		// getValueResults(): violações em parâmetro simples anotado direto (ex.: @RequestParam @Min(1) int page),
 		// sem getFieldErrors() — expõe o parâmetro e a lista de MessageSourceResolvable das violações
 		ex.getValueResults().forEach(valueResult -> {
 			String field = valueResult.getMethodParameter().getParameterName();
+			String fallback = field != null ? field : String.valueOf(valueResult.getMethodParameter().getParameterIndex());
 			valueResult.getResolvableErrors().forEach(
-					e -> errors.add(ScosFieldError.of(
-							field != null ? field : String.valueOf(valueResult.getMethodParameter().getParameterIndex()),
-							localeService.getMessage(e.getDefaultMessage(), getArgsValidation(e.getArguments())),
-							e.getDefaultMessage()
-					))
+					e -> errors.add(toFieldError(fallback, e.getDefaultMessage(), e.getArguments()))
 			);
 		});
 
@@ -229,9 +218,11 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 			log.warn("handleSecurity - handleExceptionInternal: {}", ex.getMessage());
 		}
 
-		String title = status != null ? status.getReasonPhrase() : ScosExceptionCode.GENERIC.getTitle();
+		String title = resolveTitle(status != null ? status.getReasonPhrase() : ScosExceptionCode.GENERIC.getTitle());
 		String rawDetail = ex.getMessage();
-		String detail = (rawDetail != null && !rawDetail.isBlank()) ? rawDetail : title;
+		String detail = (rawDetail != null && !rawDetail.isBlank())
+				? localeService.getMessageOrDefault(rawDetail, rawDetail)
+				: title;
 
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
@@ -246,7 +237,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 			ConstraintViolationException exception,
 			HttpServletRequest request
 	) {
-		log.warn("handleSecurity - ConstraintViolationException: {}", exception.getMessage());
+		logByStatus(HttpStatus.BAD_REQUEST, "ConstraintViolationException", exception);
 
 		List<ScosFieldError> errors = new ArrayList<>();
 		exception.getConstraintViolations().forEach(
@@ -261,7 +252,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 					errors.add(ScosFieldError.of(
 							attributes.get(0),
 							localeService.getMessage(e.getMessage(), attributes.toArray(Object[]::new)),
-							e.getMessage()
+							ScosExceptionCode.ATTRIBUTE_NOT_VALID.getCode()
 					));
 				}
 		);
@@ -317,21 +308,18 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<ProblemDetail> handleAccessDeniedException(
 			AccessDeniedException ex, HttpServletRequest request
 	) {
-		log.warn("handleSecurity - AccessDeniedException: {}", ex.getMessage());
-		String detail = localeService.getMessage(ScosExceptionCode.ACCESS_DENIED.getCode());
-		ProblemDetail problem = enrich(
-				ScosProblemDetails.of(
-						HttpStatus.FORBIDDEN, ScosExceptionCode.ACCESS_DENIED, detail, request.getRequestURI()
-				)
-		);
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+		return forbidden(ex, request);
 	}
 
 	@ExceptionHandler(AuthorizationDeniedException.class)
-	protected ResponseEntity<ProblemDetail> handleAccessDeniedException(
-            AuthorizationDeniedException ex, HttpServletRequest request
+	protected ResponseEntity<ProblemDetail> handleAuthorizationDeniedException(
+			AuthorizationDeniedException ex, HttpServletRequest request
 	) {
-		log.warn("handleSecurity - AuthorizationDeniedException: {}", ex.getMessage());
+		return forbidden(ex, request);
+	}
+
+	private ResponseEntity<ProblemDetail> forbidden(Exception ex, HttpServletRequest request) {
+		logByStatus(HttpStatus.FORBIDDEN, ex.getClass().getSimpleName(), ex);
 		String detail = localeService.getMessage(ScosExceptionCode.ACCESS_DENIED.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
@@ -340,14 +328,12 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		);
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
 	}
-
-
 
 	@ExceptionHandler(MethodNotImplementedException.class)
 	protected ResponseEntity<ProblemDetail> handleMethodNotImplementedException(
 			MethodNotImplementedException ex, HttpServletRequest request
 	) {
-		log.error("handleSecurity - MethodNotImplementedException: ", ex);
+		logByStatus(HttpStatus.NOT_IMPLEMENTED, "MethodNotImplementedException", ex);
 		String detail = localeService.getMessage(ScosExceptionCode.NOT_IMPLEMENTED.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
@@ -359,7 +345,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<ProblemDetail> handleGenericException(Exception ex, HttpServletRequest request) {
-		log.error("handleSecurity - Unhandled exception: ", ex);
+		logByStatus(HttpStatus.INTERNAL_SERVER_ERROR, "Unhandled exception", ex);
 		String detail = localeService.getMessage(ScosExceptionCode.GENERIC.getCode());
 		ProblemDetail problem = enrich(
 				ScosProblemDetails.of(
@@ -397,6 +383,18 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		} else {
 			log.error("handleSecurity - {}: ", context, ex);
 		}
+	}
+
+	/**
+	 * Shared by every bean/value-validation handler: resolves the localized message
+	 * for a field's {@code defaultMessage}/args pair and wraps it as a {@link ScosFieldError}.
+	 */
+	private ScosFieldError toFieldError(String field, String defaultMessage, Object[] args) {
+		return ScosFieldError.of(
+				field,
+				localeService.getMessage(defaultMessage, getArgsValidation(args)),
+				ScosExceptionCode.ATTRIBUTE_NOT_VALID.getCode()
+		);
 	}
 
 	private HttpStatus resolveHttpCode(int httpCode) {

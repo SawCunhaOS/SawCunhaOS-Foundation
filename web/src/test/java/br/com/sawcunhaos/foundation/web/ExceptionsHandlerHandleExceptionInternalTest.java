@@ -36,7 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Story 2.7 (AC #1): confirms that exceptions Spring's {@code ResponseEntityExceptionHandler}
  * would otherwise render in its own native format — unmatched route
  * ({@code NoResourceFoundException}, requires {@code spring.mvc.throw-exception-if-no-handler-found=true}
- * on the host application, see {@code exception/README.md}), unsupported HTTP method
+ * on the host application, see the root {@code README.md} "SCOS Foundation Web" section),
+ * unsupported HTTP method
  * ({@code HttpRequestMethodNotSupportedException}) and unacceptable {@code Accept} header
  * ({@code HttpMediaTypeNotAcceptableException}) — instead come back as a
  * {@link br.com.sawcunhaos.foundation.web.model.ScosProblemDetails}, once

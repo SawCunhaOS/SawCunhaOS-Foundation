@@ -14,6 +14,7 @@ package br.com.sawcunhaos.foundation.audit.service;
 
 import br.com.sawcunhaos.foundation.audit.specification.ScosAuditService;
 import br.com.sawcunhaos.foundation.audit.api.Auditable;
+import br.com.sawcunhaos.foundation.core.enums.Constant;
 import br.com.sawcunhaos.foundation.core.specification.ScosUserAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.event.spi.PostDeleteEvent;
@@ -92,7 +93,7 @@ public final class ScosHibernateAuditListener
     }
 
     private String getXRequestId() {
-        return MDC.get("X-Request-ID");
+        return MDC.get(Constant.REQUEST_ID_HEADER.getValue());
     }
 
 }

@@ -63,14 +63,6 @@ jobs:
         path: privacy/target/
         retention-days: 7
 
-    - name: Archive exception module artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: maven-build-exception-${{ matrix.java-version }}
-        path: exception/target/
-        retention-days: 7
-
     - name: Archive audit module artifacts
       if: always()
       uses: actions/upload-artifact@v4
@@ -166,14 +158,6 @@ jobs:
       with:
         name: security-report-privacy
         path: privacy/target/
-        retention-days: 7
-
-    - name: Publish exception module security report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: security-report-exception
-        path: exception/target/
         retention-days: 7
 
     - name: Publish audit module security report

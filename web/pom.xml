@@ -139,7 +139,12 @@
             <artifactId>spring-security-core</artifactId>
         </dependency>
         <!-- Story 2.9: moved here with ExceptionsHandler/ExceptionUtils, which use
-             jakarta.validation.* (ConstraintViolationException and friends). -->
+             jakarta.validation.* (ConstraintViolationException and friends). Kept as the
+             full starter (not just jakarta.validation-api): retrospective of Épico 2 tried
+             swapping this for the lighter API-only jar, but a real @Validated/@Min dispatch
+             test (ExceptionsHandlerDomainDispatchTest) then failed 500 instead of 400 —
+             Spring's method-validation infra needs an actual Bean Validation provider
+             (Hibernate Validator), not just the API, to evaluate constraints at all. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>

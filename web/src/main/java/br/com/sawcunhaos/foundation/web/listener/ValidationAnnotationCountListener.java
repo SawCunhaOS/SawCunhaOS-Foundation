@@ -37,8 +37,8 @@ import java.util.Set;
  * (implicit) discovery of these fields to validate them; this listener does not integrate with
  * that mechanism, it only makes the count visible. Lives here rather than in
  * {@code scos-foundation-validation} because that module deliberately has no Spring dependency
- * (Story 1.9); {@code exception} already depends on {@code spring-boot-starter-validation} and
- * handles Bean Validation failures.
+ * (Story 1.9); {@code web} already depends on {@code spring-boot-starter-validation} (Story 2.9)
+ * and handles Bean Validation failures.
  */
 @Component
 @Log4j2

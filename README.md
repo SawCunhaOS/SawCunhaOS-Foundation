@@ -13,7 +13,7 @@ Core foundation framework that provides shared infrastructure, integration utili
 - [Módulos](#módulos)
   - [SCOS Foundation Privacy](#-scos-foundation-privacy)
   - [SCOS Foundation Utils](#-scos-foundation-utils)
-  - [SCOS Foundation Exception](#-scos-foundation-exception)
+  - [SCOS Foundation Web](#-scos-foundation-web)
   - [SCOS Foundation Audit](#-scos-foundation-audit)
   - [SCOS Foundation Jdempotent](#-scos-foundation-jdempotent)
 - [Requisitos](#requisitos)
@@ -239,12 +239,12 @@ public ScosPaginatedDTO<PessoaDTO> listarPaginado(
 
 ---
 
-### ⚠️ SCOS Foundation Exception
+### ⚠️ SCOS Foundation Web
 
-**Artifact ID:** `scos-foundation-exception`  
+**Artifact ID:** `scos-foundation-web`  
 **Versão:** `1.2.0-SNAPSHOT`
 
-Módulo para tratamento centralizado de exceções e padronização de respostas de erro.
+Módulo (entre outras responsabilidades de camada web) para tratamento centralizado de exceções e padronização de respostas de erro.
 
 #### Funcionalidades
 
@@ -262,8 +262,12 @@ Módulo para tratamento centralizado de exceções e padronização de respostas
     `Content-Type: application/problem+json`)
   - Suporte a internacionalização de mensagens
   - ⚠️ **Pré-requisito para 404 de rota inexistente unificado**: a aplicação consumidora precisa
-    ligar `spring.mvc.throw-exception-if-no-handler-found=true`. Ver `exception/README.md` para
-    detalhes (por que este módulo não pode ligar essa propriedade sozinho, e o que acontece sem ela).
+    ligar `spring.mvc.throw-exception-if-no-handler-found=true` no seu próprio `application.yml`.
+    Essa propriedade é consumida pela `WebMvcAutoConfiguration` do Spring Boot, que configura o
+    `DispatcherServlet` da aplicação hospedeira — uma biblioteca (`@ControllerAdvice`) não tem
+    acesso a esse `DispatcherServlet` para ligá-la sozinha. Sem ela, uma rota inexistente cai na
+    página de erro padrão do Boot em vez de `ScosProblemDetails` (método HTTP não suportado e
+    `Accept` inválido não dependem dessa propriedade — já são cobertos independentemente).
 
 - **Modelos de Resposta**
   - `ProblemDetail` (Spring 7, nativo): corpo de erro RFC 9457 com
@@ -283,7 +287,7 @@ Módulo para tratamento centralizado de exceções e padronização de respostas
 ```xml
 <dependency>
     <groupId>br.com.sawcunhaos</groupId>
-    <artifactId>scos-foundation-exception</artifactId>
+    <artifactId>scos-foundation-web</artifactId>
     <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -670,7 +674,7 @@ Depois adicione os módulos necessários:
     </dependency>
     <dependency>
         <groupId>br.com.sawcunhaos</groupId>
-        <artifactId>scos-foundation-exception</artifactId>
+        <artifactId>scos-foundation-web</artifactId>
     </dependency>
     <dependency>
         <groupId>br.com.sawcunhaos</groupId>
@@ -684,8 +688,9 @@ Depois adicione os módulos necessários:
 ```
 
 > **Ativação:** o app consumidor precisa de `@SpringBootApplication` com
-> `@ComponentScan(basePackages = {"br.com.sawcunhaos"})` — `utils`, `exception` sobem por
-> component scan; `privacy`, `audit` e `jdempotent` por auto-configuração.
+> `@ComponentScan(basePackages = {"br.com.sawcunhaos"})` — `utils` sobe por
+> component scan; `web` (tratamento de erro), `privacy`, `audit` e `jdempotent` por
+> auto-configuração.
 
 ### 2. Build do Projeto
 

@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.web;
 
+import br.com.sawcunhaos.foundation.core.exception.MethodNotImplementedException;
 import br.com.sawcunhaos.foundation.core.exception.ScosException;
 import br.com.sawcunhaos.foundation.core.specification.ExceptionCode;
 import br.com.sawcunhaos.foundation.core.specification.LocaleService;
@@ -232,9 +233,49 @@ class ExceptionsHandlerLogLevelTest {
     void authorizationDeniedLogsWarn() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/admin");
 
-        handler.handleAccessDeniedException(new AuthorizationDeniedException("denied"), request);
+        handler.handleAuthorizationDeniedException(new AuthorizationDeniedException("denied"), request);
 
         assertLogged(Level.WARN, false);
+    }
+
+    @Test
+    @DisplayName("handleMethodNotImplementedException -> ERROR with stack trace")
+    void methodNotImplementedLogsError() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/legacy");
+
+        handler.handleMethodNotImplementedException(new MethodNotImplementedException(), request);
+
+        assertLogged(Level.ERROR, true);
+    }
+
+    @Test
+    @DisplayName("handleGenericException -> ERROR with stack trace")
+    void genericExceptionLogsError() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/persons");
+
+        handler.handleGenericException(new IllegalStateException("boom"), request);
+
+        assertLogged(Level.ERROR, true);
+    }
+
+    @Test
+    @DisplayName("handleExceptionInternal 4xx -> WARN without stack trace")
+    void handleExceptionInternalFourXxLogsWarn() {
+        ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("GET", "/missing"));
+
+        handler.handleExceptionInternal(new RuntimeException("not found"), null, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+
+        assertLogged(Level.WARN, false);
+    }
+
+    @Test
+    @DisplayName("handleExceptionInternal 5xx -> ERROR with stack trace")
+    void handleExceptionInternalFiveXxLogsError() {
+        ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("GET", "/missing"));
+
+        handler.handleExceptionInternal(new RuntimeException("boom"), null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+
+        assertLogged(Level.ERROR, true);
     }
 
     private ExceptionCode code(String code, int httpCode) {
