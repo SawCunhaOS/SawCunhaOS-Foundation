@@ -21,6 +21,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWra
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResource;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
+import lombok.Data;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Assertions;
@@ -31,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -249,5 +251,73 @@ class IdempotentAspectUTTest {
         assertEquals(requestWrapperRequest.getNonIgnoredFields().get("name"), "payload");
         assertEquals(requestWrapperRequest.getNonIgnoredFields().get("transactionId"), 1l);
         verify(joinPoint).getArgs();
+    }
+
+    @Test
+    void given_a_payload_with_field_inherited_from_superclass_when_find_idempotent_request_then_key_includes_inherited_field() throws Throwable {
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+
+        ChildPayload payload = new ChildPayload();
+        payload.setName("payload");
+        payload.setBaseField("baseValue");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+
+        //when
+        var idempotentRequestWrapper = idempotentAspect.findIdempotentRequestArg(joinPoint);
+
+        //then
+        List<Object> requestWrapperRequests = idempotentRequestWrapper.getRequest();
+        assertEquals(requestWrapperRequests.size(), 1);
+        IdempotentIgnorableWrapper requestWrapperRequest = (IdempotentIgnorableWrapper) requestWrapperRequests.get(0);
+        assertEquals(requestWrapperRequest.getNonIgnoredFields().size(), 2);
+        assertEquals(requestWrapperRequest.getNonIgnoredFields().get("name"), "payload");
+        assertEquals(requestWrapperRequest.getNonIgnoredFields().get("baseField"), "baseValue");
+        verify(joinPoint).getArgs();
+    }
+
+    @Test
+    void given_a_payload_with_field_name_shadowed_from_superclass_when_find_idempotent_request_then_key_uses_subclass_value() throws Throwable {
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+
+        ShadowingChildPayload payload = new ShadowingChildPayload();
+        payload.setName("childValue");
+        Field baseNameField = ShadowingBasePayload.class.getDeclaredField("name");
+        baseNameField.setAccessible(true);
+        baseNameField.set(payload, "baseValue");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+
+        //when
+        var idempotentRequestWrapper = idempotentAspect.findIdempotentRequestArg(joinPoint);
+
+        //then
+        List<Object> requestWrapperRequests = idempotentRequestWrapper.getRequest();
+        assertEquals(requestWrapperRequests.size(), 1);
+        IdempotentIgnorableWrapper requestWrapperRequest = (IdempotentIgnorableWrapper) requestWrapperRequests.get(0);
+        assertEquals(requestWrapperRequest.getNonIgnoredFields().size(), 1);
+        assertEquals(requestWrapperRequest.getNonIgnoredFields().get("name"), "childValue");
+        verify(joinPoint).getArgs();
+    }
+
+    @Data
+    private static class BasePayload {
+        private String baseField;
+    }
+
+    @Data
+    private static class ChildPayload extends BasePayload {
+        private String name;
+    }
+
+    private static class ShadowingBasePayload {
+        private String name;
+    }
+
+    @Data
+    private static class ShadowingChildPayload extends ShadowingBasePayload {
+        private String name;
     }
 }

@@ -48,11 +48,15 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -293,12 +297,16 @@ public class IdempotentAspect {
     public IdempotentIgnorableWrapper getIdempotentNonIgnorableWrapper(List<Object> args) throws IllegalAccessException {
         var wrapper = new IdempotentIgnorableWrapper();
         for (Object arg: args) {
-            Field[] declaredFields = arg.getClass().getDeclaredFields();
             if(isTypePrimitive(arg)){
                 wrapper.getNonIgnoredFields().put(arg.toString(), arg);
             } else {
-                for (Field declaredField : declaredFields) {
-                    declaredField.setAccessible(true);
+                for (Field declaredField : getAllFieldsInHierarchy(arg.getClass())) {
+                    try {
+                        declaredField.setAccessible(true);
+                    } catch (InaccessibleObjectException e) {
+                        log.debug("Skipping field {} of {}: not accessible", declaredField.getName(), arg.getClass(), e);
+                        continue;
+                    }
                     KeyValuePair keyValuePair = annotationChain.process(new ChainData(declaredField, arg));
                     if (!StringUtils.isBlank(keyValuePair.getKey())) {
                         wrapper.getNonIgnoredFields().put(keyValuePair.getKey(), keyValuePair.getValue());
@@ -307,6 +315,33 @@ public class IdempotentAspect {
             }
         }
         return wrapper;
+    }
+
+    /**
+     * Collects every non-static declared field from the given class up through its superclass
+     * chain (stopping before {@link Object}), so inherited fields also compose the idempotency
+     * key. When a subclass field shadows a superclass field (same name), only the subclass one
+     * is kept, matching normal Java field-shadowing semantics. Iteration order is not a
+     * guarantee callers can rely on: the result is folded into a {@code HashMap} downstream,
+     * which does not preserve insertion order.
+     *
+     * @param clazz the concrete class of the argument
+     * @return non-static fields, without name duplicates
+     */
+    private List<Field> getAllFieldsInHierarchy(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        Set<String> seenFieldNames = new HashSet<>();
+        for (Class<?> current = clazz; current != null && current != Object.class; current = current.getSuperclass()) {
+            for (Field field : current.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+                if (seenFieldNames.add(field.getName())) {
+                    fields.add(field);
+                }
+            }
+        }
+        return fields;
     }
 
     private AnnotationChain fillChains(){
