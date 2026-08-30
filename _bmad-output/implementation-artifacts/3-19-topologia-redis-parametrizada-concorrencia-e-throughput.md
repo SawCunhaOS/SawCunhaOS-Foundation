@@ -163,6 +163,12 @@ O test design completo (risco, coverage plan, estimativas) está em `_bmad-outpu
 - **Orphaned master container** (patch 5): in both `PrimeNumbersJdempotentEnableITTest`/`DisableITTest`'s `@DynamicPropertySource`, `SENTINEL.sentinel.start()` is now wrapped in a try/catch that stops `SENTINEL.master` before rethrowing, so a sentinel-container startup failure no longer leaves the master running unattended.
 - No production code touched.
 
+**Iteration 4 (2026-08-30, pedido direto do humano fora do fluxo de review):**
+
+- Os 2 testes de TPS (`tpsInformativoComChavesDistintas` e `tpsInformativoViaContextoSpring`) trocaram `Executors.newFixedThreadPool(20)` por `Executors.newVirtualThreadPerTaskExecutor()` — Java 25 (`java.version=25` no pom raiz), virtual threads estáveis desde o Java 21. Sem mudança de escopo além da troca do executor: mesmos 500 ops, mesmas chaves distintas, mesmo timeout de 30s por `future.get`, mesmo padrão `shutdown()`/`shutdownNow()`+cancel no `finally`.
+- Verificado isolado (`RedisIdempotentRepositoryTopologyITTest`: 3/3; `RedisIdempotentRepositoryTpsSpringContextITTest`: 1/1) e via `mvn -pl jdempotent verify` completo: `BUILD SUCCESS`, 52 unit + 9 integration.
+- TPS logado pós-mudança (informativo, não comparável a benchmark): manual 2733,6 ops/s (500 ops em 0,183s), via Spring 1706,4 ops/s (500 ops em 0,293s) — mesma variação run-a-run já observada antes da troca, não atribuível a virtual threads especificamente.
+
 ## Suggested Review Order
 
 **Infra compartilhada**

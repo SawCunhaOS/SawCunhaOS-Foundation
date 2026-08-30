@@ -178,7 +178,7 @@ class RedisIdempotentRepositoryTopologyITTest {
     @Test
     void tpsInformativoComChavesDistintas() throws Exception {
         int operationCount = 500;
-        ExecutorService pool = Executors.newFixedThreadPool(20);
+        ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
         List<Future<Lease>> futures = new ArrayList<>();
         boolean completedNormally = false;
         try {
