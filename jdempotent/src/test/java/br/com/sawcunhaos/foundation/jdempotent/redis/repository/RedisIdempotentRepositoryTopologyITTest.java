@@ -14,6 +14,7 @@
 package br.com.sawcunhaos.foundation.jdempotent.redis.repository;
 
 import br.com.sawcunhaos.foundation.cache.PolymorphicRedisSerializer;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.CachedBusinessFailure;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
@@ -236,6 +237,34 @@ class RedisIdempotentRepositoryTopologyITTest {
 
         Lease afterExpiry = standaloneRepository.tryAcquire(key, "hash", Duration.ofSeconds(30));
         assertTrue(afterExpiry.isAcquired(), "once the lease TTL elapses, a later call is allowed to acquire a new one");
+    }
+
+    @Test
+    void given_a_keep_failed_business_failure_when_setResponse_and_tryAcquire_then_it_round_trips_through_real_redis_standalone() {
+        // Story 3.8, review finding (verification-gap): the original implementation cached the raw
+        // business exception, which PolymorphicRedisSerializer/Jackson cannot always reconstruct on
+        // read back (exceptions with a (message, cause) constructor or extra fields) — that failure
+        // surfaced as a SerializationException on the *next* tryAcquire, which fails open into a
+        // fresh acquire and re-executes the protected method, defeating KEEP_FAILED's whole purpose.
+        // A follow-up finding (this story, same review round): even a plain two-String POJO nested
+        // under IdempotentResponseWrapper#response (Object-typed) comes back as a LinkedHashMap, not
+        // its original type — PolymorphicRedisSerializer only preserves type at the root of what it
+        // serializes (pre-existing, wider gap — see deferred-work.md). CachedBusinessFailure encodes
+        // itself as a plain String instead, precisely because a String is the one shape that always
+        // survives this round trip.
+        IdempotencyKey key = new IdempotencyKey("keep-failed-" + UUID.randomUUID());
+        CachedBusinessFailure failure = CachedBusinessFailure.of(new IllegalStateException("boom"));
+
+        Lease originalCall = standaloneRepository.tryAcquire(key, "hash", Duration.ofSeconds(30));
+        assertTrue(originalCall.isAcquired());
+        standaloneRepository.setResponse(key, null, new IdempotentResponseWrapper(failure.encode()), 30L, TimeUnit.SECONDS);
+
+        Lease lease = standaloneRepository.tryAcquire(key, "hash", Duration.ofSeconds(30));
+        assertFalse(lease.isAcquired());
+        assertTrue(lease.hasCachedResponse(), "the recorded failure must survive real Redis serialization, not fail open into a fresh acquire");
+        CachedBusinessFailure roundTripped = CachedBusinessFailure.decodeIfPresent(lease.getExistingResponse().getResponse());
+        assertEquals(IllegalStateException.class.getName(), roundTripped.getExceptionClassName());
+        assertEquals("boom", roundTripped.getExceptionMessage());
     }
 
     // -----------------------------------------------------------------

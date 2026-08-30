@@ -75,7 +75,7 @@ development_status:
   3-5-tornar-a-aquisição-do-lock-atômica-tryacquire-lease: review
   3-6-detectar-colisão-de-payload-sob-a-mesma-chave: review
   3-7-garantir-fail-open-com-circuit-breaker-quando-o-redis-está-i: review
-  3-8-tornar-a-política-de-falha-por-exceção-de-negócio-declarável: 
+  3-8-tornar-a-política-de-falha-por-exceção-de-negócio-declarável: review
     ready-for-dev
   3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci: 
     ready-for-dev

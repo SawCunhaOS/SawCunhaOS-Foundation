@@ -15,6 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.core.aspect;
 
 import br.com.sawcunhaos.foundation.jdempotent.core.constant.CryptographyAlgorithm;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentReplayedFailureException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
@@ -133,6 +134,40 @@ class IdempotentAspectTest {
         //then
         assertFalse(idempotentRepository.contains(idempotencyKey));
         assertNull(illegalStateException.getMessage());
+    }
+
+    @Test
+    void given_keep_failed_policy_when_trigger_aspect_then_key_remains_and_failure_is_replayed_without_reexecution() throws NoSuchAlgorithmException {
+        //given
+        IdempotentTestPayload test = new IdempotentTestPayload();
+        test.setName("keepFailed");
+        IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
+        wrapper.getNonIgnoredFields().put("name", "keepFailed");
+        wrapper.getNonIgnoredFields().put("transactionId", null);
+
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
+
+        //when: first call fails with a business exception
+        TestException firstException = Assertions.assertThrows(
+                TestException.class,
+                () -> testIdempotentResource.idempotentMethodThrowingARuntimeExceptionKeepFailed(test)
+        );
+
+        //then: KEEP_FAILED keeps the key (AC #1), instead of removing it
+        assertTrue(idempotentRepository.contains(idempotencyKey));
+        assertEquals(1, testIdempotentResource.getKeepFailedInvocationCount());
+
+        //when: a subsequent call with the same idempotency key
+        IdempotentReplayedFailureException replayedException = Assertions.assertThrows(
+                IdempotentReplayedFailureException.class,
+                () -> testIdempotentResource.idempotentMethodThrowingARuntimeExceptionKeepFailed(test)
+        );
+
+        //then: the recorded failure is replayed (not the original exception instance, which the
+        //repository may not be able to serialize/deserialize as-is), the method body did not run again (AC #1)
+        assertNotEquals(TestException.class, replayedException.getClass());
+        assertEquals(firstException.getClass().getName(), replayedException.getOriginalExceptionClassName());
+        assertEquals(1, testIdempotentResource.getKeepFailedInvocationCount());
     }
 
     @Test

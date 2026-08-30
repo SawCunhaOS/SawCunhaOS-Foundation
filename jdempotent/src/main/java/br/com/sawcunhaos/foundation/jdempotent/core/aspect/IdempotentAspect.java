@@ -25,8 +25,10 @@ import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentReposit
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgressException;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadMismatchException;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentReplayedFailureException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.KeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.CachedBusinessFailure;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.ChainData;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
@@ -34,6 +36,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapp
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
+import br.com.sawcunhaos.foundation.jdempotent.api.IdempotentFailurePolicy;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentId;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentRequestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
@@ -181,8 +184,19 @@ public class IdempotentAspect {
                 throw new IdempotentPayloadMismatchException(idempotencyKey);
             }
             if (lease.hasCachedResponse()) {
+                Object cachedResponse = lease.getExistingResponse().getResponse();
+                CachedBusinessFailure cachedFailure = CachedBusinessFailure.decodeIfPresent(cachedResponse);
+                if (cachedFailure != null) {
+                    // KEEP_FAILED (Story 3.8): the earlier call recorded its business
+                    // exception instead of releasing the key, so a retry replays the
+                    // same failure instead of re-executing the method. Only the class
+                    // name/message survive (see CachedBusinessFailure) — not the
+                    // original exception instance or type.
+                    log.debug(classAndMethodName + "ended up reading a cached failure for {}", requestObject);
+                    throw new IdempotentReplayedFailureException(cachedFailure);
+                }
                 log.debug(classAndMethodName + "ended up reading from cache for {}", requestObject);
-                return lease.getExistingResponse().getResponse();
+                return cachedResponse;
             }
             log.debug(classAndMethodName + "already in progress for {}", requestObject);
             throw new IdempotentInProgressException(idempotencyKey);
@@ -190,10 +204,29 @@ public class IdempotentAspect {
 
         log.debug(classAndMethodName + "saved to cache with {}", idempotencyKey);
         setJdempotentId(pjp.getArgs(),idempotencyKey.getKeyValue());
+        IdempotentFailurePolicy failurePolicy = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).onBusinessException();
         Object result;
         try {
             result = pjp.proceed();
         } catch (Exception e) {
+            if (failurePolicy == IdempotentFailurePolicy.KEEP_FAILED) {
+                // Story 3.8: record the exception as the cached result instead of
+                // releasing the key, so a retry with the same key replays this same
+                // failure instead of re-executing the method (avoids duplicating a
+                // side effect that already ran before the exception was thrown).
+                // The exception itself is not cached as-is, nor as a nested POJO:
+                // IdempotentResponseWrapper#response is Object-typed, and
+                // PolymorphicRedisSerializer only preserves the concrete type at the
+                // root of what it serializes — any custom POJO nested under an
+                // Object-typed field comes back from a real Redis round trip as a
+                // generic LinkedHashMap, not its original type (pre-existing gap,
+                // not specific to this class — see CachedBusinessFailure Javadoc).
+                // Encoding the failure as a String sidesteps that entirely.
+                log.debug(classAndMethodName + "kept as failed in cache with {} . Exception : {}", idempotencyKey, e);
+                String encodedFailure = CachedBusinessFailure.of(e).encode();
+                idempotentRepository.setResponse(idempotencyKey, requestObject, new IdempotentResponseWrapper(encodedFailure), customTtl, timeUnit);
+                throw e;
+            }
             log.debug(classAndMethodName + "deleted from cache with {} . Exception : {}", idempotencyKey, e);
             idempotentRepository.remove(idempotencyKey);
             throw e;

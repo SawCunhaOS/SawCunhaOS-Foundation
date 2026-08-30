@@ -43,4 +43,16 @@ public @interface JdempotentResource {
      * @return
      */
     TimeUnit ttlTimeUnit() default TimeUnit.HOURS;
+
+    /**
+     * What happens to the idempotency key when this method throws a business
+     * exception: {@link IdempotentFailurePolicy#RELEASE} (default, removes the
+     * key so a retry re-executes the method) or
+     * {@link IdempotentFailurePolicy#KEEP_FAILED} (records the exception as the
+     * cached result, so a retry replays the same failure instead of
+     * re-executing the method).
+     *
+     * @return
+     */
+    IdempotentFailurePolicy onBusinessException() default IdempotentFailurePolicy.RELEASE;
 }

@@ -92,8 +92,9 @@ class IdempotentAspectUTTest {
         idempotentAspect.execute(joinPoint);
 
         //then
-        verify(joinPoint, times(4)).getSignature();
-        verify(signature, times(3)).getMethod();
+        // 5 calls: log prefix + cachePrefix + ttl + ttlTimeUnit + onBusinessException (Story 3.8)
+        verify(joinPoint, times(5)).getSignature();
+        verify(signature, times(4)).getMethod();
         verify(joinPoint).getTarget();
         verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
         verify(joinPoint).proceed();

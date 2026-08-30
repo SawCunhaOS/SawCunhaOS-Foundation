@@ -73,6 +73,15 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   business request (never `FAIL_CLOSED`); the accepted, documented risk is that a response may not
   get cached in that window (a retry re-executes), with the database `UNIQUE` constraint as the
   real duplicate-prevention guarantee.
+- **Declarable failure policy per method**: `@JdempotentResource` gains
+  `onBusinessException()` (`IdempotentFailurePolicy`, new enum in `jdempotent-api`), defaulting to
+  `RELEASE` — identical to the previous behavior, the idempotency key is removed when the method
+  throws, so a retry re-executes it. Methods that opt into `KEEP_FAILED` instead keep the key and
+  record the failure, so a retry with the same key throws `IdempotentReplayedFailureException`
+  instead of re-executing the method — useful when the method already produced a side effect before
+  failing. Only the original exception's class name and message survive the replay, not the original
+  exception instance or type: the original business exception is not cacheable as-is (most don't
+  survive a real Redis round trip), so it is recorded as an encoded `String` instead.
 
 ### Added — `scos-foundation-privacy` module
 
