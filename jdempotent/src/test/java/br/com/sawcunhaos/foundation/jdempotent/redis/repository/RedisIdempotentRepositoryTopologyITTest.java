@@ -221,4 +221,66 @@ class RedisIdempotentRepositoryTopologyITTest {
             }
         }
     }
+
+    // -----------------------------------------------------------------
+    // P3 — AD-9: informative TPS sweep by concurrency level (pedido direto do humano,
+    // 2026-08-30): a infra mínima de produção prevista começa em torno de 100 conexões
+    // reais com o banco; um único operationCount plano não mostra como o throughput se
+    // move conforme o número de chamadores concorrentes cresce. Mesmo contrato
+    // tryAcquire -> Lease, mesma mitigação de chaves distintas (R-004), continua
+    // puramente informativo — nenhum piso mínimo é assertado em nenhum nível.
+    // -----------------------------------------------------------------
+
+    private static final int[] CONCURRENCY_LEVELS = {10, 30, 50, 100, 150, 300};
+    private static final int OPERATIONS_PER_LEVEL = 10_000;
+
+    @Test
+    void tpsInformativoPorNivelDeConcorrencia() throws Exception {
+        System.out.printf(
+                "[AD-9][informative][no gate] Standalone tryAcquire TPS sweep by concurrency level (%d ops/level):%n",
+                OPERATIONS_PER_LEVEL);
+        for (int concurrency : CONCURRENCY_LEVELS) {
+            double tps = runTpsAtConcurrencyLevel(concurrency);
+            System.out.printf("  concurrency=%3d -> %d ops = %.1f ops/s%n", concurrency, OPERATIONS_PER_LEVEL, tps);
+        }
+    }
+
+    private double runTpsAtConcurrencyLevel(int concurrency) throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(concurrency);
+        List<Future<Lease>> futures = new ArrayList<>();
+        boolean completedNormally = false;
+        try {
+            List<Callable<Lease>> tasks = new ArrayList<>();
+            for (int i = 0; i < OPERATIONS_PER_LEVEL; i++) {
+                // R-004: a distinct key per operation, so the measured path is the real SET NX PX,
+                // not the cheap in-progress GET a single shared key would mostly exercise.
+                IdempotencyKey key = new IdempotencyKey("tps-sweep-" + concurrency + "-" + UUID.randomUUID());
+                tasks.add(() -> standaloneRepository.tryAcquire(key, "tps-sweep-payload-hash", Duration.ofSeconds(30)));
+            }
+
+            long start = System.nanoTime();
+            assertDoesNotThrow(() -> {
+                for (Callable<Lease> task : tasks) {
+                    futures.add(pool.submit(task));
+                }
+                for (Future<Lease> future : futures) {
+                    future.get(TASK_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
+                }
+            }, "no exception is expected during the TPS sweep (AD-9: informative only, never a floor), concurrency=" + concurrency);
+            long elapsedNanos = System.nanoTime() - start;
+
+            assertEquals(OPERATIONS_PER_LEVEL, futures.size());
+            completedNormally = true;
+            return OPERATIONS_PER_LEVEL / (elapsedNanos / 1_000_000_000.0);
+        } finally {
+            // Same shutdown()/shutdownNow()+cancel split as the tests above: shutdown() alone
+            // wouldn't interrupt threads still blocked on Redis I/O past a timeout/failure.
+            if (completedNormally) {
+                pool.shutdown();
+            } else {
+                pool.shutdownNow();
+                futures.forEach(f -> f.cancel(true));
+            }
+        }
+    }
 }
