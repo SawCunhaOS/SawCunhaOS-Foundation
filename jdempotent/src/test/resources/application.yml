@@ -11,15 +11,13 @@ spring:
     enable: false
   data:
     redis:
-      database: 0
+      # spring.data.redis.* connection info is no longer set here (Story 3.19 emenda): it used
+      # to point at the docker-compose.yml fixed ports (6379/26379), a known flaky pattern
+      # (deferred-work.md). PrimeNumbersJdempotentEnableITTest/DisableITTest now supply the real
+      # host/port/sentinel.* via @DynamicPropertySource against dynamically-ported Testcontainers,
+      # same pattern as RedisIdempotentRepositoryTopologySmokeITTest.
       repositories:
         enabled: false
-      port: 26379
-      password: jdempotent
-      timeout: 5000ms
-      sentinel:
-        master: jdempotent
-        nodes: localhost
 scos:
   jdempotent:
     enabled: true

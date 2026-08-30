@@ -101,4 +101,45 @@ class ScosJdempotentRedisConfigurationTest {
                             .hasMessageContaining("not-a-number");
                 });
     }
+
+    /**
+     * Story 3.19/AD-8 estendido: mesma garantia de fail-fast da 3.18 (Cluster), agora para
+     * Standalone — {@code spring.data.redis.port} é {@code int} em {@code DataRedisProperties},
+     * então um valor não-numérico falha o binding do Spring Boot antes mesmo do bean de
+     * {@code ScosJdempotentRedisConfiguration} rodar (R-005, verificado nesta story rodando
+     * este teste isoladamente).
+     */
+    @Test
+    void contextoFalhaComConfigStandaloneMalformada() {
+        runner.withPropertyValues(
+                        "spring.data.redis.host=localhost",
+                        "spring.data.redis.port=not-a-number")
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure())
+                            .rootCause()
+                            .hasMessageContaining("not-a-number");
+                });
+    }
+
+    /**
+     * Story 3.19/AD-8 estendido: mesma garantia de fail-fast da 3.18 (Cluster), agora para
+     * Sentinel — a porta não-numérica em {@code sentinel.nodes[0]} dispara
+     * {@code NumberFormatException} dentro de {@code sentinelConfiguration()}
+     * ({@code Integer.parseInt(parts[1])}), sem depender de rede.
+     */
+    @Test
+    void contextoFalhaComConfigSentinelMalformada() {
+        runner.withPropertyValues(
+                        "spring.data.redis.sentinel.master=jdempotent",
+                        "spring.data.redis.sentinel.nodes[0]=localhost:not-a-port")
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure())
+                            .rootCause()
+                            .hasMessageContaining("not-a-port");
+                });
+    }
 }
