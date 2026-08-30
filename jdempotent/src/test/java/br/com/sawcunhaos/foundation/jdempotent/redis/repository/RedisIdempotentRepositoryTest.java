@@ -23,17 +23,24 @@ import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempoten
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -294,5 +301,77 @@ public class RedisIdempotentRepositoryTest {
         var argumentCaptor = ArgumentCaptor.forClass(IdempotentRequestResponseWrapper.class);
         verify(valueOperations).set(eq(key.getKeyValue()), argumentCaptor.capture(), eq(1L), eq(TimeUnit.HOURS));
         assertEquals("original-hash", argumentCaptor.getValue().getPayloadHash());
+    }
+
+    @Test
+    public void given_a_cache_miss_when_get_response_then_return_null_instead_of_throwing() {
+        // Story 3.7 code review finding: a missing/expired key must be a plain null return, not
+        // an NPE inside circuitBreaker.executeSupplier() — an NPE there would be wrongly counted
+        // as a circuit breaker failure instead of the normal outcome a cache miss actually is.
+        IdempotencyKey key = new IdempotencyKey("absent-key");
+        when(valueOperations.get(key.getKeyValue())).thenReturn(null);
+
+        assertNull(redisIdempotentRepository.getResponse(key));
+    }
+
+    // -----------------------------------------------------------------
+    // resolveSlowCallThreshold(RedisTemplate) — private static, invoked via reflection since it
+    // has no other externally observable seam (the circuit breaker built from it is itself
+    // private). Story 3.7 code review findings: must resolve the real Lettuce commandTimeout when
+    // available and valid, and must fall back to DEFAULT_SLOW_CALL_THRESHOLD (5s) whenever that
+    // value would be unusable (non-Lettuce factory, null, zero, or negative).
+    // -----------------------------------------------------------------
+
+    private static Duration resolveSlowCallThreshold(RedisTemplate redisTemplate) throws Exception {
+        Method method = RedisIdempotentRepository.class.getDeclaredMethod("resolveSlowCallThreshold", RedisTemplate.class);
+        method.setAccessible(true);
+        return (Duration) method.invoke(null, redisTemplate);
+    }
+
+    @Test
+    public void given_a_lettuce_factory_with_a_positive_command_timeout_when_resolving_the_slow_call_threshold_then_that_timeout_is_used() throws Exception {
+        LettuceClientConfiguration clientConfiguration = LettuceClientConfiguration.builder()
+                .commandTimeout(Duration.ofSeconds(3))
+                .build();
+        LettuceConnectionFactory lettuceConnectionFactory = mock(LettuceConnectionFactory.class);
+        when(lettuceConnectionFactory.getClientConfiguration()).thenReturn(clientConfiguration);
+        RedisTemplate template = mock(RedisTemplate.class);
+        when(template.getConnectionFactory()).thenReturn(lettuceConnectionFactory);
+
+        assertEquals(Duration.ofSeconds(3), resolveSlowCallThreshold(template));
+    }
+
+    static Stream<Duration> invalidOrUnusableTimeouts() {
+        return Stream.of(Duration.ZERO, Duration.ofSeconds(-1), null);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidOrUnusableTimeouts")
+    public void given_a_lettuce_factory_with_a_zero_negative_or_null_command_timeout_when_resolving_the_slow_call_threshold_then_the_default_is_used(Duration invalidTimeout) throws Exception {
+        LettuceClientConfiguration clientConfiguration = mock(LettuceClientConfiguration.class);
+        when(clientConfiguration.getCommandTimeout()).thenReturn(invalidTimeout);
+        LettuceConnectionFactory lettuceConnectionFactory = mock(LettuceConnectionFactory.class);
+        when(lettuceConnectionFactory.getClientConfiguration()).thenReturn(clientConfiguration);
+        RedisTemplate template = mock(RedisTemplate.class);
+        when(template.getConnectionFactory()).thenReturn(lettuceConnectionFactory);
+
+        assertEquals(Duration.ofSeconds(5), resolveSlowCallThreshold(template));
+    }
+
+    @Test
+    public void given_a_non_lettuce_connection_factory_when_resolving_the_slow_call_threshold_then_the_default_is_used() throws Exception {
+        RedisConnectionFactory nonLettuceFactory = mock(RedisConnectionFactory.class);
+        RedisTemplate template = mock(RedisTemplate.class);
+        when(template.getConnectionFactory()).thenReturn(nonLettuceFactory);
+
+        assertEquals(Duration.ofSeconds(5), resolveSlowCallThreshold(template));
+    }
+
+    @Test
+    public void given_a_null_connection_factory_when_resolving_the_slow_call_threshold_then_the_default_is_used() throws Exception {
+        RedisTemplate template = mock(RedisTemplate.class);
+        when(template.getConnectionFactory()).thenReturn(null);
+
+        assertEquals(Duration.ofSeconds(5), resolveSlowCallThreshold(template));
     }
 }

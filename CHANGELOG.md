@@ -61,6 +61,19 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   so the DLQ payload keeps including null fields, matching the old `GsonUtils` (`serializeNulls()`)
   instance. See `audit/README.md`.
 
+### Added — `scos-foundation-jdempotent` module
+
+- **Fail-open circuit breaker around Redis calls**: `RedisIdempotentRepository` wraps every Redis
+  operation (`contains`/`getResponse`/`store`/`remove`/`setResponse`/`tryAcquire`) in a single
+  programmatic `CircuitBreaker` (`io.github.resilience4j:resilience4j-spring-boot4:2.4.0`,
+  `optional=true`); once Redis is confirmed slow/down, later calls short-circuit immediately
+  instead of each paying the full Redis command timeout again. `slow-call-duration-threshold` is
+  resolved from the Lettuce connection factory's configured command timeout at construction time.
+  Fail-open behavior is unchanged for callers — a slow/unavailable Redis never blocks or fails the
+  business request (never `FAIL_CLOSED`); the accepted, documented risk is that a response may not
+  get cached in that window (a retry re-executes), with the database `UNIQUE` constraint as the
+  real duplicate-prevention guarantee.
+
 ### Added — `scos-foundation-privacy` module
 
 - New base-layer module **`scos-foundation-privacy`** providing a high-performance, multithread-safe

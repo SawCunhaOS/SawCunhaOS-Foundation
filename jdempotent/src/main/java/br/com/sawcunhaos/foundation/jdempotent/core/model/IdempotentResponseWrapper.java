@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Wraps the incoming event response
@@ -40,7 +41,10 @@ public class IdempotentResponseWrapper implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        return response != null && response.equals(obj);
+        if (!(obj instanceof IdempotentResponseWrapper other)) {
+            return false;
+        }
+        return Objects.equals(response, other.response);
     }
 
     @Override
