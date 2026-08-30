@@ -77,8 +77,7 @@ development_status:
   3-7-garantir-fail-open-com-circuit-breaker-quando-o-redis-está-i: review
   3-8-tornar-a-política-de-falha-por-exceção-de-negócio-declarável: review
     ready-for-dev
-  3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci: 
-    ready-for-dev
+  3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci: review
   3-10-tornar-o-namespace-de-prefixo-de-chave-configurável: ready-for-dev
   3-11-expor-métricas-de-idempotência: ready-for-dev
   3-12-introduzir-idempotencykeyresolver-com-composição-de-chave-de: 

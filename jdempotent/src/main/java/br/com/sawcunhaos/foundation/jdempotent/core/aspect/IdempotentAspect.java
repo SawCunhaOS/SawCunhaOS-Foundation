@@ -51,6 +51,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -73,6 +75,7 @@ import java.util.concurrent.TimeUnit;
  * An aspect that used along with the @IdempotentResource annotation
  */
 @Aspect
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
         justification = "The IdempotentRepository is a Spring-injected collaborator stored by reference by design; it is not a value object to be copied.")
