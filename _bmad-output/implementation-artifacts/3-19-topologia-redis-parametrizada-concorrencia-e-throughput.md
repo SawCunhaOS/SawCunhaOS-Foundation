@@ -188,6 +188,11 @@ O test design completo (risco, coverage plan, estimativas) está em `_bmad-outpu
 - Verificado sem profile: `RedisIdempotentRepositoryTpsSweepITTest` não roda, `mvn -pl jdempotent verify` volta a 9 integration tests, `BUILD SUCCESS`.
 - Verificado com `mvn -Ptps-sweep -pl jdempotent verify`: `RedisIdempotentRepositoryTpsSweepITTest` roda (10 integration tests), `BUILD SUCCESS`. Resultado: `concurrency=10 → 12457,8 ops/s`, `30 → 19772,9 ops/s`, `50 → 19839,3 ops/s`, `100 → 21936,2 ops/s`, `150 → 22526,6 ops/s`, `300 → 21279,9 ops/s`.
 
+**Iteration 9 (2026-08-30, pedido direto do humano — repetição estatística):** cada nível do sweep passou a rodar 1 execução de warm-up descartada (mitiga o viés de JIT/conexão fria já apontado na avaliação crítica dos resultados de execução única) + `5` medições reais, reportando média e desvio-padrão em vez de um valor único. `WARMUP_REPETITIONS=1`, `MEASURED_REPETITIONS=5` — 6 passagens × 6 níveis × 100 mil ops = 3,6 milhões de `tryAcquire` no total.
+
+- Verificado isolado com `-Ptps-sweep`: 1/1, 196,6s (~3min17s de medição pura, ~3min40s de wall-clock incluindo boot da JVM/container). Verificado sem profile via `mvn -pl jdempotent verify`: `BUILD SUCCESS`, 52 unit + 9 integration (sweep continua excluído por padrão).
+- Resultado (média ± desvio-padrão, n=5 por nível): `concurrency=10 → 14348,4 ± 865,2 ops/s`, `30 → 20140,0 ± 710,1`, `50 → 20647,4 ± 1106,1`, `100 → 21761,3 ± 539,8`, `150 → 22041,8 ± 346,9`, `300 → 22031,2 ± 1905,4`. Desvio-padrão baixo (exceto em 10 e 300) confirma que o padrão de saturação a partir de `~30` é real, não ruído — mas 300 ainda mostra dispersão notável (uma medição de 18635,8 entre quatro de ~22-23k), sinal de que mesmo com repetição a cauda de latência em alta concorrência não é totalmente estável.
+
 ## Suggested Review Order
 
 **Infra compartilhada**
