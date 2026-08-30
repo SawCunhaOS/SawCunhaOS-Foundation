@@ -309,3 +309,15 @@
 - source_spec: `_bmad-output/implementation-artifacts/3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci.md`
   summary: `RollbackTrackingTransactionManager` (fixture de teste nova) não expõe um método `reset()` e não limpa `wasRolledBack()`/`wasCommitted()` entre execuções — como o contexto Spring de teste (`TestAopTransactionalContext`) é cacheado entre testes da mesma classe por padrão, um teste futuro adicionado a `IdempotentAspectTransactionalRollbackTest` que reutilize o mesmo contexto herdaria estado obsoleto de um teste anterior sem forma de limpá-lo.
   evidence: Achado pelo Blind Hunter na revisão desta story. Não afeta os 2 testes atuais (cada um só depende de uma das duas flags, e nenhum depende do estado inicial `false`), mas é uma armadilha latente para quem adicionar um terceiro teste à mesma classe.
+
+- source_spec: `_bmad-output/implementation-artifacts/3-10-tornar-o-namespace-de-prefixo-de-chave-configurável.md`
+  summary: Os construtores públicos de `IdempotentAspect` que não passam por `ScosJdempotentConfig` (auto-configuração Spring) continuam construindo `DefaultKeyGenerator` sem namespace — um consumidor que monte `IdempotentAspect` programaticamente mantém o risco original de colisão de chaves entre aplicações, agora sem nenhuma variável de ambiente envolvida.
+  evidence: Achado pelo Blind Hunter na revisão desta story. Reconhecido nas Completion Notes da própria 3.10 como fora de escopo (`IdempotentAspect` não está listado como arquivo modificado) — mudar a API pública de `IdempotentAspect` para exigir namespace em todos os construtores é decisão de design que extrapola esta story.
+
+- source_spec: `_bmad-output/implementation-artifacts/3-10-tornar-o-namespace-de-prefixo-de-chave-configurável.md`
+  summary: Não há documentação de consumidor (README do módulo `jdempotent` ou exemplo de `application.yml`) descrevendo a nova propriedade obrigatória `scos.jdempotent.namespace` — hoje só existe o bullet no CHANGELOG.
+  evidence: Achado pelo Blind Hunter na revisão desta story, por comparação com outras entradas do mesmo CHANGELOG (ex.: mudanças do módulo `audit`) que apontam para um README correspondente. Não bloqueia a AC, mas reduz a chance de um consumidor notar a mudança breaking antes de atualizar a versão.
+
+- source_spec: `_bmad-output/implementation-artifacts/3-10-tornar-o-namespace-de-prefixo-de-chave-configurável.md`
+  summary: A Story 3.14 (migração `@Value` → `@ConfigurationProperties`, ainda `ready-for-dev`) não tem, em seu próprio arquivo, nenhum ponteiro para a decisão de coordenação registrada nas Dev Notes/Project Structure Notes da 3.10 sobre absorver ou não `ScosJdempotentProperties` — quem pegar a 3.14 pode não notar essa nota.
+  evidence: Achado pelo Blind Hunter na revisão desta story. Risco de documentação ficar obsoleta/esquecida por estar apenas no lado da 3.10, não da 3.14.

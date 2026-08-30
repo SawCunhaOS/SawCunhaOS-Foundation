@@ -33,6 +33,7 @@ class ScosJdempotentConfigTest {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withBean(ScosJdempotentRedisProperties.class, ScosJdempotentRedisProperties::new)
             .withBean("JdempotentRedisTemplate", RedisTemplate.class, () -> mock(RedisTemplate.class))
+            .withPropertyValues("scos.jdempotent.namespace=test-app")
             .withUserConfiguration(ScosJdempotentConfig.class);
 
     @Test

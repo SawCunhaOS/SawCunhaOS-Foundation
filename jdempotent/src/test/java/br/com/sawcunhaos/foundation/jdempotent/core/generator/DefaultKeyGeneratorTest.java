@@ -60,8 +60,8 @@ class DefaultKeyGeneratorTest {
 
         //Then
         assertNotEquals(keyA.getKeyValue(), keyB.getKeyValue());
-        // Suffix-only check: DefaultKeyGenerator's constructor reads the APP_NAME env var and, when
-        // set, prepends "{appName}-" before "listener-", so the full key isn't stable across environments.
+        // Suffix-only check: this test uses the no-arg constructor (no namespace), which never
+        // prepends anything before "listener-" (Story 3.10 removed the old APP_NAME env var read).
         assertTrue(keyA.getKeyValue().endsWith("listener-0123"));
         assertTrue(keyB.getKeyValue().endsWith("listener-1203"));
     }
@@ -81,7 +81,7 @@ class DefaultKeyGeneratorTest {
         //Then
         assertNotEquals(keyOne.getKeyValue(), keyTwo.getKeyValue());
         // Minimum length check (not exact): "listener-" prefix (9 chars) + 64 hex chars for a full
-        // SHA-256 digest, plus a possible "{appName}-" prefix if APP_NAME is set in the environment.
+        // SHA-256 digest (this test's no-arg constructor has no namespace, so there is no extra prefix).
         assertTrue(keyOne.getKeyValue().length() >= 9 + 64);
         assertTrue(keyTwo.getKeyValue().length() >= 9 + 64);
     }

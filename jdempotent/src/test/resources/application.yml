@@ -21,6 +21,9 @@ spring:
 scos:
   jdempotent:
     enabled: true
+    # Story 3.10: obrigatório desde que DefaultKeyGenerator parou de ler System.getenv(APP_NAME)
+    # silenciosamente. Sem esta propriedade, o contexto Spring falha a inicializar.
+    namespace: jdempotent-it
     cache:
       redis:
         expirationTimeHour: 2

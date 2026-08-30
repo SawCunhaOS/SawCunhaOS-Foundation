@@ -93,8 +93,11 @@ class PrimeNumbersJdempotentEnableITTest {
     // Story 3.19: this hash was stale (a shorter, MD5-length hex string) — masked until now
     // because the fixed-port docker-compose bug always failed the test before reaching this
     // assertion. DefaultKeyGenerator's actual (SHA-256) output for this request is below;
-    // verified deterministic across repeated runs.
-    private static final IdempotencyKey KEY_DEFAULT_PRIME_NUMBER = new IdempotencyKey("PrimeNumber.generatePrimeNumber-ea2cfd6b48da4f849a45691d17d1bc2a40cd95e359017f43c590e3ff1ca4dffb");
+    // verified deterministic across repeated runs. Story 3.10: DefaultKeyGenerator now prepends
+    // the configured "scos.jdempotent.namespace" (application.yml: "jdempotent-it") in front of
+    // the listener prefix — the digest suffix itself is unaffected (computed over the request
+    // object only, independent of the namespace).
+    private static final IdempotencyKey KEY_DEFAULT_PRIME_NUMBER = new IdempotencyKey("jdempotent-it-PrimeNumber.generatePrimeNumber-ea2cfd6b48da4f849a45691d17d1bc2a40cd95e359017f43c590e3ff1ca4dffb");
 
     @BeforeEach
     public void initialiseRestAssuredMockMvcWebApplicationContext() {

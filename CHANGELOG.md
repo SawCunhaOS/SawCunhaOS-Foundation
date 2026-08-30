@@ -82,6 +82,27 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   failing. Only the original exception's class name and message survive the replay, not the original
   exception instance or type: the original business exception is not cacheable as-is (most don't
   survive a real Redis round trip), so it is recorded as an encoded `String` instead.
+- **Configurable key-prefix namespace**: new `ScosJdempotentProperties`
+  (`@ConfigurationProperties(prefix = "scos.jdempotent")`) exposes `scos.jdempotent.namespace`,
+  injected into `ScosJdempotentConfig` to build `DefaultKeyGenerator(namespace)` for the
+  auto-configured `IdempotentAspect` beans. See BREAKING note below for the behavior change.
+
+### **BREAKING** — `scos-foundation-jdempotent`
+
+- **`scos.jdempotent.namespace` is now required for the Spring auto-configuration path**
+  (`ScosJdempotentConfig`): previously, an application without the `APP_NAME` environment variable
+  started normally and silently generated idempotency keys with no namespace prefix — a real risk
+  of key collision when two different applications share the same Redis instance. Now the Spring
+  context **fails to start** (both a `@NotBlank`/`@Validated` check and an unconditional
+  `@PostConstruct` check on `ScosJdempotentProperties`, so the failure does not depend on a Bean
+  Validation provider being present on the consumer's classpath) if the property is not set.
+  **Action required before upgrading**: set `scos.jdempotent.namespace` (e.g. the application name)
+  in every consumer's configuration; there is no automatic fallback to the old `APP_NAME`
+  environment variable. This only affects apps going through `ScosJdempotentConfig` — code that
+  builds `IdempotentAspect`/`DefaultKeyGenerator` programmatically, outside Spring
+  auto-configuration, keeps working with no namespace prefix (`DefaultKeyGenerator`'s no-arg
+  constructor no longer reads `System.getenv` either, it just never adds a prefix).
+- `EnvironmentVariableUtils` (and its `APP_NAME` constant) removed — no longer used.
 
 ### Added — `scos-foundation-privacy` module
 

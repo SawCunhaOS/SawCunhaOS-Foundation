@@ -15,6 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.configuration;
 
 import br.com.sawcunhaos.foundation.jdempotent.core.aspect.IdempotentAspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
+import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.redis.repository.RedisIdempotentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,6 +23,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -34,9 +36,11 @@ import org.springframework.data.redis.core.RedisTemplate;
         havingValue = "true",
         matchIfMissing = true)
 @RequiredArgsConstructor
+@EnableConfigurationProperties(ScosJdempotentProperties.class)
 public class ScosJdempotentConfig {
 
     private final ScosJdempotentRedisProperties redisProperties;
+    private final ScosJdempotentProperties jdempotentProperties;
 
     @Bean
     @ConditionalOnProperty(
@@ -45,13 +49,17 @@ public class ScosJdempotentConfig {
             matchIfMissing = true)
     @ConditionalOnBean(ErrorConditionalCallback.class)
     public IdempotentAspect getIdempotentAspectOnErrorConditionalCallback(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate, ErrorConditionalCallback errorConditionalCallback) {
-        return new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties), errorConditionalCallback);
+        return new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties), errorConditionalCallback, keyGenerator());
     }
 
     @Bean
     @ConditionalOnMissingBean(IdempotentAspect.class)
     public IdempotentAspect getIdempotentAspect(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate) {
-        return new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties));
+        return new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties), keyGenerator());
+    }
+
+    private DefaultKeyGenerator keyGenerator() {
+        return new DefaultKeyGenerator(jdempotentProperties.getNamespace());
     }
 
 }
