@@ -177,6 +177,8 @@ O test design completo (risco, coverage plan, estimativas) está em `_bmad-outpu
 - Verificado isolado (1/1, 38,3s de wall-clock a frio) e via `mvn -pl jdempotent verify` completo: `BUILD SUCCESS`, 52 unit + 10 integration (a classe passou a ter 4 testes).
 - Resultado do sweep (informativo, não é benchmark controlado — 1 execução): `concurrency=10 → 4301,7 ops/s`, `30 → 16946,3 ops/s`, `50 → 19427,4 ops/s`, `100 → 19080,7 ops/s`, `150 → 18767,2 ops/s`, `300 → 18724,6 ops/s`. Achado interessante: o throughput sobe até `~50` de concorrência e satura em torno de `~19k ops/s` dali em diante — consistente com uma única conexão Lettuce multiplexada sendo o gargalo, não o número de chamadores.
 
+**Iteration 7 (2026-08-30, pedido direto do humano):** `OPERATIONS_PER_LEVEL` do sweep subiu de `10_000` para `100_000` (600 mil `tryAcquire` no total, 6 níveis). Verificado isolado (1/1, 67s de wall-clock a frio) e via `mvn -pl jdempotent verify` completo: `BUILD SUCCESS`, 52 unit + 10 integration (a classe do sweep sozinha levou 39,35s dentro do `verify` completo, ante 8,5s com 10 mil/nível). Resultado: `concurrency=10 → 11740,2 ops/s`, `30 → 19241,1 ops/s`, `50 → 19398,3 ops/s`, `100 → 20645,0 ops/s`, `150 → 22005,5 ops/s`, `300 → 20968,2 ops/s` — mesmo padrão de saturação a partir de `~30`, agora com amostra 10x maior.
+
 ## Suggested Review Order
 
 **Infra compartilhada**

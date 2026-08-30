@@ -232,7 +232,7 @@ class RedisIdempotentRepositoryTopologyITTest {
     // -----------------------------------------------------------------
 
     private static final int[] CONCURRENCY_LEVELS = {10, 30, 50, 100, 150, 300};
-    private static final int OPERATIONS_PER_LEVEL = 10_000;
+    private static final int OPERATIONS_PER_LEVEL = 100_000;
 
     @Test
     void tpsInformativoPorNivelDeConcorrencia() throws Exception {
