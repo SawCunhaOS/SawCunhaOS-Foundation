@@ -16,6 +16,7 @@ package br.com.sawcunhaos.foundation.jdempotent.core.aspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentRepository;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgressException;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadMismatchException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
@@ -152,6 +153,69 @@ class IdempotentAspectUTTest {
         //when
         Assertions.assertThrows(
                 IdempotentInProgressException.class,
+                () -> idempotentAspect.execute(joinPoint)
+        );
+
+        //then
+        verify(joinPoint, times(0)).proceed();
+        verify(idempotentRepository, times(0)).setResponse(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void given_a_different_payload_when_key_already_has_a_cached_response_then_throw_payload_mismatch_instead_of_replaying_cache() throws Throwable {
+        // Story 3.6, AC #1: same key, different payload hash, first call already finished
+        // -> 422 PAYLOAD_MISMATCH, never the cached response of the other payload.
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        Method method = TestIdempotentResource.class.getMethod("idempotentMethod", IdempotentTestPayload.class);
+        IdempotentTestPayload payload = new IdempotentTestPayload("payload");
+        TestIdempotentResource testIdempotentResource = mock(TestIdempotentResource.class);
+
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+        when(signature.getMethod()).thenReturn(method);
+        when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
+        when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
+        IdempotencyKey key = new IdempotencyKey("123");
+        IdempotentResponseWrapper cachedResponse = new IdempotentResponseWrapper("cached-result");
+        when(idempotentRepository.tryAcquire(any(), any(), any()))
+                .thenReturn(Lease.mismatch(key, "new-hash", Duration.ZERO, "other-hash", cachedResponse));
+
+        //when
+        Assertions.assertThrows(
+                IdempotentPayloadMismatchException.class,
+                () -> idempotentAspect.execute(joinPoint)
+        );
+
+        //then
+        verify(joinPoint, times(0)).proceed();
+        verify(idempotentRepository, times(0)).setResponse(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void given_a_different_payload_when_first_call_is_still_in_progress_then_mismatch_takes_precedence_over_in_progress() throws Throwable {
+        // Story 3.6, AC #2: same key, different payload, first call still in-flight (no
+        // cached response yet) -> still 422 PAYLOAD_MISMATCH, not 409 IN_PROGRESS.
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        Method method = TestIdempotentResource.class.getMethod("idempotentMethod", IdempotentTestPayload.class);
+        IdempotentTestPayload payload = new IdempotentTestPayload("payload");
+        TestIdempotentResource testIdempotentResource = mock(TestIdempotentResource.class);
+
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+        when(signature.getMethod()).thenReturn(method);
+        when(joinPoint.getTarget()).thenReturn(testIdempotentResource);
+        when(joinPoint.getTarget().getClass().getSimpleName()).thenReturn("TestIdempotentResource");
+        IdempotencyKey key = new IdempotencyKey("123");
+        when(idempotentRepository.tryAcquire(any(), any(), any()))
+                .thenReturn(Lease.mismatch(key, "new-hash", Duration.ZERO, "other-hash", null));
+
+        //when
+        Assertions.assertThrows(
+                IdempotentPayloadMismatchException.class,
                 () -> idempotentAspect.execute(joinPoint)
         );
 

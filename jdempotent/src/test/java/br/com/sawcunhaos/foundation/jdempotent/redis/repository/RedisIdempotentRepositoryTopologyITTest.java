@@ -16,6 +16,7 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.repository;
 import br.com.sawcunhaos.foundation.cache.PolymorphicRedisSerializer;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisProperties;
 import org.junit.jupiter.api.AfterAll;
@@ -150,6 +151,74 @@ class RedisIdempotentRepositoryTopologyITTest {
                 futures.forEach(f -> f.cancel(true));
             }
         }
+    }
+
+    @Test
+    void given_concurrent_real_threads_with_same_key_and_different_payloads_when_tryAcquire_then_the_loser_sees_a_mismatch_not_in_progress_standalone() throws Exception {
+        // Story 3.6, AC #2: real-Redis coverage of the mismatch/in-progress race window —
+        // two genuinely concurrent calls, same key, different payload hashes; the loser
+        // must be told isMismatch(), never plain "already in progress".
+        IdempotencyKey key = new IdempotencyKey("collision-" + UUID.randomUUID());
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        List<Future<Lease>> futures = new ArrayList<>();
+        boolean completedNormally = false;
+        try {
+            CountDownLatch ready = new CountDownLatch(2);
+            CountDownLatch start = new CountDownLatch(1);
+
+            Callable<Lease> callA = () -> {
+                ready.countDown();
+                start.await();
+                return standaloneRepository.tryAcquire(key, "hash-A", Duration.ofSeconds(30));
+            };
+            Callable<Lease> callB = () -> {
+                ready.countDown();
+                start.await();
+                return standaloneRepository.tryAcquire(key, "hash-B", Duration.ofSeconds(30));
+            };
+
+            futures.add(pool.submit(callA));
+            futures.add(pool.submit(callB));
+            ready.await();
+            start.countDown();
+
+            List<Lease> results = new ArrayList<>();
+            for (Future<Lease> future : futures) {
+                results.add(future.get(TASK_TIMEOUT.toSeconds(), TimeUnit.SECONDS));
+            }
+
+            long acquiredCount = results.stream().filter(Lease::isAcquired).count();
+            assertEquals(1, acquiredCount, "exactly one of the two racing payloads must acquire the Redis lease");
+
+            long mismatchCount = results.stream().filter(Lease::isMismatch).count();
+            assertEquals(1, mismatchCount, "the losing call, with a different payload, must see a mismatch, not just in-progress");
+            completedNormally = true;
+        } finally {
+            if (completedNormally) {
+                pool.shutdown();
+            } else {
+                pool.shutdownNow();
+                futures.forEach(f -> f.cancel(true));
+            }
+        }
+    }
+
+    @Test
+    void given_a_finished_call_when_a_different_payload_arrives_under_the_same_key_then_lease_is_a_mismatch_standalone() {
+        // Story 3.6, AC #1: sequential real-Redis coverage — first call finishes and its
+        // response is cached, a later call with a different payload hash must see a
+        // mismatch instead of replaying that cached response. Also exercises the
+        // setResponse() fix that carries payloadHash forward onto the finished entry.
+        IdempotencyKey key = new IdempotencyKey("collision-finished-" + UUID.randomUUID());
+
+        Lease originalCall = standaloneRepository.tryAcquire(key, "hash-A", Duration.ofSeconds(30));
+        assertTrue(originalCall.isAcquired());
+        standaloneRepository.setResponse(key, null, new IdempotentResponseWrapper("done"), 30L, TimeUnit.SECONDS);
+
+        Lease lease = standaloneRepository.tryAcquire(key, "hash-B", Duration.ofSeconds(30));
+        assertFalse(lease.isAcquired());
+        assertTrue(lease.isMismatch(), "a different payload under the same, already-finished key must be a mismatch");
+        assertEquals("hash-A", lease.getExistingPayloadHash());
     }
 
     @Test

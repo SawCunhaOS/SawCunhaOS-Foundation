@@ -18,6 +18,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
+import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,12 +31,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -210,5 +213,86 @@ public class RedisIdempotentRepositoryTest {
         assertNull(value.getRequest());
         assertNull(value.getResponse());
         assertEquals(wrapper.getResponse().getResponse(), "response");
+    }
+
+    @Test
+    public void given_a_different_payload_hash_already_stored_under_the_key_when_tryAcquire_then_lease_is_mismatch() {
+        //Given
+        IdempotencyKey key = new IdempotencyKey("key");
+        var existing = new IdempotentRequestResponseWrapper(null, "other-hash");
+        when(valueOperations.setIfAbsent(eq(key.getKeyValue()), any(), any(Duration.class))).thenReturn(false);
+        when(valueOperations.get(key.getKeyValue())).thenReturn(existing);
+
+        //When
+        Lease lease = redisIdempotentRepository.tryAcquire(key, "new-hash", Duration.ofSeconds(30));
+
+        //Then
+        assertFalse(lease.isAcquired());
+        assertTrue(lease.isMismatch());
+        assertEquals("other-hash", lease.getExistingPayloadHash());
+    }
+
+    @Test
+    public void given_the_same_payload_hash_already_stored_under_the_key_when_tryAcquire_then_lease_is_in_progress_not_mismatch() {
+        //Given
+        IdempotencyKey key = new IdempotencyKey("key");
+        var existing = new IdempotentRequestResponseWrapper(null, "same-hash");
+        when(valueOperations.setIfAbsent(eq(key.getKeyValue()), any(), any(Duration.class))).thenReturn(false);
+        when(valueOperations.get(key.getKeyValue())).thenReturn(existing);
+
+        //When
+        Lease lease = redisIdempotentRepository.tryAcquire(key, "same-hash", Duration.ofSeconds(30));
+
+        //Then
+        assertFalse(lease.isAcquired());
+        assertFalse(lease.isMismatch());
+        assertFalse(lease.hasCachedResponse(), "no response was stored yet, this is a genuine in-progress call");
+        assertNull(lease.getExistingResponse());
+    }
+
+    @Test
+    public void given_the_same_payload_hash_already_finished_with_a_cached_response_when_tryAcquire_then_lease_is_not_mismatch_and_exposes_the_cached_response() {
+        //Given
+        IdempotencyKey key = new IdempotencyKey("key");
+        IdempotentResponseWrapper cachedResponse = new IdempotentResponseWrapper("cached-result");
+        var existing = new IdempotentRequestResponseWrapper(null, "same-hash");
+        existing.setResponse(cachedResponse);
+        when(valueOperations.setIfAbsent(eq(key.getKeyValue()), any(), any(Duration.class))).thenReturn(false);
+        when(valueOperations.get(key.getKeyValue())).thenReturn(existing);
+
+        //When
+        Lease lease = redisIdempotentRepository.tryAcquire(key, "same-hash", Duration.ofSeconds(30));
+
+        //Then
+        assertFalse(lease.isAcquired());
+        assertFalse(lease.isMismatch());
+        assertTrue(lease.hasCachedResponse());
+        // assertSame, not assertEquals: IdempotentResponseWrapper#equals(Object) compares
+        // response.equals(obj) instead of obj.response — comparing a String against a
+        // wrapper always returns false, a pre-existing bug unrelated to this story/test.
+        assertSame(cachedResponse, lease.getExistingResponse());
+    }
+
+    @Test
+    public void given_idempotency_key_when_set_response_then_payload_hash_is_carried_forward_to_the_new_stored_value() {
+        // Story 3.6: without this, the hash used to detect payload collisions is lost the
+        // moment a call finishes, and a later different-payload call would be treated as a
+        // cache hit instead of a mismatch.
+        //Given
+        IdempotencyKey key = new IdempotencyKey("key");
+        IdempotentRequestWrapper request = new IdempotentRequestWrapper(123L);
+        IdempotentResponseWrapper response = new IdempotentResponseWrapper("response");
+        var wrapper = new IdempotentRequestResponseWrapper(
+                new IdempotentRequestWrapper(new Object()), "original-hash");
+        when(valueOperations.get(key.getKeyValue())).thenReturn(wrapper);
+        when(scosJdempotentRedisProperties.getPersistReqRes()).thenReturn(true);
+
+        //When
+        redisIdempotentRepository.setResponse(key, request, response, 1L, TimeUnit.HOURS);
+
+        //Then
+        var argumentCaptor = ArgumentCaptor.forClass(IdempotentRequestResponseWrapper.class);
+        verify(valueOperations).set(eq(key.getKeyValue()), argumentCaptor.capture(), eq(1L), eq(TimeUnit.HOURS));
+        assertEquals("original-hash", argumentCaptor.getValue().getPayloadHash());
     }
 }

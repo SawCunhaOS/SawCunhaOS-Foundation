@@ -97,8 +97,12 @@ public class RedisIdempotentRepository implements IdempotentRepository {
      * / {@link Lease#getExistingResponse()} on conflict is NOT part of that atomic
      * operation: by the time it runs the key's owner may already have released or
      * refreshed it. That is fine for this story's AC (exclusivity of the lock is what
-     * matters), it can only make the returned "existing" data slightly stale/absent,
-     * which Story 3.6 will have to account for if it tightens this further.</p>
+     * matters), it can only make the returned "existing" data slightly stale/absent.</p>
+     *
+     * <p>The payload-collision check (Story 3.6, AC #1/#2) reuses that same follow-up
+     * {@code GET} — it is not a further round trip — and is decided before choosing
+     * between {@link Lease#inProgress} and a cached response, so a mismatch always
+     * takes precedence over both.</p>
      */
     @Override
     public Lease tryAcquire(IdempotencyKey idempotencyKey, String payloadHash, Duration ttl) {
@@ -114,6 +118,9 @@ public class RedisIdempotentRepository implements IdempotentRepository {
             IdempotentRequestResponseWrapper existing = valueOperations.get(idempotencyKey.getKeyValue());
             String existingPayloadHash = existing != null ? existing.getPayloadHash() : null;
             IdempotentResponseWrapper existingResponse = existing != null ? existing.getResponse() : null;
+            if (existingPayloadHash != null && !existingPayloadHash.equals(payloadHash)) {
+                return Lease.mismatch(idempotencyKey, payloadHash, effectiveTtl, existingPayloadHash, existingResponse);
+            }
             return Lease.inProgress(idempotencyKey, payloadHash, effectiveTtl, existingPayloadHash, existingResponse);
         } catch (Exception e) {
             log.error("Error acquiring idempotent lease in Redis: {}", e.getMessage());
@@ -141,7 +148,14 @@ public class RedisIdempotentRepository implements IdempotentRepository {
     }
 
     /**
-     * ttl describe
+     * Stores the final response for {@code idempotencyKey}.
+     *
+     * <p>Carries the {@code payloadHash} written by {@code tryAcquire} forward onto the
+     * new stored value (Story 3.6): without this, the hash used to detect payload
+     * collisions would be lost the moment a call finishes, and a later call with a
+     * different payload would incorrectly be treated as a plain cache hit instead of
+     * {@code Lease#isMismatch()}. Known risk flagged in Story 3.5's Completion Notes,
+     * fixed here since Story 3.6 is the first story that depends on it.</p>
      *
      * @param idempotencyKey
      * @param request
@@ -155,7 +169,9 @@ public class RedisIdempotentRepository implements IdempotentRepository {
                 ttl = ttl == 0 ? redisProperties.getExpirationTimeHour() : ttl;
                 IdempotentRequestResponseWrapper requestResponseWrapper = valueOperations.get(idempotencyKey.getKeyValue());
                 requestResponseWrapper.setResponse(response);
-                this.valueOperations.set(idempotencyKey.getKeyValue(), prepareValue(request, response), ttl, timeUnit);
+                IdempotentRequestResponseWrapper newValue = prepareValue(request, response);
+                newValue.setPayloadHash(requestResponseWrapper.getPayloadHash());
+                this.valueOperations.set(idempotencyKey.getKeyValue(), newValue, ttl, timeUnit);
             }
         } catch (Exception e) {
             log.error("Error setting idempotent response in Redis: {}", e.getMessage());

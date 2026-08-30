@@ -64,6 +64,11 @@ public abstract class AbstractIdempotentRepository implements IdempotentReposito
      * every other concurrent caller observes the entry the winner just inserted (or an
      * already-finished one) and gets it back via the {@link Lease}.
      *
+     * <p>The payload-collision check (Story 3.6, AC #1/#2) is done against that same
+     * {@code existing} entry returned by {@code putIfAbsent} — no second map lookup —
+     * so it takes precedence over both the cached-response and in-progress outcomes
+     * within this one atomic call.</p>
+     *
      * <p>NOTE: {@code ttl} is not enforced here (entries never expire), same as the
      * pre-existing {@code store()}/{@code setResponse()} for this in-memory implementation
      * — add a scheduled evictor if a long-lived in-memory idempotency window becomes a
@@ -76,7 +81,11 @@ public abstract class AbstractIdempotentRepository implements IdempotentReposito
         if (existing == null) {
             return Lease.acquired(key, payloadHash, ttl);
         }
-        return Lease.inProgress(key, payloadHash, ttl, existing.getPayloadHash(), existing.getResponse());
+        String existingPayloadHash = existing.getPayloadHash();
+        if (existingPayloadHash != null && !existingPayloadHash.equals(payloadHash)) {
+            return Lease.mismatch(key, payloadHash, ttl, existingPayloadHash, existing.getResponse());
+        }
+        return Lease.inProgress(key, payloadHash, ttl, existingPayloadHash, existing.getResponse());
     }
 
 

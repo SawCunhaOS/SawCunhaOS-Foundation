@@ -24,6 +24,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.constant.CryptographyAlgorit
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentRepository;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgressException;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadMismatchException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.KeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.ChainData;
@@ -163,15 +164,22 @@ public class IdempotentAspect {
         Long customTtl = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttl();
         TimeUnit timeUnit = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttlTimeUnit();
         Duration ttl = Duration.of(customTtl, timeUnit.toChronoUnit());
-        // Story 3.6 will compare this against the payload hash already stored under the
-        // key (Lease#getExistingPayloadHash) to tell a genuine duplicate call apart from a
-        // different payload colliding on the same idempotency key (409 vs 422).
+        // Compared against the payload hash already stored under the key
+        // (Lease#getExistingPayloadHash) to tell a genuine duplicate call apart from a
+        // different payload colliding on the same idempotency key (409 vs 422, Story 3.6).
         String payloadHash = HexFormat.of().formatHex(messageDigest.digest(requestObject.toString().getBytes(StandardCharsets.UTF_8)));
 
         log.debug(classAndMethodName + "starting for {}", requestObject);
 
         Lease lease = idempotentRepository.tryAcquire(idempotencyKey, payloadHash, ttl);
         if (!lease.isAcquired()) {
+            if (lease.isMismatch()) {
+                // AC #2: mismatch takes precedence over both "already in progress" and a
+                // cached response, even in the race window where the first call (different
+                // payload) is still processing — checked before hasCachedResponse() below.
+                log.debug(classAndMethodName + "payload mismatch for {}", requestObject);
+                throw new IdempotentPayloadMismatchException(idempotencyKey);
+            }
             if (lease.hasCachedResponse()) {
                 log.debug(classAndMethodName + "ended up reading from cache for {}", requestObject);
                 return lease.getExistingResponse().getResponse();

@@ -36,12 +36,16 @@ public interface IdempotentRepository {
      * Replaces the non-atomic {@code contains() -> store()} sequence: exactly one
      * concurrent caller for the same key gets a {@link Lease} with {@code acquired == true},
      * every other concurrent caller gets a {@link Lease} describing what is already
-     * stored for that key (an in-progress call, or a finished one with a cached response).
+     * stored for that key (an in-progress call, a finished one with a cached response,
+     * or, when the stored {@code payloadHash} differs from this call's, a payload
+     * collision — {@link Lease#isMismatch()}, Story 3.6). The mismatch comparison is
+     * done against the same value the lock-acquisition step already reads/writes, so
+     * implementations must not perform it as a second round trip to the store.
      *
      * @param key         the idempotency key
-     * @param payloadHash hash of the request payload, stored alongside the lease so
-     *                    a later payload-collision check (Story 3.6) does not need
-     *                    a second round trip
+     * @param payloadHash hash of the request payload, stored alongside the lease and
+     *                    compared against the hash already stored under the key (if any)
+     *                    to detect payload collisions (Story 3.6)
      * @param ttl         how long the lease is held before it expires; a zero/negative
      *                    duration lets the implementation fall back to its own default
      * @return the lease

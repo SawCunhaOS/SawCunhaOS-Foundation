@@ -104,4 +104,97 @@ class InMemoryIdempotentRepositoryTryAcquireTest {
         assertTrue(lease.hasCachedResponse());
         assertEquals("done", lease.getExistingResponse().getResponse());
     }
+
+    /**
+     * Story 3.6, AC #1: same key, second call finished the first with a different
+     * payload hash -> the second call must see a mismatch instead of replaying the
+     * cached response of the first payload.
+     */
+    @Test
+    void given_a_finished_call_when_a_different_payload_arrives_under_the_same_key_then_lease_is_a_mismatch() {
+        InMemoryIdempotentRepository repository = new InMemoryIdempotentRepository();
+        IdempotencyKey key = new IdempotencyKey("collision-key");
+
+        repository.tryAcquire(key, "hash-A", Duration.ofSeconds(30));
+        repository.setResponse(key, null, new IdempotentResponseWrapper("done"), 0L, java.util.concurrent.TimeUnit.HOURS);
+
+        Lease lease = repository.tryAcquire(key, "hash-B", Duration.ofSeconds(30));
+        assertFalse(lease.isAcquired());
+        assertTrue(lease.isMismatch());
+        assertEquals("hash-A", lease.getExistingPayloadHash());
+    }
+
+    /**
+     * Story 3.6, AC #2: same key, different payload arrives while the first call is
+     * still in progress (no cached response yet) -> mismatch takes precedence over
+     * "already in progress".
+     */
+    @Test
+    void given_a_call_still_in_progress_when_a_different_payload_arrives_under_the_same_key_then_lease_is_a_mismatch_not_in_progress() {
+        InMemoryIdempotentRepository repository = new InMemoryIdempotentRepository();
+        IdempotencyKey key = new IdempotencyKey("race-collision-key");
+
+        repository.tryAcquire(key, "hash-A", Duration.ofSeconds(30));
+
+        Lease lease = repository.tryAcquire(key, "hash-B", Duration.ofSeconds(30));
+        assertFalse(lease.isAcquired());
+        assertTrue(lease.isMismatch());
+        assertFalse(lease.hasCachedResponse());
+    }
+
+    /**
+     * Story 3.6, AC #2: real-thread coverage of the same race window as the test above
+     * — the second call's mismatch must win even when it genuinely races the first
+     * call's still-in-flight lease, not just when it is called sequentially after.
+     */
+    @Test
+    void given_concurrent_real_threads_with_same_key_and_different_payloads_when_tryAcquire_then_the_loser_sees_a_mismatch() throws Exception {
+        InMemoryIdempotentRepository repository = new InMemoryIdempotentRepository();
+        IdempotencyKey key = new IdempotencyKey("race-collision-concurrency-key");
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        List<Future<Lease>> futures = new ArrayList<>();
+        boolean completedNormally = false;
+        try {
+            Callable<Lease> callA = () -> {
+                ready.countDown();
+                start.await();
+                return repository.tryAcquire(key, "hash-A", Duration.ofSeconds(30));
+            };
+            Callable<Lease> callB = () -> {
+                ready.countDown();
+                start.await();
+                return repository.tryAcquire(key, "hash-B", Duration.ofSeconds(30));
+            };
+
+            futures.add(pool.submit(callA));
+            futures.add(pool.submit(callB));
+            ready.await();
+            start.countDown();
+
+            List<Lease> results = new ArrayList<>();
+            for (Future<Lease> future : futures) {
+                results.add(future.get());
+            }
+
+            long acquiredCount = results.stream().filter(Lease::isAcquired).count();
+            assertEquals(1, acquiredCount, "exactly one of the two racing payloads must acquire the lease");
+
+            long mismatchCount = results.stream().filter(Lease::isMismatch).count();
+            assertEquals(1, mismatchCount, "the losing call, with a different payload, must see a mismatch");
+            completedNormally = true;
+        } finally {
+            // Same pattern as RedisIdempotentRepositoryTopologyITTest's concurrency battery:
+            // shutdown() alone doesn't interrupt threads still blocked (e.g. a future.get()
+            // that never returns because of a bug), so a non-happy path gets shutdownNow()
+            // + cancel(true) instead of leaking them.
+            if (completedNormally) {
+                pool.shutdown();
+            } else {
+                pool.shutdownNow();
+                futures.forEach(f -> f.cancel(true));
+            }
+        }
+    }
 }
