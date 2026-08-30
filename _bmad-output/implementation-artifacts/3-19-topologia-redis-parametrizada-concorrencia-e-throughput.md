@@ -169,6 +169,8 @@ O test design completo (risco, coverage plan, estimativas) está em `_bmad-outpu
 - Verificado isolado (`RedisIdempotentRepositoryTopologyITTest`: 3/3; `RedisIdempotentRepositoryTpsSpringContextITTest`: 1/1) e via `mvn -pl jdempotent verify` completo: `BUILD SUCCESS`, 52 unit + 9 integration.
 - TPS logado pós-mudança (informativo, não comparável a benchmark): manual 2733,6 ops/s (500 ops em 0,183s), via Spring 1706,4 ops/s (500 ops em 0,293s) — mesma variação run-a-run já observada antes da troca, não atribuível a virtual threads especificamente.
 
+**Iteration 5 (2026-08-30, pedido direto do humano):** `operationCount` dos 2 testes de TPS subiu de `500` para `5000` — racional do humano: a infra mínima de produção prevista é de ~100 conexões com o banco, então 5000 ops é um piso mais realista de carga para o teste informativo do que 500. Sem outra mudança (mesmo `TASK_TIMEOUT` de 30s por `future.get`, mesmas chaves distintas). Verificado isolado (3/3 e 1/1) e via `mvn -pl jdempotent verify` completo: `BUILD SUCCESS`, 52 unit + 9 integration. TPS logado: manual 5146,4 ops/s (5000 ops em 0,972s), via Spring 4801,0 ops/s (5000 ops em 1,041s) — com amostra maior os dois ficaram bem mais próximos entre si.
+
 ## Suggested Review Order
 
 **Infra compartilhada**

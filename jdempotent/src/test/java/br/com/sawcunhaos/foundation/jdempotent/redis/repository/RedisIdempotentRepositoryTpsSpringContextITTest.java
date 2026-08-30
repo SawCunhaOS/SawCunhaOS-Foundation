@@ -87,7 +87,7 @@ class RedisIdempotentRepositoryTpsSpringContextITTest {
     @Test
     void tpsInformativoViaContextoSpring() throws Exception {
         IdempotentRepository repository = idempotentAspect.getIdempotentRepository();
-        int operationCount = 500;
+        int operationCount = 5000;
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
         List<Future<Lease>> futures = new ArrayList<>();
         boolean completedNormally = false;
