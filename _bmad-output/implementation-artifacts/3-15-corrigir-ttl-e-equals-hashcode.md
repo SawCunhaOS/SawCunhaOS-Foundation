@@ -35,6 +35,7 @@ Para eliminar comportamento inconsistente entre construtores.
   - [ ] Teste de reflexividade: `wrapper.equals(wrapper)` é sempre `true`
   - [ ] Teste de simetria: para dois wrappers `a` e `b` com o mesmo `request`, `a.equals(b) == b.equals(a)`
   - [ ] Confirmar que a mudança de `equals()` não quebra o uso de `IdempotentRequestWrapper` como chave/valor em qualquer `Map`/`Set` existente no módulo (buscar todos os usos antes de alterar)
+  - [ ] **Gap identificado na revisão da Story 3.19 (2026-08-30)**: `@JdempotentResource(ttl=X, ttlTimeUnit=Y)` nunca foi validado fim a fim quanto a expiração real — o único teste com TTL customizado (`PrimeNumbersJdempotentEnableITTest`, `ttl=30, ttlTimeUnit=SECONDS`) só confirma que a chave é gravada, nunca aguarda a expiração. Usando o mesmo padrão de teste desta task (TTL curto + aguardar expiração), estender para cobrir o caminho `@JdempotentResource` → `IdempotentAspect.execute()` → repositório, não só o repositório isolado
 
 ## Dev Notes
 
