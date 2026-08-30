@@ -81,6 +81,11 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Story 3.19: RedisIdempotentRepositoryTpsSweepITTest faz 600 mil operações
+             tryAcquire (6 níveis de concorrência x 100 mil ops) — caro demais para todo
+             mvn verify. Excluído por padrão; o profile tps-sweep abaixo zera esta property
+             para reincluí-lo. -->
+        <tps.sweep.exclude>**/*TpsSweepITTest.java</tps.sweep.exclude>
     </properties>
 
     <dependencies>
@@ -254,6 +259,9 @@
                     <includes>
                         <include>**/*ITTest.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>${tps.sweep.exclude}</exclude>
+                    </excludes>
                     <failIfNoTests>true</failIfNoTests>
                 </configuration>
                 <executions>
@@ -267,5 +275,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Story 3.19: roda o sweep de TPS por nível de concorrência (RedisIdempotentRepositoryTpsSweepITTest),
+             excluído do mvn verify normal por ser caro (600 mil operações). Uso: mvn -Ptps-sweep -pl jdempotent verify -->
+        <profile>
+            <id>tps-sweep</id>
+            <properties>
+                <tps.sweep.exclude/>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

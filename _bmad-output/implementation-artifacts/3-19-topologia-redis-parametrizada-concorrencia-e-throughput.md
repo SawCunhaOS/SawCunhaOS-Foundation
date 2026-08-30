@@ -59,6 +59,8 @@ context: ['{project-root}/_bmad-output/planning-artifacts/architecture/architect
 - `jdempotent/src/test/resources/application.yml:12-22` -- os valores fixos `spring.data.redis.port`/`sentinel.nodes` deixam de ser a fonte de verdade para os testes de PrimeNumbers depois da migração para `@DynamicPropertySource` (decisão do Dev: manter como fallback ou remover as chaves agora mortas).
 - `jdempotent/src/test/java/.../redis/test/app/JdempotentTestApplication.java` -- app Spring Boot de teste já existente; reaproveitar (não modificar) como base do novo teste de TPS via contexto Spring.
 - `jdempotent/src/test/java/.../redis/repository/RedisIdempotentRepositoryTopologyITTest.java` -- adicionar o segundo teste de TPS (via contexto Spring), ao lado do `tpsInformativoComChavesDistintas` já existente (wiring manual).
+- `jdempotent/src/test/java/.../redis/repository/RedisIdempotentRepositoryTpsSweepITTest.java` -- (iteração 8) classe nova, sweep de TPS por nível de concorrência, gated pelo profile Maven `tps-sweep`.
+- `jdempotent/pom.xml` -- (iteração 8) property `tps.sweep.exclude` + profile `tps-sweep` (zera a property) para isolar `RedisIdempotentRepositoryTpsSweepITTest` do `mvn verify` normal.
 
 ## Tasks & Acceptance
 
@@ -110,6 +112,8 @@ O test design completo (risco, coverage plan, estimativas) está em `_bmad-outpu
 - `mvn -pl jdempotent -Dit.test=RedisIdempotentRepositoryTopologyITTest verify` (isolado) -- expected: `BUILD SUCCESS`, cobrindo as 3 topologias + smoke de concorrência + os 2 testes de TPS (manual e via Spring)
 - `mvn -pl jdempotent -Dit.test=PrimeNumbersJdempotentEnableITTest,PrimeNumbersJdempotentDisableITTest verify` (isolado, pós-correção) -- expected: `BUILD SUCCESS` via porta dinâmica
 - `mvn -pl jdempotent verify` -- expected (pós-emenda): `BUILD SUCCESS` completo no módulo, sem o vermelho pré-existente do bug de porta fixa
+- `mvn -pl jdempotent verify` (sem profile) -- expected (iteração 8): `RedisIdempotentRepositoryTpsSweepITTest` NÃO roda (excluído por padrão)
+- `mvn -Ptps-sweep -pl jdempotent verify` -- expected (iteração 8): `RedisIdempotentRepositoryTpsSweepITTest` roda junto com os demais `*ITTest`, `BUILD SUCCESS`
 
 ## Dev Agent Record
 
@@ -178,6 +182,11 @@ O test design completo (risco, coverage plan, estimativas) está em `_bmad-outpu
 - Resultado do sweep (informativo, não é benchmark controlado — 1 execução): `concurrency=10 → 4301,7 ops/s`, `30 → 16946,3 ops/s`, `50 → 19427,4 ops/s`, `100 → 19080,7 ops/s`, `150 → 18767,2 ops/s`, `300 → 18724,6 ops/s`. Achado interessante: o throughput sobe até `~50` de concorrência e satura em torno de `~19k ops/s` dali em diante — consistente com uma única conexão Lettuce multiplexada sendo o gargalo, não o número de chamadores.
 
 **Iteration 7 (2026-08-30, pedido direto do humano):** `OPERATIONS_PER_LEVEL` do sweep subiu de `10_000` para `100_000` (600 mil `tryAcquire` no total, 6 níveis). Verificado isolado (1/1, 67s de wall-clock a frio) e via `mvn -pl jdempotent verify` completo: `BUILD SUCCESS`, 52 unit + 10 integration (a classe do sweep sozinha levou 39,35s dentro do `verify` completo, ante 8,5s com 10 mil/nível). Resultado: `concurrency=10 → 11740,2 ops/s`, `30 → 19241,1 ops/s`, `50 → 19398,3 ops/s`, `100 → 20645,0 ops/s`, `150 → 22005,5 ops/s`, `300 → 20968,2 ops/s` — mesmo padrão de saturação a partir de `~30`, agora com amostra 10x maior.
+
+**Iteration 8 (2026-08-30, pedido direto do humano — isolar o sweep atrás de um profile Maven):** o sweep (600 mil ops, ~35-40s dentro do `verify`) foi extraído de `RedisIdempotentRepositoryTopologyITTest` para sua própria classe, `RedisIdempotentRepositoryTpsSweepITTest` (container Standalone próprio, reaproveita `RedisIdempotentRepositoryTopologyITTest.repositoryUsing(...)` package-private, mesmo padrão já usado por `RedisIdempotentRepositoryTopologySmokeITTest`). `jdempotent/pom.xml` ganhou a property `tps.sweep.exclude` (default `**/*TpsSweepITTest.java`, excluída do Failsafe) e o profile `tps-sweep` (zera a property, reincluindo a classe). `RedisIdempotentRepositoryTopologyITTest` volta a ter só 3 testes (bateria, TTL, TPS manual).
+
+- Verificado sem profile: `RedisIdempotentRepositoryTpsSweepITTest` não roda, `mvn -pl jdempotent verify` volta a 9 integration tests, `BUILD SUCCESS`.
+- Verificado com `mvn -Ptps-sweep -pl jdempotent verify`: `RedisIdempotentRepositoryTpsSweepITTest` roda (10 integration tests), `BUILD SUCCESS`. Resultado: `concurrency=10 → 12457,8 ops/s`, `30 → 19772,9 ops/s`, `50 → 19839,3 ops/s`, `100 → 21936,2 ops/s`, `150 → 22526,6 ops/s`, `300 → 21279,9 ops/s`.
 
 ## Suggested Review Order
 
