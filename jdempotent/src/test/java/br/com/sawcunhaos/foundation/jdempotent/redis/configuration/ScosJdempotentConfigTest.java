@@ -15,6 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.configuration;
 
 import br.com.sawcunhaos.foundation.jdempotent.core.aspect.IdempotentAspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -34,7 +35,10 @@ class ScosJdempotentConfigTest {
             .withBean(ScosJdempotentRedisProperties.class, ScosJdempotentRedisProperties::new)
             .withBean("JdempotentRedisTemplate", RedisTemplate.class, () -> mock(RedisTemplate.class))
             .withPropertyValues("scos.jdempotent.namespace=test-app")
-            .withUserConfiguration(ScosJdempotentConfig.class);
+            // Story 3.11: ScosJdempotentConfig now constructor-injects IdempotencyMetrics —
+            // ScosJdempotentMetricsConfiguration is what supplies it (no-op here, no Micrometer
+            // bean registered in this runner).
+            .withUserConfiguration(ScosJdempotentMetricsConfiguration.class, ScosJdempotentConfig.class);
 
     @Test
     void naoDuplicaIdempotentAspectQuandoErrorConditionalCallbackEstaRegistrado() {
@@ -43,5 +47,21 @@ class ScosJdempotentConfigTest {
                     assertThat(context).hasNotFailed();
                     assertThat(context.getBeansOfType(IdempotentAspect.class)).hasSize(1);
                 });
+    }
+
+    /**
+     * Story 3.11 (review finding #6): nothing else proved the {@code IdempotencyMetrics} bean
+     * resolved by the auto-configuration actually reaches the final {@code IdempotentAspect} —
+     * removing the {@code aspect.setIdempotencyMetrics(...)} wiring in {@code ScosJdempotentConfig}
+     * would still pass every other test (the field only had {@code @Setter}, no {@code @Getter}).
+     */
+    @Test
+    void idempotentAspectUsaAMesmaInstanciaDeIdempotencyMetricsDoContexto() {
+        runner.run(context -> {
+            assertThat(context).hasNotFailed();
+            IdempotentAspect aspect = context.getBean(IdempotentAspect.class);
+            IdempotencyMetrics idempotencyMetrics = context.getBean(IdempotencyMetrics.class);
+            assertThat(aspect.getIdempotencyMetrics()).isSameAs(idempotencyMetrics);
+        });
     }
 }

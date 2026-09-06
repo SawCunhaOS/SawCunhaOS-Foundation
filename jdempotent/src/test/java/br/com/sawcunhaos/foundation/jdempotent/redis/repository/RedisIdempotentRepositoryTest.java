@@ -14,12 +14,14 @@
 package br.com.sawcunhaos.foundation.jdempotent.redis.repository;
 
 
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisProperties;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +37,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -48,7 +51,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -373,5 +379,130 @@ public class RedisIdempotentRepositoryTest {
         when(template.getConnectionFactory()).thenReturn(null);
 
         assertEquals(Duration.ofSeconds(5), resolveSlowCallThreshold(template));
+    }
+
+    /**
+     * Story 3.11: {@code idempotency.backend_error} on every failed Redis operation, and
+     * {@code idempotency.degraded}/{@code idempotency.degraded.transitions} when the real
+     * (not mocked) circuit breaker actually flips state. No Docker/Testcontainers needed —
+     * the breaker's failure counting and state machine are pure in-memory logic once
+     * {@code valueOperations} is stubbed to always throw; the same
+     * {@code minimumNumberOfCalls(5)} / default 50% failure-rate-threshold setup already
+     * proven in {@code RedisIdempotentRepositoryFailOpenITTest} (Story 3.7) applies here.
+     */
+    @Test
+    public void given_repeated_redis_failures_when_the_circuit_breaker_opens_then_backend_error_and_degraded_metrics_are_emitted() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        when(valueOperations.get(anyString())).thenThrow(new RuntimeException("boom"));
+
+        // minimumNumberOfCalls(5): all 5 calls are genuinely attempted (breaker still CLOSED
+        // throughout), each one fails and falls into the fail-open catch below.
+        for (int i = 0; i < 5; i++) {
+            assertFalse(repository.contains(new IdempotencyKey("key-" + i)));
+        }
+
+        verify(metrics, times(5)).backendError();
+        // Default failure-rate-threshold (50%) with a 100% failure rate over the 5 calls above
+        // trips the breaker CLOSED -> OPEN exactly once: one flip into "degraded", not one call
+        // per check (Task 3: "não a cada verificação").
+        verify(metrics, times(1)).degraded(true);
+        verify(metrics, times(1)).degradedTransition();
+        verify(metrics, times(0)).degraded(false);
+    }
+
+    // -----------------------------------------------------------------
+    // Story 3.11 review finding #4: backend_error was only ever verified against a mock
+    // IdempotencyMetrics for contains() (test above) — the other 5 Redis operations never were.
+    // -----------------------------------------------------------------
+
+    @Test
+    public void given_redis_get_throws_when_getResponse_called_then_backend_error_metric_emitted() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        when(valueOperations.get(anyString())).thenThrow(new RuntimeException("boom"));
+
+        assertNull(repository.getResponse(new IdempotencyKey("key")));
+
+        verify(metrics, times(1)).backendError();
+    }
+
+    @Test
+    public void given_redis_set_throws_when_store_called_then_backend_error_metric_emitted() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        when(scosJdempotentRedisProperties.getPersistReqRes()).thenReturn(true);
+        doThrow(new RuntimeException("boom")).when(valueOperations).set(any(), any(), anyLong(), any());
+
+        repository.store(new IdempotencyKey("key"), new IdempotentRequestWrapper(123L), 1L, TimeUnit.HOURS);
+
+        verify(metrics, times(1)).backendError();
+    }
+
+    @Test
+    public void given_redis_setIfAbsent_throws_when_tryAcquire_called_then_backend_error_metric_emitted_and_fail_open() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        when(valueOperations.setIfAbsent(anyString(), any(), any(Duration.class))).thenThrow(new RuntimeException("boom"));
+
+        Lease lease = repository.tryAcquire(new IdempotencyKey("key"), "hash", Duration.ofSeconds(30));
+
+        assertTrue(lease.isAcquired(), "fail-open: a Redis failure must never block the business request");
+        verify(metrics, times(1)).backendError();
+    }
+
+    @Test
+    public void given_redis_delete_throws_when_remove_called_then_backend_error_metric_emitted() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        when(redisTemplate.delete(anyString())).thenThrow(new RuntimeException("boom"));
+
+        repository.remove(new IdempotencyKey("key"));
+
+        verify(metrics, times(1)).backendError();
+    }
+
+    @Test
+    public void given_redis_get_throws_when_setResponse_called_then_backend_error_metric_emitted() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        when(valueOperations.get(anyString())).thenThrow(new RuntimeException("boom"));
+
+        repository.setResponse(new IdempotencyKey("key"), null, new IdempotentResponseWrapper("r"), 1L, TimeUnit.HOURS);
+
+        verify(metrics, times(1)).backendError();
+    }
+
+    /**
+     * Story 3.11 review finding #5: the only existing transition test forces CLOSED -> OPEN and
+     * checks {@code degraded(true)}/{@code degradedTransition()} fire once each — nothing proved
+     * the "collapse redundant transitions" behavior the code comment/CHANGELOG describe: OPEN ->
+     * HALF_OPEN (still degraded, must NOT re-fire) and HALF_OPEN -> CLOSED (recovery, must fire
+     * {@code degraded(false)}/{@code degradedTransition()} exactly once). Uses the real circuit
+     * breaker's {@code transitionToXState()} test hooks directly — same technique already used by
+     * {@code RedisIdempotentRepositoryFailOpenITTest} (Story 3.7) — no Redis calls needed, this is
+     * purely the breaker's own state machine.
+     */
+    @Test
+    public void given_the_breaker_transitions_open_to_half_open_to_closed_then_only_the_actual_flips_emit_degraded_events() {
+        IdempotencyMetrics metrics = mock(IdempotencyMetrics.class);
+        RedisIdempotentRepository repository = new RedisIdempotentRepository(redisTemplate, scosJdempotentRedisProperties, metrics);
+        CircuitBreaker circuitBreaker = (CircuitBreaker) ReflectionTestUtils.getField(repository, "circuitBreaker");
+
+        circuitBreaker.transitionToOpenState();
+        verify(metrics, times(1)).degraded(true);
+        verify(metrics, times(1)).degradedTransition();
+
+        // OPEN -> HALF_OPEN: both count as "degraded" (state != CLOSED) — the observable boolean
+        // does not flip, so neither degraded(...) nor degradedTransition() may fire again.
+        circuitBreaker.transitionToHalfOpenState();
+        verify(metrics, times(1)).degraded(true);
+        verify(metrics, times(1)).degradedTransition();
+        verify(metrics, times(0)).degraded(false);
+
+        // HALF_OPEN -> CLOSED: recovery, the boolean flips back to false — must fire exactly once.
+        circuitBreaker.transitionToClosedState();
+        verify(metrics, times(1)).degraded(false);
+        verify(metrics, times(2)).degradedTransition();
     }
 }

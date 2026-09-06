@@ -321,3 +321,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/3-10-tornar-o-namespace-de-prefixo-de-chave-configurável.md`
   summary: A Story 3.14 (migração `@Value` → `@ConfigurationProperties`, ainda `ready-for-dev`) não tem, em seu próprio arquivo, nenhum ponteiro para a decisão de coordenação registrada nas Dev Notes/Project Structure Notes da 3.10 sobre absorver ou não `ScosJdempotentProperties` — quem pegar a 3.14 pode não notar essa nota.
   evidence: Achado pelo Blind Hunter na revisão desta story. Risco de documentação ficar obsoleta/esquecida por estar apenas no lado da 3.10, não da 3.14.
+
+- source_spec: `_bmad-output/implementation-artifacts/3-11-expor-métricas-de-idempotência.md`
+  summary: Falta documentação para o consumidor sobre como efetivamente expor as métricas `idempotency.*` (ex.: dependência de `spring-boot-starter-actuator` para existir um bean `MeterRegistry`, `management.endpoints.web.exposure.include=metrics,prometheus`) — hoje só há explicação do mecanismo interno no CHANGELOG/Javadoc.
+  evidence: Achado pelo Blind Hunter na revisão desta story. Fora do escopo desta story (instrumentação, AC #1); a Story 4.13 ("Documentar o módulo jdempotent") é o lugar natural para cobrir isso.

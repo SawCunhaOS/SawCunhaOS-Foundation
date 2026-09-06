@@ -159,6 +159,18 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Story 3.11 (FR7): idempotency.* metrics (ScosJdempotentMetricsConfiguration /
+             MicrometerIdempotencyMetrics), registered only when Micrometer is on the consumer's
+             classpath (@ConditionalOnClass(MeterRegistry.class)), no-op otherwise. Version managed
+             by spring-boot-dependencies (imported by scos-bom), same as elsewhere in the reactor.
+             optional=true: internal use of this module, not a mandatory transitive dependency for
+             consumers. -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Unit Test Dependencies-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -18,6 +18,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentReposit
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgressException;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadMismatchException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrapper;
@@ -29,6 +30,7 @@ import lombok.Data;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -69,6 +71,18 @@ class IdempotentAspectUTTest {
     @Mock
     private ErrorConditionalCallback errorCallback;
 
+    @Mock
+    private IdempotencyMetrics idempotencyMetrics;
+
+    @BeforeEach
+    void wireIdempotencyMetrics() {
+        // Story 3.11: IdempotentAspect defaults idempotencyMetrics to a NoOp instance (not a
+        // constructor param, so every pre-existing constructor keeps working) — @InjectMocks'
+        // constructor-injection strategy therefore never touches this field, wire it explicitly
+        // so each event test below can verify exactly one call to the right IdempotencyMetrics method.
+        idempotentAspect.setIdempotencyMetrics(idempotencyMetrics);
+    }
+
     @Test
     void given_new_payload_when_key_not_in_repository_and_method_has_one_arg_then_should_store_repository() throws Throwable {
         //given
@@ -99,6 +113,11 @@ class IdempotentAspectUTTest {
         verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
         verify(joinPoint).proceed();
         verify(idempotentRepository, times(1)).setResponse(any(), any(), any(), any(), any());
+        // Story 3.11: idempotency.acquired emitted exactly once when tryAcquire obtains the lock.
+        verify(idempotencyMetrics, times(1)).acquired();
+        verify(idempotencyMetrics, times(0)).hit();
+        verify(idempotencyMetrics, times(0)).inProgress();
+        verify(idempotencyMetrics, times(0)).mismatch();
     }
 
     @Test
@@ -131,6 +150,11 @@ class IdempotentAspectUTTest {
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
         assertEquals("cached-result", result);
+        // Story 3.11: idempotency.hit emitted exactly once when a cached response is replayed.
+        verify(idempotencyMetrics, times(1)).hit();
+        verify(idempotencyMetrics, times(0)).acquired();
+        verify(idempotencyMetrics, times(0)).inProgress();
+        verify(idempotencyMetrics, times(0)).mismatch();
     }
 
     @Test
@@ -160,6 +184,12 @@ class IdempotentAspectUTTest {
         //then
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(0)).setResponse(any(), any(), any(), any(), any());
+        // Story 3.11: idempotency.in_progress emitted exactly once — the production-detection
+        // signal for a lease expiring before the protected method finishes (Story 3.5, AC #4).
+        verify(idempotencyMetrics, times(1)).inProgress();
+        verify(idempotencyMetrics, times(0)).acquired();
+        verify(idempotencyMetrics, times(0)).hit();
+        verify(idempotencyMetrics, times(0)).mismatch();
     }
 
     @Test
@@ -192,6 +222,11 @@ class IdempotentAspectUTTest {
         //then
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(0)).setResponse(any(), any(), any(), any(), any());
+        // Story 3.11: idempotency.mismatch emitted exactly once for a 422 PAYLOAD_MISMATCH.
+        verify(idempotencyMetrics, times(1)).mismatch();
+        verify(idempotencyMetrics, times(0)).acquired();
+        verify(idempotencyMetrics, times(0)).hit();
+        verify(idempotencyMetrics, times(0)).inProgress();
     }
 
     @Test
@@ -223,6 +258,9 @@ class IdempotentAspectUTTest {
         //then
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(0)).setResponse(any(), any(), any(), any(), any());
+        // Story 3.11: mismatch still takes precedence over in_progress at the metrics level too.
+        verify(idempotencyMetrics, times(1)).mismatch();
+        verify(idempotencyMetrics, times(0)).inProgress();
     }
 
     @Test

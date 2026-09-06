@@ -17,6 +17,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.aspect.IdempotentAspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.KeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
@@ -42,7 +43,10 @@ class ScosJdempotentPropertiesTest {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withBean(ScosJdempotentRedisProperties.class, ScosJdempotentRedisProperties::new)
             .withBean("JdempotentRedisTemplate", RedisTemplate.class, () -> mock(RedisTemplate.class))
-            .withUserConfiguration(ScosJdempotentConfig.class);
+            // Story 3.11: ScosJdempotentConfig now constructor-injects IdempotencyMetrics —
+            // ScosJdempotentMetricsConfiguration is what supplies it (no-op here, no Micrometer
+            // bean registered in this runner).
+            .withUserConfiguration(ScosJdempotentMetricsConfiguration.class, ScosJdempotentConfig.class);
 
     @Test
     void falhaDeFormaExplicitaQuandoNamespaceNaoEstaConfigurado() {
@@ -98,6 +102,10 @@ class ScosJdempotentPropertiesTest {
                             "listener", new StringBuilder(), MessageDigest.getInstance("SHA-256"));
 
                     assertThat(key.getKeyValue()).startsWith("checkout-service-listener-");
+
+                    // Story 3.11 (review finding #6): the getIdempotentAspectOnErrorConditionalCallback
+                    // bean specifically must also wire the resolved IdempotencyMetrics through.
+                    assertThat(aspect.getIdempotencyMetrics()).isSameAs(context.getBean(IdempotencyMetrics.class));
                 });
     }
 }

@@ -16,8 +16,11 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.configuration;
 import br.com.sawcunhaos.foundation.jdempotent.core.aspect.IdempotentAspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.NoOpIdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.redis.repository.RedisIdempotentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -41,6 +44,11 @@ public class ScosJdempotentConfig {
 
     private final ScosJdempotentRedisProperties redisProperties;
     private final ScosJdempotentProperties jdempotentProperties;
+    // Story 3.11 (review finding #3): ObjectProvider, not a required IdempotencyMetrics bean —
+    // a consumer that excludes ScosJdempotentMetricsConfiguration via
+    // spring.autoconfigure.exclude but keeps this config active must not lose IdempotentAspect/
+    // RedisIdempotentRepository entirely (NoSuchBeanDefinitionException) over an optional metric.
+    private final ObjectProvider<IdempotencyMetrics> idempotencyMetricsProvider;
 
     @Bean
     @ConditionalOnProperty(
@@ -49,13 +57,19 @@ public class ScosJdempotentConfig {
             matchIfMissing = true)
     @ConditionalOnBean(ErrorConditionalCallback.class)
     public IdempotentAspect getIdempotentAspectOnErrorConditionalCallback(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate, ErrorConditionalCallback errorConditionalCallback) {
-        return new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties), errorConditionalCallback, keyGenerator());
+        IdempotencyMetrics idempotencyMetrics = idempotencyMetricsProvider.getIfAvailable(NoOpIdempotencyMetrics::new);
+        IdempotentAspect aspect = new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties, idempotencyMetrics), errorConditionalCallback, keyGenerator());
+        aspect.setIdempotencyMetrics(idempotencyMetrics);
+        return aspect;
     }
 
     @Bean
     @ConditionalOnMissingBean(IdempotentAspect.class)
     public IdempotentAspect getIdempotentAspect(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate) {
-        return new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties), keyGenerator());
+        IdempotencyMetrics idempotencyMetrics = idempotencyMetricsProvider.getIfAvailable(NoOpIdempotencyMetrics::new);
+        IdempotentAspect aspect = new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties, idempotencyMetrics), keyGenerator());
+        aspect.setIdempotencyMetrics(idempotencyMetrics);
+        return aspect;
     }
 
     private DefaultKeyGenerator keyGenerator() {

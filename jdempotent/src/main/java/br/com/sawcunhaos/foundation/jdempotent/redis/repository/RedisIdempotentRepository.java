@@ -15,6 +15,8 @@ package br.com.sawcunhaos.foundation.jdempotent.redis.repository;
 
 
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.IdempotentRepository;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.NoOpIdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestResponseWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
@@ -32,6 +34,7 @@ import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -56,6 +59,11 @@ public class RedisIdempotentRepository implements IdempotentRepository {
     private final ValueOperations<String, IdempotentRequestResponseWrapper> valueOperations;
     private final RedisTemplate redisTemplate;
     private final ScosJdempotentRedisProperties redisProperties;
+    private final IdempotencyMetrics idempotencyMetrics;
+    /** Story 3.11: tracks the last value reported via {@link IdempotencyMetrics#degraded(boolean)} so
+     * {@link IdempotencyMetrics#degradedTransition()} fires once per actual flip, not once per
+     * circuit-breaker FSM edge (e.g. OPEN -> HALF_OPEN is degraded -> degraded, not a transition). */
+    private final AtomicBoolean degraded = new AtomicBoolean(false);
 
     /**
      * Story 3.7 (AC #1, ADD-3): a single circuit breaker guards every Redis operation this
@@ -77,9 +85,22 @@ public class RedisIdempotentRepository implements IdempotentRepository {
 
 
     public RedisIdempotentRepository(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate, ScosJdempotentRedisProperties redisProperties) {
+        this(redisTemplate, redisProperties, new NoOpIdempotencyMetrics());
+    }
+
+    /**
+     * Story 3.11 (FR7): same as the two-arg constructor, plus the {@link IdempotencyMetrics}
+     * sink this repository reports {@code idempotency.backend_error} and
+     * {@code idempotency.degraded}/{@code idempotency.degraded.transitions} to. The
+     * degraded gauge/counter are wired here (not lazily) because they observe the
+     * circuit breaker's own state-transition events, and the breaker is built in
+     * this constructor.
+     */
+    public RedisIdempotentRepository(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate, ScosJdempotentRedisProperties redisProperties, IdempotencyMetrics idempotencyMetrics) {
         this.valueOperations = redisTemplate.opsForValue();
         this.redisTemplate = redisTemplate;
         this.redisProperties = redisProperties;
+        this.idempotencyMetrics = idempotencyMetrics;
         this.circuitBreaker = CircuitBreaker.of("jdempotent-redis", CircuitBreakerConfig.custom()
                 .slowCallDurationThreshold(resolveSlowCallThreshold(redisTemplate))
                 .slowCallRateThreshold(100)
@@ -89,6 +110,17 @@ public class RedisIdempotentRepository implements IdempotentRepository {
                 .waitDurationInOpenState(Duration.ofSeconds(10))
                 .permittedNumberOfCallsInHalfOpenState(1)
                 .build());
+        // Story 3.11: "degraded" = the breaker is anywhere but CLOSED (OPEN or HALF_OPEN both
+        // count — a HALF_OPEN trial call still means normal traffic is fail-opening). The
+        // counter only fires when the boolean actually flips, per compareAndSet below — a
+        // CLOSED -> OPEN -> HALF_OPEN sequence is one transition into "degraded", not two.
+        this.circuitBreaker.getEventPublisher().onStateTransition(event -> {
+            boolean isDegraded = event.getStateTransition().getToState() != CircuitBreaker.State.CLOSED;
+            if (degraded.compareAndSet(!isDegraded, isDegraded)) {
+                emitMetricSafely(() -> idempotencyMetrics.degraded(isDegraded), "degraded");
+                emitMetricSafely(idempotencyMetrics::degradedTransition, "degradedTransition");
+            }
+        });
     }
 
     /**
@@ -116,6 +148,7 @@ public class RedisIdempotentRepository implements IdempotentRepository {
         try {
             return circuitBreaker.executeSupplier(() -> this.valueOperations.get(idempotencyKey.getKeyValue()) != null);
         } catch (Exception e) {
+            emitMetricSafely(idempotencyMetrics::backendError, "backendError");
             log.error("Error checking idempotency key in Redis: {}", e.getMessage());
             return false;
         }
@@ -132,6 +165,7 @@ public class RedisIdempotentRepository implements IdempotentRepository {
                 return stored != null ? stored.getResponse() : null;
             });
         } catch (Exception e) {
+            emitMetricSafely(idempotencyMetrics::backendError, "backendError");
             log.error("Error retrieving idempotent response from Redis: {}", e.getMessage());
             return null;
         }
@@ -144,6 +178,7 @@ public class RedisIdempotentRepository implements IdempotentRepository {
             circuitBreaker.executeRunnable(() ->
                     this.valueOperations.set(idempotencyKey.getKeyValue(), prepareValue(request), effectiveTtl, timeUnit));
         } catch (Exception e) {
+            emitMetricSafely(idempotencyMetrics::backendError, "backendError");
             log.error("Error storing idempotent request in Redis: {}", e.getMessage());
         }
     }
@@ -201,6 +236,7 @@ public class RedisIdempotentRepository implements IdempotentRepository {
                 return Lease.inProgress(idempotencyKey, payloadHash, effectiveTtl, existingPayloadHash, existingResponse);
             });
         } catch (Exception e) {
+            emitMetricSafely(idempotencyMetrics::backendError, "backendError");
             log.error("Error acquiring idempotent lease in Redis: {}", e.getMessage());
             // NOTE: fail-open on Redis errors (incl. the circuit breaker's own
             // CallNotPermittedException, Story 3.7), mirrors contains()/store() above which
@@ -223,6 +259,7 @@ public class RedisIdempotentRepository implements IdempotentRepository {
         try {
             circuitBreaker.executeRunnable(() -> redisTemplate.delete(idempotencyKey.getKeyValue()));
         } catch (Exception e) {
+            emitMetricSafely(idempotencyMetrics::backendError, "backendError");
             log.error("Error removing idempotent key from Redis: {}", e.getMessage());
         }
     }
@@ -271,6 +308,7 @@ public class RedisIdempotentRepository implements IdempotentRepository {
                 }
             });
         } catch (Exception e) {
+            emitMetricSafely(idempotencyMetrics::backendError, "backendError");
             log.error("Error setting idempotent response in Redis: {}", e.getMessage());
         }
     }
@@ -304,6 +342,20 @@ public class RedisIdempotentRepository implements IdempotentRepository {
             return new IdempotentRequestResponseWrapper(request, response);
         }
         return new IdempotentRequestResponseWrapper(null);
+    }
+
+    /**
+     * Story 3.11 (review finding #1): {@code IdempotencyMetrics} is a public interface a
+     * consumer can implement and inject — a broken custom implementation must never break
+     * this repository's fail-open guarantee (Story 3.7). Every emission call goes through
+     * here so a thrown exception is logged and swallowed, never propagated.
+     */
+    private void emitMetricSafely(Runnable metricCall, String eventName) {
+        try {
+            metricCall.run();
+        } catch (Exception e) {
+            log.warn("IdempotencyMetrics.{}() threw — ignoring, must never affect the fail-open guarantee", eventName, e);
+        }
     }
 }
 

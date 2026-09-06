@@ -86,6 +86,16 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   (`@ConfigurationProperties(prefix = "scos.jdempotent")`) exposes `scos.jdempotent.namespace`,
   injected into `ScosJdempotentConfig` to build `DefaultKeyGenerator(namespace)` for the
   auto-configured `IdempotentAspect` beans. See BREAKING note below for the behavior change.
+- **Idempotency observability**: `idempotency.acquired`/`.hit`/`.in_progress`/`.mismatch`/
+  `.backend_error` (counters), `idempotency.degraded` (gauge, 0/1) and
+  `idempotency.degraded.transitions` (counter) via the new `IdempotencyMetrics` abstraction —
+  no-op by default, Micrometer-backed (`MicrometerIdempotencyMetrics`) only when Micrometer is on
+  the consumer's classpath (`@ConditionalOnClass(MeterRegistry.class)`), registered by the new
+  `ScosJdempotentMetricsConfiguration` auto-configuration. `idempotency.in_progress` is the
+  production-detection signal for a lease expiring before the protected method finishes (Story 3.5,
+  AC #4); `idempotency.degraded` reflects the `RedisIdempotentRepository` circuit breaker (Story
+  3.7) being anywhere but `CLOSED`, flipping (and incrementing `.degraded.transitions`) only on an
+  actual normal/degraded transition, not on every check.
 
 ### **BREAKING** — `scos-foundation-jdempotent`
 

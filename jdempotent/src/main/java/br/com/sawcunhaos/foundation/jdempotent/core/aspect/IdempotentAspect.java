@@ -28,6 +28,8 @@ import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadM
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentReplayedFailureException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.KeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
+import br.com.sawcunhaos.foundation.jdempotent.core.metrics.NoOpIdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.CachedBusinessFailure;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.ChainData;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
@@ -86,6 +88,17 @@ public class IdempotentAspect {
     @Getter
     private IdempotentRepository idempotentRepository;
     private ErrorConditionalCallback errorCallback;
+    /**
+     * Story 3.11 (FR7): defaults to the no-op implementation so every existing
+     * constructor keeps working unchanged for consumers that don't wire metrics —
+     * {@code ScosJdempotentConfig} overrides it via the setter with the resolved
+     * {@code IdempotencyMetrics} bean (no-op or Micrometer-backed). {@code @Getter}
+     * exists so the wiring itself is testable (confirms the instance set by
+     * {@code ScosJdempotentConfig} is the one actually used).
+     */
+    @Setter
+    @Getter
+    private IdempotencyMetrics idempotencyMetrics = new NoOpIdempotencyMetrics();
     private static final ThreadLocal<StringBuilder> stringBuilders =
             new ThreadLocal<>() {
                 @Override
@@ -183,10 +196,12 @@ public class IdempotentAspect {
                 // AC #2: mismatch takes precedence over both "already in progress" and a
                 // cached response, even in the race window where the first call (different
                 // payload) is still processing — checked before hasCachedResponse() below.
+                emitMetricSafely(idempotencyMetrics::mismatch, "mismatch");
                 log.debug(classAndMethodName + "payload mismatch for {}", requestObject);
                 throw new IdempotentPayloadMismatchException(idempotencyKey);
             }
             if (lease.hasCachedResponse()) {
+                emitMetricSafely(idempotencyMetrics::hit, "hit");
                 Object cachedResponse = lease.getExistingResponse().getResponse();
                 CachedBusinessFailure cachedFailure = CachedBusinessFailure.decodeIfPresent(cachedResponse);
                 if (cachedFailure != null) {
@@ -201,10 +216,12 @@ public class IdempotentAspect {
                 log.debug(classAndMethodName + "ended up reading from cache for {}", requestObject);
                 return cachedResponse;
             }
+            emitMetricSafely(idempotencyMetrics::inProgress, "inProgress");
             log.debug(classAndMethodName + "already in progress for {}", requestObject);
             throw new IdempotentInProgressException(idempotencyKey);
         }
 
+        emitMetricSafely(idempotencyMetrics::acquired, "acquired");
         log.debug(classAndMethodName + "saved to cache with {}", idempotencyKey);
         setJdempotentId(pjp.getArgs(),idempotencyKey.getKeyValue());
         IdempotentFailurePolicy failurePolicy = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).onBusinessException();
@@ -389,5 +406,19 @@ public class IdempotentAspect {
         if(arg instanceof CharSequence) return true;
         if(arg instanceof Boolean) return true;
         return arg instanceof Number;
+    }
+
+    /**
+     * Story 3.11 (review finding #1): {@code IdempotencyMetrics} is a public interface a
+     * consumer can implement and inject — a broken custom implementation must never fail
+     * (or otherwise alter) the idempotency business flow. Every emission call goes through
+     * here so a thrown exception is logged and swallowed, never propagated.
+     */
+    private void emitMetricSafely(Runnable metricCall, String eventName) {
+        try {
+            metricCall.run();
+        } catch (Exception e) {
+            log.warn("IdempotencyMetrics.{}() threw — ignoring, must never affect the idempotency business flow", eventName, e);
+        }
     }
 }
