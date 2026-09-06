@@ -79,7 +79,7 @@ development_status:
     ready-for-dev
   3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci: review
   3-10-tornar-o-namespace-de-prefixo-de-chave-configurável: review
-  3-11-expor-métricas-de-idempotência: ready-for-dev
+  3-11-expor-métricas-de-idempotência: in-progress
   3-12-introduzir-idempotencykeyresolver-com-composição-de-chave-de: 
     ready-for-dev
   3-13-suportar-header-idempotency-key-como-fonte-de-chave: ready-for-dev

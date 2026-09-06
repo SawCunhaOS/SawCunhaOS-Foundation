@@ -1,6 +1,10 @@
+---
+baseline_commit: 2686e1f8b31f4de53c80a5f8e65af48c84e0d017
+---
+
 # Story 3.11: Expor métricas de idempotência
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
