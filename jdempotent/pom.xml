@@ -94,6 +94,23 @@
             <artifactId>spring-aop</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Story 3.13: IdempotencyKeyResolver reads the Idempotency-Key header via
+             RequestContextHolder/HttpServletRequest when available (AC #1), and must fall back
+             cleanly (no exception) when there is no web request context, e.g. a messaging
+             listener invoking the annotated method (AC #2). optional=true: compile-time only for
+             this module, not forced onto every consumer (same convention as spring-aop/
+             spring-aspects above) — a consumer with no web context simply never has a header to
+             read, which the resolver already handles as "no header present". -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter</artifactId>

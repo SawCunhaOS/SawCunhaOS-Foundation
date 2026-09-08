@@ -106,6 +106,19 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   `@JdempotentId` no longer contributes to the composed key at all — a new
   `JdempotentIdAnnotationChain` link excludes it, even when the same field also carries
   `@JdempotentProperty`; `@JdempotentId` now exists solely to receive the generated key back.
+- **`Idempotency-Key` header as a key source (Story 3.13)**: `@JdempotentResource` gains
+  `keySource()` (new `KeySource` enum, `FIELDS_ONLY` default/unchanged behavior, or
+  `HEADER_THEN_FIELDS`), `headerName()` (which HTTP header to read), and `onMismatch()` (new
+  `IdempotentKeyMismatchPolicy` enum, currently declarative-only — see its Javadoc). With
+  `HEADER_THEN_FIELDS`, `IdempotencyKeyResolver` reads the named header from the current HTTP
+  request (`RequestContextHolder`) and, when present, uses it as the sole source of the key —
+  annotated fields are not consulted at all in that case. Falls back to the `FIELDS_ONLY`
+  composition when the header is absent/blank, or when there is no HTTP request context at all
+  (e.g. a messaging listener invoking the annotated method): never throws in that case. Never
+  reads `X-Request-ID` as a fallback — a different concern (request correlation) from business
+  idempotency. `scos-foundation-jdempotent`'s `pom.xml` gains `spring-web` and
+  `jakarta.servlet-api` as `optional=true` (compile-time only, not forced onto consumers) to
+  read the header via `RequestContextHolder`/`HttpServletRequest`.
 
 ### **BREAKING** — `scos-foundation-jdempotent`
 

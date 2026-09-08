@@ -15,6 +15,7 @@ package br.com.sawcunhaos.foundation.jdempotent.core.aspect;
 
 import br.com.sawcunhaos.foundation.jdempotent.core.constant.CryptographyAlgorithm;
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
+import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadMismatchException;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentReplayedFailureException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.IdempotencyKeyResolver;
@@ -31,9 +32,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -275,6 +279,37 @@ class IdempotentAspectTest {
 
         //then
         assertTrue(idempotentRepository.contains(idempotencyKey));
+    }
+
+    @Test
+    void given_idempotency_key_header_present_when_trigger_aspect_then_the_stored_key_is_header_derived() {
+        // Story 3.13 (AC #1): keySource=HEADER_THEN_FIELDS wired all the way through the real
+        // AOP-proxied IdempotentAspect.execute(), not just at the resolver level. Proven here
+        // without hand-recomputing the expected hash: two calls sharing the same Idempotency-Key
+        // header but DIFFERENT payload bodies must collide onto the very same stored key — if the
+        // key were field-derived instead, the two different bodies would land under two
+        // different keys and never collide at all. The collision is caught by the pre-existing,
+        // key-source-agnostic Story 3.6 mismatch check (IdempotentPayloadMismatchException),
+        // confirming this story reuses that mechanism rather than needing a new one (see
+        // IdempotentKeyMismatchPolicy Javadoc / Story 3.13 Completion Notes).
+        MockHttpServletRequest httpRequest = new MockHttpServletRequest();
+        httpRequest.addHeader("Idempotency-Key", "client-supplied-key");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+        try {
+            IdempotentTestPayload first = new IdempotentTestPayload("first-body");
+            IdempotentTestPayload second = new IdempotentTestPayload("second-body");
+
+            //when: first call stores under the header-derived key
+            testIdempotentResource.idempotentMethodWithHeaderKeySource(first);
+
+            //then: a different payload body, same header, collides on the same key -> mismatch
+            Assertions.assertThrows(
+                    IdempotentPayloadMismatchException.class,
+                    () -> testIdempotentResource.idempotentMethodWithHeaderKeySource(second)
+            );
+        } finally {
+            RequestContextHolder.resetRequestAttributes();
+        }
     }
 
 }

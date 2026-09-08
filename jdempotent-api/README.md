@@ -14,15 +14,13 @@ Nenhum erro, nenhum aviso — inclua sempre o módulo de implementação junto.
 
 | Tipo | Descrição |
 |---|---|
-| `@JdempotentResource` | Marca o método que precisa ser idempotente |
+| `@JdempotentResource` | Marca o método que precisa ser idempotente; carrega `cachePrefix`/`ttl`/`onBusinessException` e, desde a Story 3.13, `keySource`/`headerName`/`onMismatch` para fonte de chave via header |
 | `@JdempotentId` | Recebe o identificador de idempotência gerado, no campo anotado |
 | `@JdempotentIgnore` | Exclui o campo anotado do cálculo de hash da chave |
 | `@JdempotentProperty` | Customiza como um campo entra no cálculo de hash da chave |
 | `@JdempotentRequestPayload` | Marca o parâmetro do método que representa o payload da requisição idempotente |
-
-> Nota de evolução (Story 3.13, Épico 3): `@JdempotentResource` ganhará os atributos `keySource`,
-> `headerName` e `onMismatch` numa story futura, direto neste módulo. Esta story move a anotação
-> como ela existe hoje, sem adiantar esses atributos.
+| `KeySource` (Story 3.13) | De onde a chave é composta: `FIELDS_ONLY` (padrão) ou `HEADER_THEN_FIELDS` (lê `headerName()` primeiro) |
+| `IdempotentKeyMismatchPolicy` (Story 3.13) | Política declarada para um header reenviado com payload diferente; hoje só `CONFLICT`, ver Javadoc para o que está (e não está) implementado |
 
 ## Regra de fronteira
 

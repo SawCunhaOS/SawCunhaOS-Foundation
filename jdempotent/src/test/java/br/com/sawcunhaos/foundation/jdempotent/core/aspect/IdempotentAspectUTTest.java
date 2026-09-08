@@ -106,9 +106,11 @@ class IdempotentAspectUTTest {
         idempotentAspect.execute(joinPoint);
 
         //then
-        // 5 calls: log prefix + cachePrefix + ttl + ttlTimeUnit + onBusinessException (Story 3.8)
-        verify(joinPoint, times(5)).getSignature();
-        verify(signature, times(4)).getMethod();
+        // 2 calls: log prefix + the single JdempotentResource lookup (Story 3.13 review patch:
+        // cachePrefix/ttl/ttlTimeUnit/onBusinessException/keySource/headerName now all read off
+        // the one annotation instance fetched once in execute(), not looked up again per attribute).
+        verify(joinPoint, times(2)).getSignature();
+        verify(signature, times(1)).getMethod();
         verify(joinPoint).getTarget();
         verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
         verify(joinPoint).proceed();
@@ -144,8 +146,10 @@ class IdempotentAspectUTTest {
         Object result = idempotentAspect.execute(joinPoint);
 
         //then
-        verify(joinPoint, times(4)).getSignature();
-        verify(signature, times(3)).getMethod();
+        // Story 3.13 (review patch): 2 getSignature()/1 getMethod() — see comment in the
+        // "should_store_repository" test above.
+        verify(joinPoint, times(2)).getSignature();
+        verify(signature, times(1)).getMethod();
         verify(joinPoint).getTarget();
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(1)).tryAcquire(any(), any(), any());
@@ -285,8 +289,10 @@ class IdempotentAspectUTTest {
         );
 
         //then
-        verify(joinPoint, times(4)).getSignature();
-        verify(signature, times(3)).getMethod();
+        // Story 3.13 (review patch): 2 getSignature()/1 getMethod() — see comment in the
+        // "should_store_repository" test above.
+        verify(joinPoint, times(2)).getSignature();
+        verify(signature, times(1)).getMethod();
         verify(joinPoint).getTarget();
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(0)).remove(any());
@@ -340,8 +346,10 @@ class IdempotentAspectUTTest {
         );
 
         //then
-        verify(joinPoint, times(4)).getSignature();
-        verify(signature, times(3)).getMethod();
+        // Story 3.13 (review patch): 2 getSignature()/1 getMethod() — see comment in the
+        // "should_store_repository" test above.
+        verify(joinPoint, times(2)).getSignature();
+        verify(signature, times(1)).getMethod();
         verify(joinPoint).getTarget();
         verify(joinPoint, times(0)).proceed();
         verify(idempotentRepository, times(0)).remove(any());

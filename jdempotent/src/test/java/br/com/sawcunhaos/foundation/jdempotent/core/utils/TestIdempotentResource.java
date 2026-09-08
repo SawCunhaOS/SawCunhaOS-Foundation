@@ -17,6 +17,7 @@ package br.com.sawcunhaos.foundation.jdempotent.core.utils;
 import br.com.sawcunhaos.foundation.jdempotent.api.IdempotentFailurePolicy;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentRequestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.KeySource;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,5 +70,11 @@ public class TestIdempotentResource {
     @JdempotentResource
     public String idempotencyKeyAsString(@JdempotentRequestPayload String idempotencyKey) {
         return idempotencyKey;
+    }
+
+    // Story 3.13 (AC #1): keySource=HEADER_THEN_FIELDS + headerName wired through to the real
+    // AOP-proxied flow, exercised by IdempotentAspectTest.
+    @JdempotentResource(cachePrefix = "TestIdempotentResource", keySource = KeySource.HEADER_THEN_FIELDS, headerName = "Idempotency-Key")
+    public void idempotentMethodWithHeaderKeySource(IdempotentTestPayload testObject) {
     }
 }

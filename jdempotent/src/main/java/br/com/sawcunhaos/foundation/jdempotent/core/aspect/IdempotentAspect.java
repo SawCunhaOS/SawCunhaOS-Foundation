@@ -187,14 +187,19 @@ public class IdempotentAspect {
     public Object execute(ProceedingJoinPoint pjp) throws Throwable {
         String classAndMethodName = generateLogPrefixForIncomingEvent(pjp);
         IdempotentRequestWrapper requestObject = findIdempotentRequestArg(pjp);
-        String listenerName = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).cachePrefix();
+        JdempotentResource resourceAnnotation = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class);
+        String listenerName = resourceAnnotation.cachePrefix();
         MessageDigest messageDigest = CryptographyAlgorithm.SHA256.newDigest();
         // Story 3.12 (AC #2): key composition goes exclusively through IdempotencyKeyResolver
         // now, not a direct call to keyGenerator — the resolver is the single reusable point
         // any future entrypoint (HTTP here, messaging per Story 3.13) would also go through.
-        IdempotencyKey idempotencyKey = keyResolver.resolve(requestObject, listenerName);
-        Long customTtl = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttl();
-        TimeUnit timeUnit = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttlTimeUnit();
+        // Story 3.13 (AC #1, #2): keySource/headerName are forwarded as-is — the resolver owns
+        // the header-vs-fields precedence and the no-web-context fallback, this call site does
+        // not need to know about either.
+        IdempotencyKey idempotencyKey = keyResolver.resolve(
+                requestObject, listenerName, resourceAnnotation.keySource(), resourceAnnotation.headerName());
+        Long customTtl = resourceAnnotation.ttl();
+        TimeUnit timeUnit = resourceAnnotation.ttlTimeUnit();
         Duration ttl = Duration.of(customTtl, timeUnit.toChronoUnit());
         // Compared against the payload hash already stored under the key
         // (Lease#getExistingPayloadHash) to tell a genuine duplicate call apart from a
@@ -237,7 +242,7 @@ public class IdempotentAspect {
         emitMetricSafely(idempotencyMetrics::acquired, "acquired");
         log.debug(classAndMethodName + "saved to cache with {}", idempotencyKey);
         setJdempotentId(pjp.getArgs(),idempotencyKey.getKeyValue());
-        IdempotentFailurePolicy failurePolicy = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).onBusinessException();
+        IdempotentFailurePolicy failurePolicy = resourceAnnotation.onBusinessException();
         Object result;
         try {
             result = pjp.proceed();
