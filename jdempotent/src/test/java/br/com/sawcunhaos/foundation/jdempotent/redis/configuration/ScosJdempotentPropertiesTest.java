@@ -43,6 +43,10 @@ class ScosJdempotentPropertiesTest {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withBean(ScosJdempotentRedisProperties.class, ScosJdempotentRedisProperties::new)
             .withBean("JdempotentRedisTemplate", RedisTemplate.class, () -> mock(RedisTemplate.class))
+            // Story 3.14: expirationTimeHour is a required @ConfigurationProperties field (no
+            // default, same as it was under @Value) — set here so it doesn't interfere with the
+            // namespace assertions below, which are what these tests are actually about.
+            .withPropertyValues("scos.jdempotent.cache.redis.expirationTimeHour=1")
             // Story 3.11: ScosJdempotentConfig now constructor-injects IdempotencyMetrics —
             // ScosJdempotentMetricsConfiguration is what supplies it (no-op here, no Micrometer
             // bean registered in this runner).
