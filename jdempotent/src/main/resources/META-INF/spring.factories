@@ -1,0 +1,13 @@
+# Story 3.14: org.springframework.boot.EnvironmentPostProcessor is loaded via this classic SPI
+# file (SpringFactoriesLoader.forDefaultResourceLocation(), reading META-INF/spring.factories),
+# NOT via a META-INF/spring/<FQCN>.imports file — verified against the actual pinned Spring Boot
+# version (4.1.x) by decompiling EnvironmentPostProcessorsFactory.fromSpringFactories() and
+# SpringFactoriesLoader, since the org.springframework.boot.env.EnvironmentPostProcessor.imports
+# convention (the newer, `.env`-package interface) does not apply to this
+# org.springframework.boot.EnvironmentPostProcessor (the current, non-deprecated one) on this
+# version. This is a different, earlier-executing SPI than
+# META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports (read only
+# during ApplicationContext refresh) — SpringApplication reads this one before any
+# ApplicationContext exists.
+org.springframework.boot.EnvironmentPostProcessor=\
+br.com.sawcunhaos.foundation.jdempotent.redis.configuration.ScosJdempotentRedisEnvironmentPostProcessor

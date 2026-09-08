@@ -16,8 +16,12 @@ spring:
       # (deferred-work.md). PrimeNumbersJdempotentEnableITTest/DisableITTest now supply the real
       # host/port/sentinel.* via @DynamicPropertySource against dynamically-ported Testcontainers,
       # same pattern as RedisIdempotentRepositoryTopologySmokeITTest.
-      repositories:
-        enabled: false
+      #
+      # repositories.enabled: false used to be hardcoded here as a workaround for Story 3.14's bug
+      # (ScosJdempotentRedisEnvironmentPostProcessor never ran, being registered in the wrong SPI
+      # file) — removed now that the fixed post-processor supplies it itself via defaultProperties.
+      # JdempotentTestApplication also excludes DataRedisRepositoriesAutoConfiguration directly, so
+      # nothing in this module's tests actually depended on this YAML value.
 scos:
   jdempotent:
     enabled: true
