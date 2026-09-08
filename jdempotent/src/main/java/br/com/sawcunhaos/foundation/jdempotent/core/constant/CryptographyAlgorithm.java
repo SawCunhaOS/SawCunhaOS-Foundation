@@ -13,6 +13,9 @@
 
 package br.com.sawcunhaos.foundation.jdempotent.core.constant;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  *
  * Supported hash algorithms to generate idempotency key
@@ -43,5 +46,19 @@ public enum CryptographyAlgorithm {
 
     public String value(){
         return algorithm;
+    }
+
+    /**
+     * Story 3.12 (patch): single point that turns an algorithm constant into a ready
+     * {@link MessageDigest}, so the {@code getInstance}/catch boilerplate isn't repeated at
+     * every call site (it was previously duplicated between {@code IdempotentAspect#execute}
+     * and {@code IdempotencyKeyResolver#resolve}).
+     */
+    public MessageDigest newDigest() {
+        try {
+            return MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Algorithm not supported: " + algorithm, e);
+        }
     }
 }

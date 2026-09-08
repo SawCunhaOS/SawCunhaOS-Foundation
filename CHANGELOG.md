@@ -96,8 +96,28 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   AC #4); `idempotency.degraded` reflects the `RedisIdempotentRepository` circuit breaker (Story
   3.7) being anywhere but `CLOSED`, flipping (and incrementing `.degraded.transitions`) only on an
   actual normal/degraded transition, not on every check.
+- **`IdempotencyKeyResolver`**: the single point of idempotency-key composition, extracted out of
+  `IdempotentAspect`/`DefaultKeyGenerator` (Story 3.12). Takes plain data — an already-collected
+  `IdempotentRequestWrapper` and a listener/prefix name — with no `ProceedingJoinPoint`/AspectJ
+  dependency, so it is reusable, unchanged, by a future non-HTTP entrypoint (e.g. a messaging
+  listener, Story 3.13). `@JdempotentProperty`-selected fields are now composed via a `TreeMap`
+  (deterministic, alphabetical-by-key ordering), replacing the previous `HashMap`-backed
+  composition whose iteration order was never a documented guarantee. A field annotated with
+  `@JdempotentId` no longer contributes to the composed key at all — a new
+  `JdempotentIdAnnotationChain` link excludes it, even when the same field also carries
+  `@JdempotentProperty`; `@JdempotentId` now exists solely to receive the generated key back.
 
 ### **BREAKING** — `scos-foundation-jdempotent`
+
+- **Idempotency-key composition changed (Story 3.12)**: fields are now folded into a `TreeMap`
+  (deterministic order) instead of a `HashMap` before hashing, and a field annotated only with
+  `@JdempotentId` no longer contributes to the hash at all (it only ever receives the generated
+  key back — see `IdempotentAspect#setJdempotentId`). Both changes alter the resulting SHA-256
+  hash for the common multi-field case, not just the `@JdempotentId` one. **Action required before
+  upgrading**: any idempotency key already stored (Redis or in-memory) is not reproduced by an
+  equivalent call after this upgrade — a retry composes a *different* key and is treated as a new
+  request, not a duplicate, until the old key's TTL expires. Acceptable for typical short-TTL
+  dedup windows; plan the rollout accordingly if a long TTL is configured.
 
 - **`scos.jdempotent.namespace` is now required for the Spring auto-configuration path**
   (`ScosJdempotentConfig`): previously, an application without the `APP_NAME` environment variable

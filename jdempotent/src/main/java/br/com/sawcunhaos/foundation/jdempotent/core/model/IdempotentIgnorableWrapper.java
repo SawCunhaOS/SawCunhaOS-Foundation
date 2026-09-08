@@ -16,17 +16,23 @@ package br.com.sawcunhaos.foundation.jdempotent.core.model;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 @Getter
 public class IdempotentIgnorableWrapper implements Serializable {
 
+    /**
+     * Story 3.12 (AC #1): a {@link TreeMap} orders entries by key name, so the material fed
+     * into the idempotency-key hash is deterministic regardless of the (unspecified)
+     * iteration order {@code Class#getDeclaredFields()} happens to return — a {@code HashMap}
+     * gave no such guarantee.
+     */
     private final Map<String, Object> nonIgnoredFields;
 
     public IdempotentIgnorableWrapper() {
-        nonIgnoredFields = new HashMap<>();
+        nonIgnoredFields = new TreeMap<>();
     }
 
     @Override

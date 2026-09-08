@@ -13,6 +13,7 @@
 
 package br.com.sawcunhaos.foundation.jdempotent.core.utils;
 
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentId;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentIgnore;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentProperty;
 import lombok.Data;
@@ -25,6 +26,12 @@ public class IdempotentTestPayload {
 
     @JdempotentProperty("transactionId")
     private Long eventId;
+
+    // Story 3.12: exists only to prove @JdempotentId never composes the key — no existing
+    // test asserts on it, and the new JdempotentIdAnnotationChain link excludes it before it
+    // ever reaches IdempotentIgnorableWrapper#nonIgnoredFields.
+    @JdempotentId
+    private String generatedId;
 
     public IdempotentTestPayload() {
     }

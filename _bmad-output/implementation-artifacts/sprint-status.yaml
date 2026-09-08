@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-22-2026 00:00
-last_updated: 09-06-2026
+last_updated: 09-08-2026
 project: SawCunhaOS-Foundation
 project_key: NOKEY
 tracking_system: file-system
@@ -80,8 +80,7 @@ development_status:
   3-9-posicionar-o-aspecto-de-idempotência-fora-do-escopo-transaci: review
   3-10-tornar-o-namespace-de-prefixo-de-chave-configurável: review
   3-11-expor-métricas-de-idempotência: review
-  3-12-introduzir-idempotencykeyresolver-com-composição-de-chave-de: 
-    ready-for-dev
+  3-12-introduzir-idempotencykeyresolver-com-composição-de-chave-de: review
   3-13-suportar-header-idempotency-key-como-fonte-de-chave: ready-for-dev
   3-14-migrar-configuração-para-configurationproperties: ready-for-dev
   3-15-corrigir-ttl-e-equals-hashcode: ready-for-dev

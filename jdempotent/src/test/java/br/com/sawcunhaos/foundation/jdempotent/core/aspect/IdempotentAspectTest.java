@@ -17,6 +17,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.constant.CryptographyAlgorit
 import br.com.sawcunhaos.foundation.jdempotent.core.datasource.InMemoryIdempotentRepository;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentReplayedFailureException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.generator.IdempotencyKeyResolver;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotencyKey;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentIgnorableWrapper;
 import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapper;
@@ -36,6 +37,7 @@ import org.springframework.test.util.AopTestUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -248,6 +250,31 @@ class IdempotentAspectTest {
 
         //then
         assertTrue(idempotentRepository.contains(key));
+    }
+
+    @Test
+    void given_resolver_invoked_directly_without_aop_when_compared_to_the_aspect_flow_then_produces_the_same_key() throws IllegalAccessException {
+        // Story 3.12 (Task 4, test 3): IdempotencyKeyResolver must be usable outside
+        // IdempotentAspect/AOP (e.g. a future messaging entrypoint, Story 3.13) and still
+        // agree with the key the real aspect flow computes and stores under — resolved here
+        // via the same `defaultKeyGenerator` bean TestAopContext wires into the AOP-proxied
+        // aspect (patch: a bare `new IdempotencyKeyResolver()` would only agree by coincidence,
+        // since both default to a null namespace), and via the same field-collection path
+        // (`getIdempotentNonIgnorableWrapper`) production code actually uses.
+        //given
+        IdempotentTestPayload test = new IdempotentTestPayload();
+        test.setName("resolver-direct");
+        IdempotentIgnorableWrapper wrapper =
+                new IdempotentAspect().getIdempotentNonIgnorableWrapper(List.of(test));
+
+        IdempotencyKey idempotencyKey = new IdempotencyKeyResolver(defaultKeyGenerator)
+                .resolve(new IdempotentRequestWrapper(wrapper), "");
+
+        //when
+        testIdempotentResource.idempotentMethod(test);
+
+        //then
+        assertTrue(idempotentRepository.contains(idempotencyKey));
     }
 
 }

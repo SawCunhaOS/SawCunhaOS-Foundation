@@ -17,6 +17,7 @@ package br.com.sawcunhaos.foundation.jdempotent.core.aspect;
 import br.com.sawcunhaos.foundation.jdempotent.core.callback.ErrorConditionalCallback;
 import br.com.sawcunhaos.foundation.jdempotent.core.chain.AnnotationChain;
 import br.com.sawcunhaos.foundation.jdempotent.core.chain.JdempotentDefaultChain;
+import br.com.sawcunhaos.foundation.jdempotent.core.chain.JdempotentIdAnnotationChain;
 import br.com.sawcunhaos.foundation.jdempotent.core.chain.JdempotentIgnoreAnnotationChain;
 import br.com.sawcunhaos.foundation.jdempotent.core.chain.JdempotentNoAnnotationChain;
 import br.com.sawcunhaos.foundation.jdempotent.core.chain.JdempotentPropertyAnnotationChain;
@@ -27,6 +28,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentInProgre
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentPayloadMismatchException;
 import br.com.sawcunhaos.foundation.jdempotent.core.exception.IdempotentReplayedFailureException;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.DefaultKeyGenerator;
+import br.com.sawcunhaos.foundation.jdempotent.core.generator.IdempotencyKeyResolver;
 import br.com.sawcunhaos.foundation.jdempotent.core.generator.KeyGenerator;
 import br.com.sawcunhaos.foundation.jdempotent.core.metrics.IdempotencyMetrics;
 import br.com.sawcunhaos.foundation.jdempotent.core.metrics.NoOpIdempotencyMetrics;
@@ -62,7 +64,6 @@ import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,7 +84,14 @@ import java.util.concurrent.TimeUnit;
         justification = "The IdempotentRepository is a Spring-injected collaborator stored by reference by design; it is not a value object to be copied.")
 public class IdempotentAspect {
     private AnnotationChain annotationChain;
-    private KeyGenerator keyGenerator;
+    private final KeyGenerator keyGenerator;
+    /**
+     * Story 3.12 (AC #2): the single point of idempotency-key composition, reusable outside
+     * AOP. Wraps {@link #keyGenerator} rather than duplicating its hash+prefix logic, so the
+     * already-configured namespace (Story 3.10) and already-tested behavior (NFR4) carry over
+     * unchanged — see {@code IdempotencyKeyResolver}'s Javadoc.
+     */
+    private final IdempotencyKeyResolver keyResolver;
     @Setter
     @Getter
     private IdempotentRepository idempotentRepository;
@@ -118,6 +126,7 @@ public class IdempotentAspect {
     public IdempotentAspect() {
         this.idempotentRepository = new InMemoryIdempotentRepository();
         this.keyGenerator = new DefaultKeyGenerator();
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
@@ -125,12 +134,14 @@ public class IdempotentAspect {
         this.errorCallback = errorCallback;
         this.idempotentRepository = new InMemoryIdempotentRepository();
         this.keyGenerator = new DefaultKeyGenerator();
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
     public IdempotentAspect(IdempotentRepository idempotentRepository) {
         this.idempotentRepository = idempotentRepository;
         this.keyGenerator = new DefaultKeyGenerator();
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
@@ -138,6 +149,7 @@ public class IdempotentAspect {
         this.idempotentRepository = idempotentRepository;
         this.errorCallback = errorCallback;
         this.keyGenerator = new DefaultKeyGenerator();
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
@@ -145,12 +157,14 @@ public class IdempotentAspect {
         this.errorCallback = errorCallback;
         this.idempotentRepository = new InMemoryIdempotentRepository();
         this.keyGenerator = keyGenerator;
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
     public IdempotentAspect(IdempotentRepository idempotentRepository, DefaultKeyGenerator keyGenerator) {
         this.idempotentRepository = idempotentRepository;
         this.keyGenerator = keyGenerator;
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
@@ -158,6 +172,7 @@ public class IdempotentAspect {
         this.idempotentRepository = idempotentRepository;
         this.errorCallback = errorCallback;
         this.keyGenerator = keyGenerator;
+        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
     }
 
@@ -173,13 +188,11 @@ public class IdempotentAspect {
         String classAndMethodName = generateLogPrefixForIncomingEvent(pjp);
         IdempotentRequestWrapper requestObject = findIdempotentRequestArg(pjp);
         String listenerName = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).cachePrefix();
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Algorithm not supported: " + CryptographyAlgorithm.SHA256.value(), e);
-        }
-        IdempotencyKey idempotencyKey = keyGenerator.generateIdempotentKey(requestObject, listenerName, stringBuilders.get(), messageDigest);
+        MessageDigest messageDigest = CryptographyAlgorithm.SHA256.newDigest();
+        // Story 3.12 (AC #2): key composition goes exclusively through IdempotencyKeyResolver
+        // now, not a direct call to keyGenerator — the resolver is the single reusable point
+        // any future entrypoint (HTTP here, messaging per Story 3.13) would also go through.
+        IdempotencyKey idempotencyKey = keyResolver.resolve(requestObject, listenerName);
         Long customTtl = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttl();
         TimeUnit timeUnit = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(JdempotentResource.class).ttlTimeUnit();
         Duration ttl = Duration.of(customTtl, timeUnit.toChronoUnit());
@@ -367,9 +380,10 @@ public class IdempotentAspect {
      * Collects every non-static declared field from the given class up through its superclass
      * chain (stopping before {@link Object}), so inherited fields also compose the idempotency
      * key. When a subclass field shadows a superclass field (same name), only the subclass one
-     * is kept, matching normal Java field-shadowing semantics. Iteration order is not a
-     * guarantee callers can rely on: the result is folded into a {@code HashMap} downstream,
-     * which does not preserve insertion order.
+     * is kept, matching normal Java field-shadowing semantics. Iteration order here is not a
+     * guarantee callers can rely on: the result is folded, keyed by field/property name, into a
+     * {@code TreeMap} downstream (see {@link IdempotentIgnorableWrapper}), which is what
+     * actually makes the composed key deterministic (Story 3.12), not this method's order.
      *
      * @param clazz the concrete class of the argument
      * @return non-static fields, without name duplicates
@@ -393,11 +407,16 @@ public class IdempotentAspect {
     private AnnotationChain fillChains(){
         JdempotentNoAnnotationChain jdempotentNoAnnotationChain = new JdempotentNoAnnotationChain();
         JdempotentIgnoreAnnotationChain jdempotentIgnoreAnnotationChain = new JdempotentIgnoreAnnotationChain();
+        // Story 3.12 (AC #1): checked right after JdempotentIgnore and before JdempotentProperty,
+        // so a field carrying @JdempotentId is excluded from key composition even if it also
+        // carries @JdempotentProperty.
+        JdempotentIdAnnotationChain jdempotentIdAnnotationChain = new JdempotentIdAnnotationChain();
         JdempotentDefaultChain jdempotentDefaultChain = new JdempotentDefaultChain();
         JdempotentPropertyAnnotationChain jdempotentPropertyAnnotationChain = new JdempotentPropertyAnnotationChain();
 
         jdempotentNoAnnotationChain.next(jdempotentIgnoreAnnotationChain);
-        jdempotentIgnoreAnnotationChain.next(jdempotentPropertyAnnotationChain);
+        jdempotentIgnoreAnnotationChain.next(jdempotentIdAnnotationChain);
+        jdempotentIdAnnotationChain.next(jdempotentPropertyAnnotationChain);
         jdempotentPropertyAnnotationChain.next(jdempotentDefaultChain);
         return jdempotentIgnoreAnnotationChain;
     }
