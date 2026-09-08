@@ -82,7 +82,7 @@ development_status:
   3-11-expor-métricas-de-idempotência: review
   3-12-introduzir-idempotencykeyresolver-com-composição-de-chave-de: review
   3-13-suportar-header-idempotency-key-como-fonte-de-chave: review
-  3-14-migrar-configuração-para-configurationproperties: ready-for-dev
+  3-14-migrar-configuração-para-configurationproperties: review
   3-15-corrigir-ttl-e-equals-hashcode: ready-for-dev
   3-16-adicionar-allowlist-de-tipos-no-polymorphicredisserializer: ready-for-dev
   3-17-substituir-construtores-telescópicos-por-builder-e-documenta: 

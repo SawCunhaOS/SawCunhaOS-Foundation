@@ -119,8 +119,38 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   idempotency. `scos-foundation-jdempotent`'s `pom.xml` gains `spring-web` and
   `jakarta.servlet-api` as `optional=true` (compile-time only, not forced onto consumers) to
   read the header via `RequestContextHolder`/`HttpServletRequest`.
+- **`@Value` → `@ConfigurationProperties` (Story 3.14)**: `ScosJdempotentRedisProperties` is now
+  `@ConfigurationProperties(prefix = "scos.jdempotent.cache.redis")` instead of six field-level
+  `@Value` lookups. `expirationTimeHour`, `dialTimeoutSecond`, `readTimeoutSecond`,
+  `writeTimeoutSecond` and `maxRetryCount` all keep failing fast when unconfigured (same two-layer
+  `@NotNull`/`@Validated` + unconditional `@PostConstruct` pattern as `ScosJdempotentProperties`,
+  Story 3.10) — no silent default introduced where none existed before. See **BREAKING** below for
+  the public-surface removals this migration also made.
 
 ### **BREAKING** — `scos-foundation-jdempotent`
+
+- **`ScosJdempotentRedisEnvironmentPostProcessor` now actually runs (Story 3.14)**: it was
+  registered in `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`,
+  a SPI read only during `ApplicationContext` refresh, so `EnvironmentPostProcessor#postProcessEnvironment`
+  was never invoked — `spring.data.redis.repositories.enabled=false` was silently never applied.
+  Now correctly registered in `META-INF/spring.factories` (the SPI `SpringApplication` reads before
+  any `ApplicationContext` exists; not the `META-INF/spring/*.imports` convention, which this
+  project's pinned Spring Boot version does not use for this particular interface — verified by
+  decompiling the dependency). **Action required before upgrading**: any consumer application that
+  relies on Spring Data Redis Repositories being auto-configured *elsewhere* in the same app (this
+  property is environment-wide, not scoped to this module) must now set
+  `spring.data.redis.repositories.enabled=true` explicitly to override this module's default, or
+  set `scos.jdempotent.enabled=false` if it does not need this module's own Redis wiring.
+
+- **Public surface removed (Story 3.14)**: `ConfigUtility` (public class,
+  `scos.jdempotent.cryptography.algorithm`) removed entirely — the field was never read anywhere
+  (the aspect hardcodes SHA-256 since Story 3.2), confirmed via a repo-wide search before removal.
+  `ScosJdempotentRedisProperties` also drops its `enable` field (bound to the unrelated
+  `scos.jdempotent.enabled` key via `@Value`, not anything under this class's own `cache.redis`
+  namespace) — being `@Data`, it had Lombok-generated `isEnable()`/`setEnable(boolean)` public
+  accessors, but a repo-wide search found no consumer of either. **Action required before
+  upgrading**: if anything outside this repo directly called `ConfigUtility` or
+  `ScosJdempotentRedisProperties#isEnable()`/`#setEnable(boolean)`, those calls no longer compile.
 
 - **Idempotency-key composition changed (Story 3.12)**: fields are now folded into a `TreeMap`
   (deterministic order) instead of a `HashMap` before hashing, and a field annotated only with
