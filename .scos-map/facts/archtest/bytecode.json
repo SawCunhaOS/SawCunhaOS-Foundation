@@ -1,0 +1,11 @@
+{
+ "fato": "bytecode",
+ "modulo": "archtest",
+ "fonte": "jdeps",
+ "confianca": "ausente",
+ "gerado_em": "2026-09-09T22:10:39Z",
+ "derivado_de": {},
+ "estado": "ausente",
+ "motivo": "compilou mas nao achou classes",
+ "comando_sugerido": "cd archtest && mvn compile"
+}

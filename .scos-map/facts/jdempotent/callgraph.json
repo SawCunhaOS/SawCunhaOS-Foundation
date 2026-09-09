@@ -1,0 +1,81 @@
+{
+ "fato": "callgraph",
+ "modulo": "jdempotent",
+ "fonte": "java-callgraph",
+ "confianca": "ausente",
+ "gerado_em": "2026-09-09T22:10:39Z",
+ "derivado_de": {},
+ "estado": "indisponivel",
+ "motivo": "java-callgraph.jar nao encontrado",
+ "comando_sugerido": "baixe o jar e passe --callgraph-jar <caminho> ou coloque em ~/.scos-map/java-callgraph.jar",
+ "lacunas_conhecidas": [
+  {
+   "tipo": "reflexao_ou_evento",
+   "path": "jdempotent/src/main/java/br/com/sawcunhaos/foundation/jdempotent/core/listener/JdempotentAnnotationCountListener.java",
+   "motivo": "reflexao ou publicacao de evento: alvo resolvido em runtime"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "jdempotent/src/main/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentProperties.java",
+   "anotacao": "Validated",
+   "motivo": "@Validated gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "jdempotent/src/main/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentRedisProperties.java",
+   "anotacao": "Validated",
+   "motivo": "@Validated gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "reflexao_ou_evento",
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/IdempotentAspectTest.java",
+   "motivo": "reflexao ou publicacao de evento: alvo resolvido em runtime"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/IdempotentAspectTransactionalRollbackTest.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/RollbackTrackingTransactionManager.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/TestAopTransactionalContext.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/utils/TestTransactionalIdempotentResource.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "reflexao_ou_evento",
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryTest.java",
+   "motivo": "reflexao ou publicacao de evento: alvo resolvido em runtime"
+  }
+ ],
+ "entrypoints": [
+  {
+   "path": "jdempotent/src/main/java/br/com/sawcunhaos/foundation/jdempotent/core/listener/JdempotentAnnotationCountListener.java",
+   "anotacao": "SpringBootApplication",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/JdempotentTestApplication.java",
+   "anotacao": "SpringBootApplication",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/controller/PrimeNumbersController.java",
+   "anotacao": "RestController",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "fato": "docs",
+ "modulo": "archtest",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:20Z",
+ "derivado_de": {
+  "archtest/AGENTS.md": "4e93315",
+  "archtest/README.md": "ccd71f8"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "archtest/AGENTS.md",
+   "bytes": 751,
+   "last_modified": "2026-08-29",
+   "last_commit": "60d4a74",
+   "commits_90d": 1,
+   "titulo": "archtest",
+   "secoes": [
+    "Conventions that differ from defaults",
+    "Known pitfalls"
+   ],
+   "modulos_citados": [
+    "archtest"
+   ]
+  },
+  {
+   "path": "archtest/README.md",
+   "bytes": 1174,
+   "last_modified": "2026-08-29",
+   "last_commit": "60d4a74",
+   "commits_90d": 2,
+   "titulo": "scos-foundation-archtest",
+   "secoes": [
+    "Regras existentes"
+   ],
+   "modulos_citados": [
+    "archtest",
+    "core",
+    "spring",
+    "web"
+   ]
+  }
+ ]
+}

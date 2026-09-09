@@ -1,0 +1,76 @@
+{
+ "fato": "docs",
+ "modulo": "privacy",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:17Z",
+ "derivado_de": {
+  "privacy/AGENTS.md": "3b07f6a",
+  "privacy/README.md": "0765027"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "privacy/AGENTS.md",
+   "bytes": 744,
+   "last_modified": "2026-08-29",
+   "last_commit": "60d4a74",
+   "commits_90d": 1,
+   "titulo": "privacy",
+   "secoes": [
+    "Conventions that differ from defaults",
+    "Running and verifying"
+   ],
+   "modulos_citados": [
+    "core",
+    "privacy",
+    "spring"
+   ]
+  },
+  {
+   "path": "privacy/README.md",
+   "bytes": 13010,
+   "last_modified": "2026-05-30",
+   "last_commit": "68152a9",
+   "commits_90d": 0,
+   "titulo": "SCOS Foundation Privacy",
+   "secoes": [
+    "Why a dedicated module",
+    "Loading on import (Spring)",
+    "Masking rules (`privacy-masking.yml`)",
+    "Strategies",
+    "Builtins by country/region",
+    "Which rule fires where",
+    "1) `headers` — request header in the HTTP log",
+    "privacy-masking.yml",
+    "application.yml — the filter must actually log the headers",
+    "log:  Header Name -> authorization -- ***",
+    "2) `body` — JSON field in the HTTP body log (matched by field name)",
+    "privacy-masking.yml",
+    "application.yml",
+    "3) `log-patterns` — free text in the application log (matched by value)",
+    "privacy-masking.yml",
+    "4) `audit-encrypt-fields` — at rest in the audit trail (matched by field name)",
+    "privacy-masking.yml",
+    "Behaviour flags (`application.yml`)",
+    "Application log masking (`%mask` / `%maskmdc`)",
+    "Step 1 — make the words available",
+    "Step 2 — reference `%mask` in the pattern",
+    "Gotcha — `log-patterns` regex must not be anchored",
+    "Opt-out",
+    "JSON encoders (Logstash) — not covered by `%mask`",
+    "Use outside the SCOS layer (no Spring)",
+    "Audit at-rest encryption",
+    "Performance"
+   ],
+   "modulos_citados": [
+    "audit",
+    "core",
+    "jdempotent",
+    "privacy",
+    "spring",
+    "validation"
+   ]
+  }
+ ]
+}

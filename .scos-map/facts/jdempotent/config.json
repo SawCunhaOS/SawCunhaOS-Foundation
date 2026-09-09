@@ -1,0 +1,57 @@
+{
+ "fato": "config",
+ "modulo": "jdempotent",
+ "fonte": "leitura de chaves (valores omitidos por seguranca)",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:18Z",
+ "derivado_de": {
+  "jdempotent/src/test/resources/application.yml": "ff7dd12",
+  "jdempotent/src/test/resources/logback-spring.xml": "e9c1fac",
+  "jdempotent/src/test/resources/testcontainer.properties": "cb547a1"
+ },
+ "aviso": "apenas nomes de chave e placeholders; nenhum valor foi lido",
+ "perfis_detectados": [],
+ "arquivos": [
+  {
+   "path": "jdempotent/src/test/resources/application.yml",
+   "bytes": 1603,
+   "last_modified": "2026-09-08",
+   "chaves": [
+    "server",
+    "server.port",
+    "spring",
+    "spring.cloud",
+    "spring.cloud.compatibility-verifier",
+    "spring.cloud.compatibility-verifier.enabled",
+    "spring.main",
+    "spring.main.allow-bean-definition-overriding",
+    "spring.cache",
+    "spring.cache.enable",
+    "spring.data",
+    "spring.data.redis",
+    "scos",
+    "scos.jdempotent",
+    "scos.jdempotent.enabled",
+    "scos.jdempotent.namespace",
+    "scos.jdempotent.cache",
+    "scos.jdempotent.cache.redis"
+   ]
+  },
+  {
+   "path": "jdempotent/src/test/resources/logback-spring.xml",
+   "bytes": 1316,
+   "last_modified": "2026-02-15",
+   "placeholders": [
+    "PID"
+   ]
+  },
+  {
+   "path": "jdempotent/src/test/resources/testcontainer.properties",
+   "bytes": 377,
+   "last_modified": "2026-02-15",
+   "chaves": [
+    "docker.host"
+   ]
+  }
+ ]
+}

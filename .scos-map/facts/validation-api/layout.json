@@ -1,0 +1,44 @@
+{
+ "fato": "layout",
+ "modulo": "validation-api",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:07Z",
+ "derivado_de": {
+  "validation-api/src/main/java/br/com/sawcunhaos/foundation/validation/api/CNPJ.java": "6b1fc3e",
+  "validation-api/src/main/java/br/com/sawcunhaos/foundation/validation/api/CPF.java": "e25ce2a",
+  "validation-api/src/main/java/br/com/sawcunhaos/foundation/validation/api/TaxIdentifier.java": "253c379",
+  "validation-api/src/main/java/br/com/sawcunhaos/foundation/validation/api/ZipCode.java": "7ff9bd9",
+  "validation-api/src/test/java/br/com/sawcunhaos/foundation/validation/api/ArchitectureTest.java": "31ed166"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src/test/java",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.validation.api",
+ "arquivos": 7,
+ "por_extensao": {
+  ".java": 5,
+  ".md": 1,
+  ".xml": 1
+ },
+ "por_tipo": {
+  "codigo": 5,
+  "doc": 1,
+  "build": 1
+ },
+ "areas": [
+  {
+   "caminho": "validation-api/src/main/java/br/com/sawcunhaos/foundation/validation/api",
+   "papel": "api",
+   "arquivos": 4
+  },
+  {
+   "caminho": "validation-api/src/test/java/br/com/sawcunhaos/foundation/validation/api",
+   "papel": "api",
+   "arquivos": 1
+  }
+ ],
+ "entrypoints": []
+}

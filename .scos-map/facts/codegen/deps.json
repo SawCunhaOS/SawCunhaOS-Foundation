@@ -1,0 +1,23 @@
+{
+ "fato": "deps",
+ "modulo": "codegen",
+ "fonte": "pom.xml + mvn dependency:tree",
+ "confianca": "resolvida",
+ "gerado_em": "2026-09-09T22:10:09Z",
+ "derivado_de": {
+  "codegen/pom.xml": "6512e52"
+ },
+ "diretas": [],
+ "divergencias": [],
+ "transitivas": [
+  {
+   "ga": "com.github.spotbugs:spotbugs-annotations",
+   "versao_resolvida": "4.9.8"
+  },
+  {
+   "ga": "com.google.code.findbugs:jsr305",
+   "versao_resolvida": "3.0.2"
+  }
+ ],
+ "transitivas_total": 2
+}

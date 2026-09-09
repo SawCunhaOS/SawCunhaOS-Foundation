@@ -1,0 +1,30 @@
+{
+ "fato": "docs",
+ "modulo": "audit-api",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:06Z",
+ "derivado_de": {
+  "audit-api/README.md": "6142d6e"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "audit-api/README.md",
+   "bytes": 1128,
+   "last_modified": "2026-08-22",
+   "last_commit": "637f22c",
+   "commits_90d": 1,
+   "titulo": "scos-foundation-audit-api",
+   "secoes": [
+    "Conteúdo",
+    "Regra de fronteira"
+   ],
+   "modulos_citados": [
+    "audit",
+    "audit-api",
+    "spring"
+   ]
+  }
+ ]
+}

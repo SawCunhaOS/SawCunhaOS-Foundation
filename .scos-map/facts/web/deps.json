@@ -1,0 +1,562 @@
+{
+ "fato": "deps",
+ "modulo": "web",
+ "fonte": "pom.xml + mvn dependency:tree",
+ "confianca": "resolvida",
+ "gerado_em": "2026-09-09T22:10:15Z",
+ "derivado_de": {
+  "web/pom.xml": "afa71df"
+ },
+ "diretas": [
+  {
+   "ga": "br.com.sawcunhaos:scos-foundation-core",
+   "versao_declarada": "${project.version}",
+   "origem": "gerenciada:dependencyManagement",
+   "scope": "compile",
+   "versao_resolvida": "1.2.0-SNAPSHOT"
+  },
+  {
+   "ga": "br.com.sawcunhaos:scos-foundation-cache",
+   "versao_declarada": "${project.version}",
+   "origem": "gerenciada:dependencyManagement",
+   "scope": "compile",
+   "versao_resolvida": "1.2.0-SNAPSHOT"
+  },
+  {
+   "ga": "br.com.sawcunhaos:scos-foundation-privacy",
+   "versao_declarada": "${project.version}",
+   "origem": "gerenciada:dependencyManagement",
+   "scope": "compile",
+   "versao_resolvida": "1.2.0-SNAPSHOT"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-web",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.data:spring-data-commons",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.cloud:spring-cloud-context",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "5.0.2"
+  },
+  {
+   "ga": "tools.jackson.dataformat:jackson-dataformat-xml",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "3.2.2"
+  },
+  {
+   "ga": "org.projectlombok:lombok",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "1.18.46"
+  },
+  {
+   "ga": "org.springframework.security:spring-security-core",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "7.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-validation",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "br.com.sawcunhaos:scos-foundation-validation-api",
+   "versao_declarada": "${project.version}",
+   "origem": "gerenciada:dependencyManagement",
+   "scope": "compile",
+   "versao_resolvida": "1.2.0-SNAPSHOT"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5",
+   "versao_declarada": "1.5.0",
+   "origem": "gerenciada:dependencyManagement",
+   "scope": "test",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.mockito:mockito-core",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "5.23.0"
+  },
+  {
+   "ga": "org.mockito:mockito-junit-jupiter",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "5.23.0"
+  },
+  {
+   "ga": "org.springframework:spring-test",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-test",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-webmvc-test",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "4.1.1"
+  }
+ ],
+ "divergencias": [],
+ "transitivas": [
+  {
+   "ga": "ch.qos.logback:logback-classic",
+   "versao_resolvida": "1.5.38"
+  },
+  {
+   "ga": "ch.qos.logback:logback-core",
+   "versao_resolvida": "1.5.38"
+  },
+  {
+   "ga": "com.fasterxml.jackson.core:jackson-annotations",
+   "versao_resolvida": "2.22"
+  },
+  {
+   "ga": "com.fasterxml.woodstox:woodstox-core",
+   "versao_resolvida": "7.2.1"
+  },
+  {
+   "ga": "com.fasterxml:classmate",
+   "versao_resolvida": "1.7.3"
+  },
+  {
+   "ga": "com.github.spotbugs:spotbugs-annotations",
+   "versao_resolvida": "4.9.8"
+  },
+  {
+   "ga": "com.google.code.findbugs:jsr305",
+   "versao_resolvida": "3.0.2"
+  },
+  {
+   "ga": "com.jayway.jsonpath:json-path",
+   "versao_resolvida": "2.10.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5-api",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5-engine",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5-engine-api",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.vaadin.external.google:android-json",
+   "versao_resolvida": "0.0.20131108.vaadin1"
+  },
+  {
+   "ga": "commons-logging:commons-logging",
+   "versao_resolvida": "1.3.6"
+  },
+  {
+   "ga": "io.lettuce:lettuce-core",
+   "versao_resolvida": "7.5.2.RELEASE"
+  },
+  {
+   "ga": "io.micrometer:micrometer-commons",
+   "versao_resolvida": "1.17.1"
+  },
+  {
+   "ga": "io.micrometer:micrometer-observation",
+   "versao_resolvida": "1.17.1"
+  },
+  {
+   "ga": "io.netty:netty-buffer",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-codec-base",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-codec-dns",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-common",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-handler",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-resolver",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-resolver-dns",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-transport",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.netty:netty-transport-native-unix-common",
+   "versao_resolvida": "4.2.17.Final"
+  },
+  {
+   "ga": "io.projectreactor:reactor-core",
+   "versao_resolvida": "3.8.6"
+  },
+  {
+   "ga": "jakarta.activation:jakarta.activation-api",
+   "versao_resolvida": "2.1.4"
+  },
+  {
+   "ga": "jakarta.annotation:jakarta.annotation-api",
+   "versao_resolvida": "3.0.0"
+  },
+  {
+   "ga": "jakarta.validation:jakarta.validation-api",
+   "versao_resolvida": "3.1.1"
+  },
+  {
+   "ga": "jakarta.xml.bind:jakarta.xml.bind-api",
+   "versao_resolvida": "4.0.5"
+  },
+  {
+   "ga": "net.bytebuddy:byte-buddy",
+   "versao_resolvida": "1.18.11"
+  },
+  {
+   "ga": "net.bytebuddy:byte-buddy-agent",
+   "versao_resolvida": "1.18.11"
+  },
+  {
+   "ga": "net.minidev:accessors-smart",
+   "versao_resolvida": "2.6.0"
+  },
+  {
+   "ga": "net.minidev:json-smart",
+   "versao_resolvida": "2.6.0"
+  },
+  {
+   "ga": "org.apache.commons:commons-lang3",
+   "versao_resolvida": "3.20.0"
+  },
+  {
+   "ga": "org.apache.logging.log4j:log4j-api",
+   "versao_resolvida": "2.25.5"
+  },
+  {
+   "ga": "org.apache.logging.log4j:log4j-to-slf4j",
+   "versao_resolvida": "2.25.5"
+  },
+  {
+   "ga": "org.apache.tomcat.embed:tomcat-embed-core",
+   "versao_resolvida": "11.0.24"
+  },
+  {
+   "ga": "org.apache.tomcat.embed:tomcat-embed-el",
+   "versao_resolvida": "11.0.24"
+  },
+  {
+   "ga": "org.apache.tomcat.embed:tomcat-embed-websocket",
+   "versao_resolvida": "11.0.24"
+  },
+  {
+   "ga": "org.apiguardian:apiguardian-api",
+   "versao_resolvida": "1.1.2"
+  },
+  {
+   "ga": "org.assertj:assertj-core",
+   "versao_resolvida": "3.27.7"
+  },
+  {
+   "ga": "org.awaitility:awaitility",
+   "versao_resolvida": "4.3.0"
+  },
+  {
+   "ga": "org.codehaus.woodstox:stax2-api",
+   "versao_resolvida": "4.3.0"
+  },
+  {
+   "ga": "org.hamcrest:hamcrest",
+   "versao_resolvida": "3.0"
+  },
+  {
+   "ga": "org.hibernate.validator:hibernate-validator",
+   "versao_resolvida": "9.1.3.Final"
+  },
+  {
+   "ga": "org.jboss.logging:jboss-logging",
+   "versao_resolvida": "3.6.3.Final"
+  },
+  {
+   "ga": "org.jspecify:jspecify",
+   "versao_resolvida": "1.0.1"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter-api",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter-engine",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter-params",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.platform:junit-platform-commons",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.platform:junit-platform-engine",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.objenesis:objenesis",
+   "versao_resolvida": "3.3"
+  },
+  {
+   "ga": "org.opentest4j:opentest4j",
+   "versao_resolvida": "1.3.0"
+  },
+  {
+   "ga": "org.ow2.asm:asm",
+   "versao_resolvida": "9.7.1"
+  },
+  {
+   "ga": "org.reactivestreams:reactive-streams",
+   "versao_resolvida": "1.0.4"
+  },
+  {
+   "ga": "org.skyscreamer:jsonassert",
+   "versao_resolvida": "1.5.3"
+  },
+  {
+   "ga": "org.slf4j:jul-to-slf4j",
+   "versao_resolvida": "2.0.18"
+  },
+  {
+   "ga": "org.slf4j:slf4j-api",
+   "versao_resolvida": "2.0.18"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-autoconfigure",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-cache",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-data-commons",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-data-redis",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-http-converter",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-jackson",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-netty",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-persistence",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-servlet",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-cache",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-data-redis",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-jackson",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-logging",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-tomcat",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-starter-tomcat-runtime",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-test",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-test-autoconfigure",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-tomcat",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-transaction",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-validation",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-web-server",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.boot:spring-boot-webmvc",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.data:spring-data-keyvalue",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.data:spring-data-redis",
+   "versao_resolvida": "4.1.1"
+  },
+  {
+   "ga": "org.springframework.security:spring-security-crypto",
+   "versao_resolvida": "7.1.1"
+  },
+  {
+   "ga": "org.springframework:spring-aop",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-beans",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-context",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-context-support",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-core",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-expression",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-messaging",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-oxm",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-tx",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-web",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.springframework:spring-webmvc",
+   "versao_resolvida": "7.0.9"
+  },
+  {
+   "ga": "org.xmlunit:xmlunit-core",
+   "versao_resolvida": "2.11.0"
+  },
+  {
+   "ga": "org.yaml:snakeyaml",
+   "versao_resolvida": "2.6"
+  },
+  {
+   "ga": "redis.clients.authentication:redis-authx-core",
+   "versao_resolvida": "0.1.1-beta2"
+  },
+  {
+   "ga": "tools.jackson.core:jackson-core",
+   "versao_resolvida": "3.2.2"
+  },
+  {
+   "ga": "tools.jackson.core:jackson-databind",
+   "versao_resolvida": "3.2.2"
+  },
+  {
+   "ga": "tools.jackson.dataformat:jackson-dataformat-smile",
+   "versao_resolvida": "3.2.2"
+  }
+ ],
+ "transitivas_total": 105
+}

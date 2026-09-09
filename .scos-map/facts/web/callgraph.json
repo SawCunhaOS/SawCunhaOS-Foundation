@@ -1,0 +1,92 @@
+{
+ "fato": "callgraph",
+ "modulo": "web",
+ "fonte": "java-callgraph",
+ "confianca": "ausente",
+ "gerado_em": "2026-09-09T22:10:39Z",
+ "derivado_de": {},
+ "estado": "indisponivel",
+ "motivo": "java-callgraph.jar nao encontrado",
+ "comando_sugerido": "baixe o jar e passe --callgraph-jar <caminho> ou coloque em ~/.scos-map/java-callgraph.jar",
+ "lacunas_conhecidas": [
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestDELETE.java",
+   "anotacao": "CacheEvict",
+   "motivo": "@CacheEvict gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestGET.java",
+   "anotacao": "Cacheable",
+   "motivo": "@Cacheable gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestPATCH.java",
+   "anotacao": "CacheEvict",
+   "motivo": "@CacheEvict gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestPOST.java",
+   "anotacao": "CacheEvict",
+   "motivo": "@CacheEvict gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestPUT.java",
+   "anotacao": "CacheEvict",
+   "motivo": "@CacheEvict gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "reflexao_ou_evento",
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/listener/ValidationAnnotationCountListener.java",
+   "motivo": "reflexao ou publicacao de evento: alvo resolvido em runtime"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/test/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestAnnotationCachingTest.java",
+   "anotacao": "Cacheable",
+   "motivo": "@Cacheable gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "web/src/test/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestAnnotationCachingTest.java",
+   "anotacao": "CacheEvict",
+   "motivo": "@CacheEvict gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  }
+ ],
+ "entrypoints": [
+  {
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/annotation/ScosController.java",
+   "anotacao": "RestController",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "web/src/main/java/br/com/sawcunhaos/foundation/web/listener/ValidationAnnotationCountListener.java",
+   "anotacao": "SpringBootApplication",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "web/src/test/java/br/com/sawcunhaos/foundation/web/TestBootConfiguration.java",
+   "anotacao": "SpringBootApplication",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "web/src/test/java/br/com/sawcunhaos/foundation/web/filter/LoggingFilterMaskingE2ETest.java",
+   "anotacao": "RestController",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "web/src/test/java/br/com/sawcunhaos/foundation/web/support/DomainErrorController.java",
+   "anotacao": "RestController",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "web/src/test/java/br/com/sawcunhaos/foundation/web/support/PingController.java",
+   "anotacao": "RestController",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  }
+ ]
+}

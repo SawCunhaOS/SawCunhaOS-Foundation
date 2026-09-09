@@ -1,0 +1,28 @@
+{
+ "fato": "docs",
+ "modulo": "web",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:15Z",
+ "derivado_de": {
+  "web/AGENTS.md": "9f8ae2c"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "web/AGENTS.md",
+   "bytes": 588,
+   "last_modified": "2026-08-29",
+   "last_commit": "60d4a74",
+   "commits_90d": 1,
+   "titulo": "web",
+   "secoes": [
+    "Where things are"
+   ],
+   "modulos_citados": [
+    "core",
+    "web"
+   ]
+  }
+ ]
+}

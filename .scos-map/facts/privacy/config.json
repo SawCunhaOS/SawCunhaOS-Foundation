@@ -1,0 +1,133 @@
+{
+ "fato": "config",
+ "modulo": "privacy",
+ "fonte": "leitura de chaves (valores omitidos por seguranca)",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:16Z",
+ "derivado_de": {
+  "privacy/src/main/resources/privacy-masking.yml": "2ac872e",
+  "privacy/src/main/resources/privacy-builtins/br.yml": "a0d1df7",
+  "privacy/src/main/resources/privacy-builtins/eu.yml": "942650c",
+  "privacy/src/main/resources/privacy-builtins/generic.yml": "4c71082",
+  "privacy/src/main/resources/privacy-builtins/in.yml": "3350c8e",
+  "privacy/src/main/resources/privacy-builtins/uk.yml": "778f9cd",
+  "privacy/src/main/resources/privacy-builtins/us.yml": "4f2bb8b",
+  "privacy/src/test/resources/test-masking-basic.yml": "6b8dba6"
+ },
+ "aviso": "apenas nomes de chave e placeholders; nenhum valor foi lido",
+ "perfis_detectados": [],
+ "arquivos": [
+  {
+   "path": "privacy/src/main/resources/privacy-masking.yml",
+   "bytes": 1671,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "scos",
+    "scos.privacy",
+    "scos.privacy.masking",
+    "scos.privacy.masking.builtins",
+    "scos.privacy.masking.headers",
+    "scos.privacy.masking.body",
+    "scos.privacy.masking.log-patterns",
+    "scos.privacy.masking.audit-encrypt-fields"
+   ]
+  },
+  {
+   "path": "privacy/src/main/resources/privacy-builtins/br.yml",
+   "bytes": 1240,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "pack",
+    "patterns",
+    "patterns.regex",
+    "patterns.strategy",
+    "patterns.keep-first",
+    "patterns.keep-last",
+    "patterns.cpf",
+    "patterns.cnpj"
+   ]
+  },
+  {
+   "path": "privacy/src/main/resources/privacy-builtins/eu.yml",
+   "bytes": 336,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "pack",
+    "patterns",
+    "patterns.regex",
+    "patterns.strategy",
+    "patterns.keep-first",
+    "patterns.keep-last"
+   ]
+  },
+  {
+   "path": "privacy/src/main/resources/privacy-builtins/generic.yml",
+   "bytes": 976,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "pack",
+    "patterns",
+    "patterns.regex",
+    "patterns.strategy",
+    "patterns.keep-first",
+    "patterns.keep-last",
+    "patterns.luhn",
+    "patterns.value"
+   ]
+  },
+  {
+   "path": "privacy/src/main/resources/privacy-builtins/in.yml",
+   "bytes": 319,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "pack",
+    "patterns",
+    "patterns.regex",
+    "patterns.strategy",
+    "patterns.keep-first",
+    "patterns.keep-last"
+   ]
+  },
+  {
+   "path": "privacy/src/main/resources/privacy-builtins/uk.yml",
+   "bytes": 337,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "pack",
+    "patterns",
+    "patterns.regex",
+    "patterns.strategy",
+    "patterns.keep-first",
+    "patterns.keep-last"
+   ]
+  },
+  {
+   "path": "privacy/src/main/resources/privacy-builtins/us.yml",
+   "bytes": 565,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "pack",
+    "patterns",
+    "patterns.regex",
+    "patterns.strategy",
+    "patterns.keep-first",
+    "patterns.keep-last"
+   ]
+  },
+  {
+   "path": "privacy/src/test/resources/test-masking-basic.yml",
+   "bytes": 629,
+   "last_modified": "2026-05-30",
+   "chaves": [
+    "scos",
+    "scos.privacy",
+    "scos.privacy.masking",
+    "scos.privacy.masking.builtins",
+    "scos.privacy.masking.headers",
+    "scos.privacy.masking.body",
+    "scos.privacy.masking.log-patterns",
+    "scos.privacy.masking.audit-encrypt-fields"
+   ]
+  }
+ ]
+}

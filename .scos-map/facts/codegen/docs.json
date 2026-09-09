@@ -1,0 +1,30 @@
+{
+ "fato": "docs",
+ "modulo": "codegen",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:09Z",
+ "derivado_de": {
+  "codegen/README.md": "7669781"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "codegen/README.md",
+   "bytes": 1754,
+   "last_modified": "2026-08-23",
+   "last_commit": "7d9074c",
+   "commits_90d": 1,
+   "titulo": "SCOS Foundation Codegen",
+   "secoes": [
+    "Templates",
+    "Como usar"
+   ],
+   "modulos_citados": [
+    "codegen",
+    "validation",
+    "web"
+   ]
+  }
+ ]
+}

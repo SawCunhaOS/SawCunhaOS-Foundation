@@ -1,0 +1,213 @@
+{
+ "fato": "config",
+ "modulo": "_raiz",
+ "fonte": "leitura de chaves (valores omitidos por seguranca)",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:04Z",
+ "derivado_de": {
+  ".gitignore": "d4d579c",
+  ".github/actions/setup-gpg/action.yml": "fb879b2",
+  ".github/workflows/build.yml": "f50476d",
+  ".github/workflows/manual-release.yml": "16735c4",
+  ".github/workflows/publish-snapshot.yml": "128a13e",
+  ".github/workflows/release-notes.yml": "fa353ae",
+  ".github/workflows/validate-pr-target.yml": "7caf5bb",
+  ".github/workflows/validate-pr-template.yml": "d04147f",
+  "etc/devops/checkstyle/checkstyle.xml": "5303621",
+  "etc/spotbugs/exclude.xml": "4b71905"
+ },
+ "aviso": "apenas nomes de chave e placeholders; nenhum valor foi lido",
+ "perfis_detectados": [],
+ "arquivos": [
+  {
+   "path": ".gitignore",
+   "bytes": 330,
+   "last_modified": "2026-02-14"
+  },
+  {
+   "path": ".github/actions/setup-gpg/action.yml",
+   "bytes": 1282,
+   "last_modified": "2026-06-14",
+   "chaves": [
+    "name",
+    "description",
+    "inputs",
+    "inputs.GPG_PRIVATE_KEY",
+    "inputs.GPG_PRIVATE_KEY.description",
+    "inputs.GPG_PRIVATE_KEY.required",
+    "inputs.GPG_PASSPHRASE",
+    "inputs.GPG_PASSPHRASE.description",
+    "inputs.GPG_PASSPHRASE.required",
+    "runs",
+    "runs.using",
+    "runs.steps",
+    "runs.steps.shell",
+    "runs.steps.env",
+    "runs.steps.env.GPG_PRIVATE_KEY",
+    "runs.steps.run"
+   ]
+  },
+  {
+   "path": ".github/workflows/build.yml",
+   "bytes": 4641,
+   "last_modified": "2026-08-29",
+   "chaves": [
+    "name",
+    "on",
+    "on.push",
+    "on.push.branches",
+    "on.pull_request",
+    "jobs",
+    "jobs.build",
+    "jobs.build.runs-on",
+    "jobs.build.timeout-minutes",
+    "jobs.build.strategy",
+    "jobs.build.strategy.matrix",
+    "jobs.build.steps",
+    "jobs.build.steps.with",
+    "jobs.build.steps.uses",
+    "jobs.build.steps.run",
+    "jobs.build.steps.if",
+    "jobs.security-check",
+    "jobs.security-check.runs-on",
+    "jobs.security-check.timeout-minutes",
+    "jobs.security-check.needs",
+    "jobs.security-check.strategy",
+    "jobs.security-check.strategy.matrix",
+    "jobs.security-check.steps",
+    "jobs.security-check.steps.uses",
+    "jobs.security-check.steps.with",
+    "jobs.security-check.steps.run",
+    "jobs.security-check.steps.continue-on-error",
+    "jobs.security-check.steps.if"
+   ]
+  },
+  {
+   "path": ".github/workflows/manual-release.yml",
+   "bytes": 2225,
+   "last_modified": "2026-06-14",
+   "chaves": [
+    "name",
+    "on",
+    "on.workflow_dispatch",
+    "on.workflow_dispatch.inputs",
+    "on.workflow_dispatch.inputs.branch",
+    "on.workflow_dispatch.inputs.version_type",
+    "on.workflow_dispatch.inputs.confirm",
+    "jobs",
+    "jobs.check-permissions",
+    "jobs.check-permissions.runs-on",
+    "jobs.check-permissions.steps",
+    "jobs.check-permissions.steps.run",
+    "jobs.release",
+    "jobs.release.needs",
+    "jobs.release.runs-on",
+    "jobs.release.if",
+    "jobs.release.steps",
+    "jobs.release.steps.uses",
+    "jobs.release.steps.with",
+    "jobs.release.steps.run",
+    "jobs.release.steps.env"
+   ]
+  },
+  {
+   "path": ".github/workflows/publish-snapshot.yml",
+   "bytes": 1755,
+   "last_modified": "2026-06-14",
+   "chaves": [
+    "name",
+    "on",
+    "on.workflow_run",
+    "on.workflow_run.workflows",
+    "on.workflow_run.types",
+    "jobs",
+    "jobs.release",
+    "jobs.release.runs-on",
+    "jobs.release.if",
+    "jobs.release.steps",
+    "jobs.release.steps.uses",
+    "jobs.release.steps.with",
+    "jobs.release.steps.run",
+    "jobs.release.steps.env",
+    "jobs.release.steps.if"
+   ]
+  },
+  {
+   "path": ".github/workflows/release-notes.yml",
+   "bytes": 1054,
+   "last_modified": "2026-06-14",
+   "chaves": [
+    "name",
+    "on",
+    "on.push",
+    "on.push.tags",
+    "permissions",
+    "permissions.contents",
+    "jobs",
+    "jobs.release-notes",
+    "jobs.release-notes.runs-on",
+    "jobs.release-notes.steps",
+    "jobs.release-notes.steps.uses",
+    "jobs.release-notes.steps.with",
+    "jobs.release-notes.steps.id",
+    "jobs.release-notes.steps.env",
+    "jobs.release-notes.steps.run"
+   ]
+  },
+  {
+   "path": ".github/workflows/validate-pr-target.yml",
+   "bytes": 571,
+   "last_modified": "2026-06-14",
+   "chaves": [
+    "name",
+    "on",
+    "on.pull_request",
+    "on.pull_request.types",
+    "permissions",
+    "permissions.contents",
+    "jobs",
+    "jobs.validate-target",
+    "jobs.validate-target.runs-on",
+    "jobs.validate-target.steps",
+    "jobs.validate-target.steps.uses",
+    "jobs.validate-target.steps.env",
+    "jobs.validate-target.steps.run"
+   ]
+  },
+  {
+   "path": ".github/workflows/validate-pr-template.yml",
+   "bytes": 853,
+   "last_modified": "2026-06-14",
+   "chaves": [
+    "name",
+    "on",
+    "on.pull_request",
+    "on.pull_request.types",
+    "permissions",
+    "permissions.contents",
+    "jobs",
+    "jobs.validate",
+    "jobs.validate.runs-on",
+    "jobs.validate.steps",
+    "jobs.validate.steps.uses",
+    "jobs.validate.steps.if",
+    "jobs.validate.steps.env",
+    "jobs.validate.steps.run"
+   ]
+  },
+  {
+   "path": "etc/devops/checkstyle/checkstyle.xml",
+   "bytes": 20483,
+   "last_modified": "2026-02-15",
+   "placeholders": [
+    "org.checkstyle.google.suppressionfilter.config",
+    "org.checkstyle.google.suppressionxpathfilter.config"
+   ]
+  },
+  {
+   "path": "etc/spotbugs/exclude.xml",
+   "bytes": 706,
+   "last_modified": "2026-06-14"
+  }
+ ]
+}

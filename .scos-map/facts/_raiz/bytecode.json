@@ -1,0 +1,10 @@
+{
+ "fato": "bytecode",
+ "modulo": "_raiz",
+ "fonte": "n/d",
+ "confianca": "ausente",
+ "gerado_em": "2026-09-09T22:10:20Z",
+ "derivado_de": {},
+ "estado": "nao_aplicavel",
+ "motivo": "modulo agregador (packaging=pom) nao tem codigo"
+}

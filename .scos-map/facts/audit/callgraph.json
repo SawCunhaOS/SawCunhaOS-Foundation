@@ -1,0 +1,128 @@
+{
+ "fato": "callgraph",
+ "modulo": "audit",
+ "fonte": "java-callgraph",
+ "confianca": "ausente",
+ "gerado_em": "2026-09-09T22:10:39Z",
+ "derivado_de": {},
+ "estado": "indisponivel",
+ "motivo": "java-callgraph.jar nao encontrado",
+ "comando_sugerido": "baixe o jar e passe --callgraph-jar <caminho> ou coloque em ~/.scos-map/java-callgraph.jar",
+ "lacunas_conhecidas": [
+  {
+   "tipo": "implementacao_em_runtime",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/repository/ScosAuditDlqRepository.java",
+   "alvo": "ScosAuditDlqRepository",
+   "motivo": "repositorio JpaRepository implementado por Spring Data em runtime"
+  },
+  {
+   "tipo": "implementacao_em_runtime",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/repository/ScosAuditLogRepository.java",
+   "alvo": "ScosAuditLogRepository",
+   "motivo": "repositorio JpaRepository implementado por Spring Data em runtime"
+  },
+  {
+   "tipo": "reflexao_ou_evento",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/listener/AuditableAnnotationCountListener.java",
+   "motivo": "reflexao ou publicacao de evento: alvo resolvido em runtime"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditDlqJob.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashService.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditIntegrityServiceBean.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditLogService.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditQueryServiceBean.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditRetentionJob.java",
+   "anotacao": "Transactional",
+   "motivo": "@Transactional gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditServiceBean.java",
+   "anotacao": "Async",
+   "motivo": "@Async gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AbstractAuditIntegrationTest.java",
+   "anotacao": "Async",
+   "motivo": "@Async gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditIntegrationTest.java",
+   "anotacao": "Async",
+   "motivo": "@Async gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "proxy_spring",
+   "path": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditPostgresTest.java",
+   "anotacao": "Async",
+   "motivo": "@Async gera proxy em runtime; a chamada real nao aparece no bytecode compilado"
+  },
+  {
+   "tipo": "implementacao_em_runtime",
+   "path": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/repository/CountryRepository.java",
+   "alvo": "CountryRepository",
+   "motivo": "repositorio JpaRepository implementado por Spring Data em runtime"
+  }
+ ],
+ "entrypoints": [
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/listener/AuditableAnnotationCountListener.java",
+   "anotacao": "SpringBootApplication",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditBatchConsumer.java",
+   "anotacao": "Scheduled",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditBatchConsumer.java",
+   "anotacao": "Scheduled",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditDlqJob.java",
+   "anotacao": "Scheduled",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditRetentionJob.java",
+   "anotacao": "Scheduled",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  },
+  {
+   "path": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditTestApplication.java",
+   "anotacao": "SpringBootApplication",
+   "nota": "ponto de entrada - ausencia de chamador NAO significa codigo morto"
+  }
+ ]
+}

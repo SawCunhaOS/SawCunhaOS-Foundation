@@ -1,0 +1,28 @@
+{
+ "fato": "layout",
+ "modulo": "archtest",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:19Z",
+ "derivado_de": {
+  "archtest/src/test/java/br/com/sawcunhaos/foundation/archtest/ArchitectureTest.java": "3af2381"
+ },
+ "raizes_fonte": [
+  "src/test/java",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.archtest",
+ "arquivos": 4,
+ "por_extensao": {
+  ".md": 2,
+  ".xml": 1,
+  ".java": 1
+ },
+ "por_tipo": {
+  "doc": 2,
+  "build": 1,
+  "codigo": 1
+ },
+ "areas": [],
+ "entrypoints": []
+}

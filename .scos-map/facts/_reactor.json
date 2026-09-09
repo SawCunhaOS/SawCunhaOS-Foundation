@@ -1,0 +1,315 @@
+{
+ "fato": "reactor",
+ "modulo": "_reactor",
+ "fonte": "poms e manifests do repo",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:20Z",
+ "derivado_de": {
+  "pom.xml": "e29a81b",
+  "audit-api/pom.xml": "80e1d32",
+  "jdempotent-api/pom.xml": "1c7e3df",
+  "validation-api/pom.xml": "19efbca",
+  "codegen/pom.xml": "6512e52",
+  "core/pom.xml": "a40308e",
+  "spring/pom.xml": "71a891e",
+  "validation/pom.xml": "e559c4d",
+  "cache/pom.xml": "f6d1117",
+  "jpa/pom.xml": "a895fec",
+  "web/pom.xml": "afa71df",
+  "feign/pom.xml": "89c654c",
+  "privacy/pom.xml": "0b9e1f5",
+  "audit/pom.xml": "51f3602",
+  "jdempotent/pom.xml": "5a16971",
+  "archtest/pom.xml": "325936e"
+ },
+ "modulos": [
+  {
+   "id": "_raiz",
+   "path": "",
+   "tipo": "pom",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation"
+  },
+  {
+   "id": "audit-api",
+   "path": "audit-api",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-audit-api"
+  },
+  {
+   "id": "jdempotent-api",
+   "path": "jdempotent-api",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-jdempotent-api"
+  },
+  {
+   "id": "validation-api",
+   "path": "validation-api",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-validation-api"
+  },
+  {
+   "id": "codegen",
+   "path": "codegen",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-codegen"
+  },
+  {
+   "id": "core",
+   "path": "core",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-core"
+  },
+  {
+   "id": "spring",
+   "path": "spring",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-spring"
+  },
+  {
+   "id": "validation",
+   "path": "validation",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-validation"
+  },
+  {
+   "id": "cache",
+   "path": "cache",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-cache"
+  },
+  {
+   "id": "jpa",
+   "path": "jpa",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-jpa"
+  },
+  {
+   "id": "web",
+   "path": "web",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-web"
+  },
+  {
+   "id": "feign",
+   "path": "feign",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-feign"
+  },
+  {
+   "id": "privacy",
+   "path": "privacy",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-privacy"
+  },
+  {
+   "id": "audit",
+   "path": "audit",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-audit"
+  },
+  {
+   "id": "jdempotent",
+   "path": "jdempotent",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-jdempotent"
+  },
+  {
+   "id": "archtest",
+   "path": "archtest",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-archtest"
+  }
+ ],
+ "arestas_internas": [
+  {
+   "de": "spring",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "validation",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "validation",
+   "para": "validation-api",
+   "scope": "compile"
+  },
+  {
+   "de": "cache",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "jpa",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "jpa",
+   "para": "validation",
+   "scope": "compile"
+  },
+  {
+   "de": "web",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "web",
+   "para": "cache",
+   "scope": "compile"
+  },
+  {
+   "de": "web",
+   "para": "privacy",
+   "scope": "compile"
+  },
+  {
+   "de": "web",
+   "para": "validation-api",
+   "scope": "compile"
+  },
+  {
+   "de": "feign",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "audit",
+   "para": "privacy",
+   "scope": "compile"
+  },
+  {
+   "de": "audit",
+   "para": "core",
+   "scope": "compile"
+  },
+  {
+   "de": "audit",
+   "para": "audit-api",
+   "scope": "compile"
+  },
+  {
+   "de": "audit",
+   "para": "jpa",
+   "scope": "compile"
+  },
+  {
+   "de": "jdempotent",
+   "para": "cache",
+   "scope": "compile"
+  },
+  {
+   "de": "jdempotent",
+   "para": "privacy",
+   "scope": "compile"
+  },
+  {
+   "de": "jdempotent",
+   "para": "jdempotent-api",
+   "scope": "compile"
+  },
+  {
+   "de": "archtest",
+   "para": "core",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "spring",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "validation",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "cache",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "jpa",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "web",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "feign",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "privacy",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "audit",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "jdempotent",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "audit-api",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "jdempotent-api",
+   "scope": "test"
+  },
+  {
+   "de": "archtest",
+   "para": "validation-api",
+   "scope": "test"
+  }
+ ],
+ "parents": {
+  "_raiz": "scos-bom",
+  "audit-api": "scos-foundation",
+  "jdempotent-api": "scos-foundation",
+  "validation-api": "scos-foundation",
+  "codegen": "scos-foundation",
+  "core": "scos-foundation",
+  "spring": "scos-foundation",
+  "validation": "scos-foundation",
+  "cache": "scos-foundation",
+  "jpa": "scos-foundation",
+  "web": "scos-foundation",
+  "feign": "scos-foundation",
+  "privacy": "scos-foundation",
+  "audit": "scos-foundation",
+  "jdempotent": "scos-foundation",
+  "archtest": "scos-foundation"
+ },
+ "conflitos_de_versao": []
+}

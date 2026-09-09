@@ -1,0 +1,63 @@
+{
+ "fato": "docs",
+ "modulo": "audit",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:18Z",
+ "derivado_de": {
+  "audit/AGENTS.md": "9fc6642",
+  "audit/README.md": "e72750c"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "audit/AGENTS.md",
+   "bytes": 719,
+   "last_modified": "2026-08-29",
+   "last_commit": "60d4a74",
+   "commits_90d": 1,
+   "titulo": "audit",
+   "secoes": [
+    "Conventions that differ from defaults",
+    "Known pitfalls"
+   ],
+   "modulos_citados": [
+    "audit",
+    "audit-api"
+   ]
+  },
+  {
+   "path": "audit/README.md",
+   "bytes": 10142,
+   "last_modified": "2026-08-29",
+   "last_commit": "60d4a74",
+   "commits_90d": 2,
+   "titulo": "scos-foundation-audit",
+   "secoes": [
+    "Arquitetura interna (v1.2.0)",
+    "Dependência",
+    "Configuração mínima (`application.yml`)",
+    "Marcando entidades como auditáveis",
+    "Auditando leituras de PII (`@Auditable` em métodos)",
+    "Consultando a trilha",
+    "Verificação de integridade (hash-chain)",
+    "Serialização JSON (Jackson) e política de nulos",
+    "Grants append-only (recomendado)",
+    "Tuning de performance (`scos.audit.performance.*`)",
+    "Durabilidade (`scos.audit.durability.*`)",
+    "Retenção (`scos.audit.retention.*`)",
+    "Métricas Micrometer",
+    "Troubleshooting",
+    "Módulo não inicia / beans não sobem",
+    "Eventos não aparecem na trilha",
+    "Fila cheia — eventos indo para DLQ sem falha de persistência",
+    "DLQ acumulando",
+    "Migration Liquibase"
+   ],
+   "modulos_citados": [
+    "audit",
+    "spring"
+   ]
+  }
+ ]
+}

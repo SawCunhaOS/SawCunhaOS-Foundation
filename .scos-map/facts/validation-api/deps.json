@@ -1,0 +1,97 @@
+{
+ "fato": "deps",
+ "modulo": "validation-api",
+ "fonte": "pom.xml + mvn dependency:tree",
+ "confianca": "resolvida",
+ "gerado_em": "2026-09-09T22:10:08Z",
+ "derivado_de": {
+  "validation-api/pom.xml": "19efbca"
+ },
+ "diretas": [
+  {
+   "ga": "jakarta.validation:jakarta.validation-api",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "compile",
+   "versao_resolvida": "3.1.1"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5",
+   "versao_declarada": "1.5.0",
+   "origem": "gerenciada:dependencyManagement",
+   "scope": "test",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter",
+   "versao_declarada": null,
+   "origem": "herdada:parent/scos-foundation",
+   "scope": "test",
+   "versao_resolvida": "6.0.3"
+  }
+ ],
+ "divergencias": [],
+ "transitivas": [
+  {
+   "ga": "com.github.spotbugs:spotbugs-annotations",
+   "versao_resolvida": "4.9.8"
+  },
+  {
+   "ga": "com.google.code.findbugs:jsr305",
+   "versao_resolvida": "3.0.2"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5-api",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5-engine",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "com.tngtech.archunit:archunit-junit5-engine-api",
+   "versao_resolvida": "1.5.0"
+  },
+  {
+   "ga": "org.apiguardian:apiguardian-api",
+   "versao_resolvida": "1.1.2"
+  },
+  {
+   "ga": "org.jspecify:jspecify",
+   "versao_resolvida": "1.0.1"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter-api",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter-engine",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.jupiter:junit-jupiter-params",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.platform:junit-platform-commons",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.junit.platform:junit-platform-engine",
+   "versao_resolvida": "6.0.3"
+  },
+  {
+   "ga": "org.opentest4j:opentest4j",
+   "versao_resolvida": "1.3.0"
+  },
+  {
+   "ga": "org.slf4j:slf4j-api",
+   "versao_resolvida": "2.0.18"
+  }
+ ],
+ "transitivas_total": 15
+}

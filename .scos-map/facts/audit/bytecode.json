@@ -1,0 +1,284 @@
+{
+ "fato": "bytecode",
+ "modulo": "audit",
+ "fonte": "jdeps -verbose --multi-release 25 com classpath",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:36Z",
+ "derivado_de": {
+  "audit/pom.xml": "51f3602"
+ },
+ "estado": "disponivel",
+ "resolucao": "tipo",
+ "derivado_de_agregado": {
+  "escopo": "fontes .java/.kt (apenas main) do modulo audit",
+  "arquivos": 30,
+  "sha": "97dc01e"
+ },
+ "frescor": {
+  "estado": "fresco",
+  "compilado_em": "2026-09-09T20:31:01Z",
+  "nota": null,
+  "aviso": null
+ },
+ "classes_dir": "audit/target/classes",
+ "bytecode_major": 69,
+ "classpath_resolvido": true,
+ "classpath_motivo": null,
+ "jdeps_args": [
+  "-verbose",
+  "--multi-release",
+  "25"
+ ],
+ "jdeps_tentativas": [
+  {
+   "args": [],
+   "rc": 2,
+   "erros": [
+    "jackson-core-3.2.2.jar is a multi-release jar file but --multi-release option is not set"
+   ]
+  },
+  {
+   "args": [
+    "--multi-release",
+    "25"
+   ],
+   "rc": 0,
+   "erros": null
+  }
+ ],
+ "arestas_arquivo": "facts/audit/bytecode_edges.tsv",
+ "arestas_total": 492,
+ "arestas_internas": 57,
+ "diagnostico": {
+  "linhas_saida": 520,
+  "com_seta": 520,
+  "casaram_regex": 492,
+  "descartadas_origem_externa": 0,
+  "auto_referencia": 0
+ },
+ "aviso_nao_resolvidas": null,
+ "motivo_vazio": null,
+ "amostra_saida": null,
+ "classes_conhecidas": 32,
+ "assinatura_classes": {
+  "classes": 32,
+  "sha": "fd20eda"
+ },
+ "pacotes": [
+  "br.com.sawcunhaos.foundation.audit.configuration",
+  "br.com.sawcunhaos.foundation.audit.configuration.properties",
+  "br.com.sawcunhaos.foundation.audit.domain.entity",
+  "br.com.sawcunhaos.foundation.audit.domain.repository",
+  "br.com.sawcunhaos.foundation.audit.listener",
+  "br.com.sawcunhaos.foundation.audit.service",
+  "br.com.sawcunhaos.foundation.audit.specification"
+ ],
+ "pacotes_com_aresta_interna": [
+  "br.com.sawcunhaos.foundation.audit.configuration",
+  "br.com.sawcunhaos.foundation.audit.configuration.properties",
+  "br.com.sawcunhaos.foundation.audit.domain.entity",
+  "br.com.sawcunhaos.foundation.audit.domain.repository",
+  "br.com.sawcunhaos.foundation.audit.service",
+  "br.com.sawcunhaos.foundation.audit.specification"
+ ],
+ "ciclos": [],
+ "jars_usados": {
+  "spring-context-7.0.9.jar": 31,
+  "spring-boot-autoconfigure-4.1.1.jar": 19,
+  "hibernate-core-7.4.5.Final.jar": 18,
+  "slf4j-api-2.0.18.jar": 14,
+  "jakarta.persistence-api-3.2.0.jar": 13,
+  "spring-boot-4.1.1.jar": 12,
+  "spring-data-commons-4.1.1.jar": 12,
+  "spring-beans-7.0.9.jar": 9,
+  "micrometer-core-1.17.1.jar": 8,
+  "spring-tx-7.0.9.jar": 8,
+  "jackson-databind-3.2.2.jar": 5,
+  "spring-data-jpa-4.1.1.jar": 4,
+  "scos-foundation-audit-api-1.2.0-SNAPSHOT.jar": 3,
+  "spring-core-7.0.9.jar": 3,
+  "spring-boot-jdbc-4.1.1.jar": 2,
+  "spring-boot-jpa-4.1.1.jar": 2,
+  "spring-orm-7.0.9.jar": 2,
+  "jackson-annotations-2.22.jar": 2,
+  "log4j-api-2.25.5.jar": 2,
+  "scos-foundation-privacy-1.2.0-SNAPSHOT.jar": 2,
+  "scos-foundation-core-1.2.0-SNAPSHOT.jar": 2,
+  "liquibase-core-5.0.4.jar": 1,
+  "HikariCP-7.0.2.jar": 1,
+  "scos-foundation-jpa-1.2.0-SNAPSHOT.jar": 1,
+  "jakarta.annotation-api-3.0.0.jar": 1,
+  "jackson-core-3.2.2.jar": 1
+ },
+ "deps_usadas_via_transitiva": [
+  {
+   "artefato": "spring-context",
+   "referencias": 31
+  },
+  {
+   "artefato": "spring-boot-autoconfigure",
+   "referencias": 19
+  },
+  {
+   "artefato": "hibernate-core",
+   "referencias": 18
+  },
+  {
+   "artefato": "slf4j-api",
+   "referencias": 14
+  },
+  {
+   "artefato": "jakarta.persistence-api",
+   "referencias": 13
+  },
+  {
+   "artefato": "spring-boot",
+   "referencias": 12
+  },
+  {
+   "artefato": "spring-data-commons",
+   "referencias": 12
+  },
+  {
+   "artefato": "spring-beans",
+   "referencias": 9
+  },
+  {
+   "artefato": "micrometer-core",
+   "referencias": 8
+  },
+  {
+   "artefato": "spring-tx",
+   "referencias": 8
+  },
+  {
+   "artefato": "jackson-databind",
+   "referencias": 5
+  },
+  {
+   "artefato": "spring-data-jpa",
+   "referencias": 4
+  },
+  {
+   "artefato": "spring-core",
+   "referencias": 3
+  },
+  {
+   "artefato": "jackson-annotations",
+   "referencias": 2
+  },
+  {
+   "artefato": "log4j-api",
+   "referencias": 2
+  },
+  {
+   "artefato": "spring-boot-jdbc",
+   "referencias": 2
+  },
+  {
+   "artefato": "spring-boot-jpa",
+   "referencias": 2
+  },
+  {
+   "artefato": "spring-orm",
+   "referencias": 2
+  },
+  {
+   "artefato": "HikariCP",
+   "referencias": 1
+  },
+  {
+   "artefato": "jackson-core",
+   "referencias": 1
+  },
+  {
+   "artefato": "jakarta.annotation-api",
+   "referencias": 1
+  }
+ ],
+ "deps_usadas_ausentes_do_pom": [],
+ "deps_declaradas_sem_uso": [],
+ "deps_ignoradas_na_analise": [
+  {
+   "artefato": "junit-jupiter",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "junit-jupiter-api",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "junit-platform-engine",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "junit-platform-launcher",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "lombok",
+   "motivo": "processador de anotacao: nao aparece no bytecode por design"
+  },
+  {
+   "artefato": "mockito-core",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "mysql-connector-j",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "postgresql",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-boot-starter-actuator",
+   "motivo": "agregador (starter/bom): nao tem classes proprias"
+  },
+  {
+   "artefato": "spring-boot-starter-security",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-boot-starter-web",
+   "motivo": "agregador (starter/bom): nao tem classes proprias"
+  },
+  {
+   "artefato": "spring-boot-test",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-boot-testcontainers",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-security-test",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-test",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "testcontainers-junit-jupiter",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "testcontainers-mysql",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "testcontainers-postgresql",
+   "motivo": "scope test"
+  }
+ ],
+ "modulo_de_boot": true,
+ "transitivas_resolvidas": true,
+ "aviso_sem_transitivas": null,
+ "como_ler_deps": {
+  "usadas_via_transitiva": "o codigo usa, o pom nao declara, mas veio resolvida (tipico de starter Spring Boot). Risco: quebra se o intermediario parar de trazer. Ordenado por 'referencias' - quanto maior, mais o codigo depende dela e mais vale declarar explicitamente.",
+  "usadas_ausentes_do_pom": "usada e NEM resolvida - o caso que merece atencao imediata.",
+  "declaradas_sem_uso": "sem referencia no bytecode. Confirme antes de remover: uso por reflexao, SPI ou so em runtime nao aparece aqui.",
+  "ignoradas_na_analise": "fora da comparacao de proposito - veja o motivo de cada uma."
+ }
+}

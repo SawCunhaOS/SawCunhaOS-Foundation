@@ -1,0 +1,95 @@
+{
+ "fato": "bytecode",
+ "modulo": "jdempotent-api",
+ "fonte": "jdeps -verbose --multi-release 25 com classpath",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:22Z",
+ "derivado_de": {
+  "jdempotent-api/pom.xml": "1c7e3df"
+ },
+ "estado": "disponivel",
+ "resolucao": "tipo",
+ "derivado_de_agregado": {
+  "escopo": "fontes .java/.kt (apenas main) do modulo jdempotent-api",
+  "arquivos": 8,
+  "sha": "6dd438c"
+ },
+ "frescor": {
+  "estado": "fresco",
+  "compilado_em": "2026-09-09T20:30:59Z",
+  "nota": null,
+  "aviso": null
+ },
+ "classes_dir": "jdempotent-api/target/classes",
+ "bytecode_major": 69,
+ "classpath_resolvido": true,
+ "classpath_motivo": null,
+ "jdeps_args": [
+  "-verbose",
+  "--multi-release",
+  "25"
+ ],
+ "jdeps_tentativas": [
+  {
+   "args": [],
+   "rc": 2,
+   "erros": [
+    "archunit-junit5-1.5.0.jar is a multi-release jar file but --multi-release option is not set"
+   ]
+  },
+  {
+   "args": [
+    "--multi-release",
+    "25"
+   ],
+   "rc": 0,
+   "erros": null
+  }
+ ],
+ "arestas_arquivo": "facts/jdempotent-api/bytecode_edges.tsv",
+ "arestas_total": 40,
+ "arestas_internas": 3,
+ "diagnostico": {
+  "linhas_saida": 41,
+  "com_seta": 41,
+  "casaram_regex": 40,
+  "descartadas_origem_externa": 0,
+  "auto_referencia": 0
+ },
+ "aviso_nao_resolvidas": null,
+ "motivo_vazio": null,
+ "amostra_saida": null,
+ "classes_conhecidas": 8,
+ "assinatura_classes": {
+  "classes": 8,
+  "sha": "cdb4d02"
+ },
+ "pacotes": [
+  "br.com.sawcunhaos.foundation.jdempotent.api"
+ ],
+ "pacotes_com_aresta_interna": [],
+ "ciclos": [],
+ "jars_usados": {},
+ "deps_usadas_via_transitiva": [],
+ "deps_usadas_ausentes_do_pom": [],
+ "deps_declaradas_sem_uso": [],
+ "deps_ignoradas_na_analise": [
+  {
+   "artefato": "archunit-junit5",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "junit-jupiter",
+   "motivo": "scope test"
+  }
+ ],
+ "modulo_de_boot": false,
+ "transitivas_resolvidas": true,
+ "aviso_sem_transitivas": null,
+ "como_ler_deps": {
+  "usadas_via_transitiva": "o codigo usa, o pom nao declara, mas veio resolvida (tipico de starter Spring Boot). Risco: quebra se o intermediario parar de trazer. Ordenado por 'referencias' - quanto maior, mais o codigo depende dela e mais vale declarar explicitamente.",
+  "usadas_ausentes_do_pom": "usada e NEM resolvida - o caso que merece atencao imediata.",
+  "declaradas_sem_uso": "sem referencia no bytecode. Confirme antes de remover: uso por reflexao, SPI ou so em runtime nao aparece aqui.",
+  "ignoradas_na_analise": "fora da comparacao de proposito - veja o motivo de cada uma."
+ }
+}

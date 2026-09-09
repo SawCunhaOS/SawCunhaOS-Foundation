@@ -1,0 +1,607 @@
+{
+ "scos_map_versao": "1.0",
+ "gerado_em": "2026-09-09T22:10:39Z",
+ "raiz": "SawCunhaOS-Foundation",
+ "como_usar": [
+  "Este arquivo e o unico que precisa ser lido sempre.",
+  "Escolha os fatos relevantes em modulos[].fatos e abra so aqueles.",
+  "Fato com estado 'obsoleto' foi gerado antes de mudancas nas fontes listadas em 'mudou'; regenere antes de confiar.",
+  "O mapa e um indice: para ler conteudo, abra o arquivo pelo caminho."
+ ],
+ "git": {
+  "disponivel": true,
+  "head": "ec2a66c",
+  "branch": "release/1.2.0",
+  "dirty": false,
+  "workspace_multi_repo": false,
+  "repositorios": null,
+  "nota_rename": "historico sem --follow: arquivo renomeado aparece com a data do rename"
+ },
+ "ecossistemas": [
+  "maven"
+ ],
+ "tier_executado": 3,
+ "arquivos": {
+  "total": 441,
+  "por_tipo": {
+   "config": 38,
+   "doc": 41,
+   "nao_classificado": 11,
+   "build": 16,
+   "codigo": 322,
+   "template": 13
+  },
+  "tsv": "files.tsv"
+ },
+ "modulos": {
+  "_raiz": {
+   "path": "",
+   "tipo": "pom",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation",
+   "arquivos": 50,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/_raiz/layout.json"
+    },
+    "config": {
+     "estado": "fresco",
+     "arquivo": "facts/_raiz/config.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/_raiz/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/_raiz/docs.json"
+    },
+    "bytecode": {
+     "estado": "nao_aplicavel",
+     "motivo": "modulo agregador (packaging=pom) nao tem codigo",
+     "arquivo": "facts/_raiz/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/_raiz/callgraph.json"
+    }
+   }
+  },
+  "audit-api": {
+   "path": "audit-api",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-audit-api",
+   "arquivos": 5,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/audit-api/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/audit-api/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/audit-api/docs.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/audit-api/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/audit-api/callgraph.json"
+    }
+   }
+  },
+  "jdempotent-api": {
+   "path": "jdempotent-api",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-jdempotent-api",
+   "arquivos": 11,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent-api/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent-api/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent-api/docs.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent-api/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/jdempotent-api/callgraph.json"
+    }
+   }
+  },
+  "validation-api": {
+   "path": "validation-api",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-validation-api",
+   "arquivos": 7,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/validation-api/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/validation-api/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/validation-api/docs.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/validation-api/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/validation-api/callgraph.json"
+    }
+   }
+  },
+  "codegen": {
+   "path": "codegen",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-codegen",
+   "arquivos": 15,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/codegen/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/codegen/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/codegen/docs.json"
+    },
+    "bytecode": {
+     "estado": "ausente",
+     "motivo": "compilou mas nao achou classes",
+     "arquivo": "facts/codegen/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/codegen/callgraph.json"
+    }
+   }
+  },
+  "core": {
+   "path": "core",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-core",
+   "arquivos": 25,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/core/layout.json"
+    },
+    "config": {
+     "estado": "fresco",
+     "arquivo": "facts/core/config.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/core/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/core/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/core/callgraph.json"
+    }
+   }
+  },
+  "spring": {
+   "path": "spring",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-spring",
+   "arquivos": 10,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/spring/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/spring/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/spring/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/spring/callgraph.json"
+    }
+   }
+  },
+  "validation": {
+   "path": "validation",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-validation",
+   "arquivos": 19,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/validation/layout.json"
+    },
+    "config": {
+     "estado": "fresco",
+     "arquivo": "facts/validation/config.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/validation/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/validation/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/validation/callgraph.json"
+    }
+   }
+  },
+  "cache": {
+   "path": "cache",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-cache",
+   "arquivos": 6,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/cache/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/cache/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/cache/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/cache/callgraph.json"
+    }
+   }
+  },
+  "jpa": {
+   "path": "jpa",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-jpa",
+   "arquivos": 5,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/jpa/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/jpa/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/jpa/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/jpa/callgraph.json"
+    }
+   }
+  },
+  "web": {
+   "path": "web",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-web",
+   "arquivos": 54,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/web/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/web/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/web/docs.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/web/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/web/callgraph.json"
+    }
+   }
+  },
+  "feign": {
+   "path": "feign",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-feign",
+   "arquivos": 5,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/feign/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/feign/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/feign/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/feign/callgraph.json"
+    }
+   }
+  },
+  "privacy": {
+   "path": "privacy",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-privacy",
+   "arquivos": 52,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/privacy/layout.json"
+    },
+    "config": {
+     "estado": "fresco",
+     "arquivo": "facts/privacy/config.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/privacy/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/privacy/docs.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/privacy/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/privacy/callgraph.json"
+    }
+   }
+  },
+  "audit": {
+   "path": "audit",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-audit",
+   "arquivos": 75,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/audit/layout.json"
+    },
+    "config": {
+     "estado": "fresco",
+     "arquivo": "facts/audit/config.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/audit/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/audit/docs.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/audit/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/audit/callgraph.json"
+    }
+   }
+  },
+  "jdempotent": {
+   "path": "jdempotent",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-jdempotent",
+   "arquivos": 98,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent/layout.json"
+    },
+    "config": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent/config.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent/deps.json"
+    },
+    "bytecode": {
+     "estado": "fresco",
+     "arquivo": "facts/jdempotent/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/jdempotent/callgraph.json"
+    }
+   }
+  },
+  "archtest": {
+   "path": "archtest",
+   "tipo": "jar",
+   "ecossistema": "maven",
+   "artefato": "br.com.sawcunhaos:scos-foundation-archtest",
+   "arquivos": 4,
+   "fatos": {
+    "layout": {
+     "estado": "fresco",
+     "arquivo": "facts/archtest/layout.json"
+    },
+    "deps": {
+     "estado": "fresco",
+     "arquivo": "facts/archtest/deps.json"
+    },
+    "docs": {
+     "estado": "fresco",
+     "arquivo": "facts/archtest/docs.json"
+    },
+    "bytecode": {
+     "estado": "ausente",
+     "motivo": "compilou mas nao achou classes",
+     "arquivo": "facts/archtest/bytecode.json"
+    },
+    "callgraph": {
+     "estado": "indisponivel",
+     "motivo": "java-callgraph.jar nao encontrado",
+     "arquivo": "facts/archtest/callgraph.json"
+    }
+   }
+  }
+ },
+ "reactor": "facts/_reactor.json",
+ "tamanho_bytes": {
+  "files.tsv": 65493,
+  "facts/_raiz/layout.json": 725,
+  "facts/_raiz/config.json": 5443,
+  "facts/_raiz/deps.json": 15297,
+  "facts/_raiz/docs.json": 29216,
+  "facts/audit-api/layout.json": 1022,
+  "facts/audit-api/deps.json": 1975,
+  "facts/audit-api/docs.json": 628,
+  "facts/jdempotent-api/layout.json": 1780,
+  "facts/jdempotent-api/deps.json": 1985,
+  "facts/jdempotent-api/docs.json": 644,
+  "facts/validation-api/layout.json": 1279,
+  "facts/validation-api/deps.json": 2178,
+  "facts/validation-api/docs.json": 701,
+  "facts/codegen/layout.json": 436,
+  "facts/codegen/deps.json": 463,
+  "facts/codegen/docs.json": 611,
+  "facts/core/layout.json": 3190,
+  "facts/core/config.json": 1088,
+  "facts/core/deps.json": 3022,
+  "facts/spring/layout.json": 1557,
+  "facts/spring/deps.json": 4486,
+  "facts/validation/layout.json": 2477,
+  "facts/validation/config.json": 745,
+  "facts/validation/deps.json": 5668,
+  "facts/cache/layout.json": 938,
+  "facts/cache/deps.json": 8632,
+  "facts/jpa/layout.json": 954,
+  "facts/jpa/deps.json": 9626,
+  "facts/web/layout.json": 8775,
+  "facts/web/deps.json": 13288,
+  "facts/web/docs.json": 547,
+  "facts/feign/layout.json": 844,
+  "facts/feign/deps.json": 3416,
+  "facts/privacy/layout.json": 5074,
+  "facts/privacy/config.json": 3360,
+  "facts/privacy/deps.json": 5401,
+  "facts/privacy/docs.json": 2149,
+  "facts/audit/layout.json": 8949,
+  "facts/audit/config.json": 7050,
+  "facts/audit/deps.json": 15745,
+  "facts/audit/docs.json": 1683,
+  "facts/jdempotent/layout.json": 15549,
+  "facts/jdempotent/config.json": 1460,
+  "facts/jdempotent/deps.json": 17473,
+  "facts/archtest/layout.json": 558,
+  "facts/archtest/deps.json": 16790,
+  "facts/archtest/docs.json": 949,
+  "facts/_reactor.json": 5964,
+  "facts/_raiz/bytecode.json": 234,
+  "facts/audit-api/bytecode.json": 2499,
+  "facts/jdempotent-api/bytecode.json": 2529,
+  "facts/validation-api/bytecode.json": 2571,
+  "facts/codegen/bytecode.json": 265,
+  "facts/core/bytecode.json": 3129,
+  "facts/spring/bytecode.json": 3799,
+  "facts/validation/bytecode.json": 3459,
+  "facts/cache/bytecode.json": 4467,
+  "facts/jpa/bytecode.json": 4176,
+  "facts/web/bytecode.json": 5857,
+  "facts/feign/bytecode.json": 3022,
+  "facts/privacy/bytecode.json": 4477,
+  "facts/audit/bytecode.json": 6733,
+  "facts/jdempotent/bytecode.json": 7771,
+  "facts/archtest/bytecode.json": 267,
+  "facts/_raiz/callgraph.json": 393,
+  "facts/audit-api/callgraph.json": 397,
+  "facts/jdempotent-api/callgraph.json": 402,
+  "facts/validation-api/callgraph.json": 402,
+  "facts/codegen/callgraph.json": 395,
+  "facts/core/callgraph.json": 392,
+  "facts/spring/callgraph.json": 394,
+  "facts/validation/callgraph.json": 398,
+  "facts/cache/callgraph.json": 1141,
+  "facts/jpa/callgraph.json": 391,
+  "facts/web/callgraph.json": 3826,
+  "facts/feign/callgraph.json": 393,
+  "facts/privacy/callgraph.json": 395,
+  "facts/audit/callgraph.json": 5466,
+  "facts/jdempotent/callgraph.json": 3692,
+  "facts/archtest/callgraph.json": 396
+ },
+ "_metricas": {
+  "mapa_bytes": 396810,
+  "fontes_bytes": 1732440,
+  "reducao": 4.4,
+  "segundos": 35.3
+ }
+}

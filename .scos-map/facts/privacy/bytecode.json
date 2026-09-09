@@ -1,0 +1,172 @@
+{
+ "fato": "bytecode",
+ "modulo": "privacy",
+ "fonte": "jdeps -verbose --multi-release 25 com classpath",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:35Z",
+ "derivado_de": {
+  "privacy/pom.xml": "0b9e1f5"
+ },
+ "estado": "disponivel",
+ "resolucao": "tipo",
+ "derivado_de_agregado": {
+  "escopo": "fontes .java/.kt (apenas main) do modulo privacy",
+  "arquivos": 25,
+  "sha": "6a0729f"
+ },
+ "frescor": {
+  "estado": "fresco",
+  "compilado_em": "2026-09-09T20:30:59Z",
+  "nota": null,
+  "aviso": null
+ },
+ "classes_dir": "privacy/target/classes",
+ "bytecode_major": 69,
+ "classpath_resolvido": true,
+ "classpath_motivo": null,
+ "jdeps_args": [
+  "-verbose",
+  "--multi-release",
+  "25"
+ ],
+ "jdeps_tentativas": [
+  {
+   "args": [],
+   "rc": 2,
+   "erros": [
+    "jackson-core-3.2.2.jar is a multi-release jar file but --multi-release option is not set"
+   ]
+  },
+  {
+   "args": [
+    "--multi-release",
+    "25"
+   ],
+   "rc": 0,
+   "erros": null
+  }
+ ],
+ "arestas_arquivo": "facts/privacy/bytecode_edges.tsv",
+ "arestas_total": 443,
+ "arestas_internas": 88,
+ "diagnostico": {
+  "linhas_saida": 455,
+  "com_seta": 455,
+  "casaram_regex": 443,
+  "descartadas_origem_externa": 0,
+  "auto_referencia": 0
+ },
+ "aviso_nao_resolvidas": null,
+ "motivo_vazio": null,
+ "amostra_saida": null,
+ "classes_conhecidas": 33,
+ "assinatura_classes": {
+  "classes": 33,
+  "sha": "7296049"
+ },
+ "pacotes": [
+  "br.com.sawcunhaos.foundation.privacy",
+  "br.com.sawcunhaos.foundation.privacy.config",
+  "br.com.sawcunhaos.foundation.privacy.core",
+  "br.com.sawcunhaos.foundation.privacy.crypto",
+  "br.com.sawcunhaos.foundation.privacy.logback",
+  "br.com.sawcunhaos.foundation.privacy.model",
+  "br.com.sawcunhaos.foundation.privacy.specification",
+  "br.com.sawcunhaos.foundation.privacy.spring"
+ ],
+ "pacotes_com_aresta_interna": [
+  "br.com.sawcunhaos.foundation.privacy",
+  "br.com.sawcunhaos.foundation.privacy.config",
+  "br.com.sawcunhaos.foundation.privacy.core",
+  "br.com.sawcunhaos.foundation.privacy.crypto",
+  "br.com.sawcunhaos.foundation.privacy.logback",
+  "br.com.sawcunhaos.foundation.privacy.model",
+  "br.com.sawcunhaos.foundation.privacy.specification",
+  "br.com.sawcunhaos.foundation.privacy.spring"
+ ],
+ "ciclos": [],
+ "jars_usados": {
+  "slf4j-api-2.0.18.jar": 6,
+  "jackson-databind-3.2.2.jar": 4,
+  "logback-classic-1.5.38.jar": 4,
+  "spring-boot-autoconfigure-4.1.1.jar": 3,
+  "snakeyaml-2.6.jar": 2,
+  "logback-core-1.5.38.jar": 2,
+  "spring-boot-4.1.1.jar": 2,
+  "jackson-core-3.2.2.jar": 1,
+  "spring-beans-7.0.9.jar": 1,
+  "spring-context-7.0.9.jar": 1,
+  "spring-core-7.0.9.jar": 1
+ },
+ "deps_usadas_via_transitiva": [
+  {
+   "artefato": "logback-core",
+   "referencias": 2
+  },
+  {
+   "artefato": "spring-boot",
+   "referencias": 2
+  },
+  {
+   "artefato": "jackson-core",
+   "referencias": 1
+  },
+  {
+   "artefato": "spring-context",
+   "referencias": 1
+  },
+  {
+   "artefato": "spring-core",
+   "referencias": 1
+  }
+ ],
+ "deps_usadas_ausentes_do_pom": [],
+ "deps_declaradas_sem_uso": [],
+ "deps_ignoradas_na_analise": [
+  {
+   "artefato": "assertj-core",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "jqwik",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "junit-jupiter",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "lombok",
+   "motivo": "processador de anotacao: nao aparece no bytecode por design"
+  },
+  {
+   "artefato": "mockito-core",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-boot-configuration-processor",
+   "motivo": "processador de anotacao: nao aparece no bytecode por design"
+  },
+  {
+   "artefato": "spring-boot-test",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-boot-test-autoconfigure",
+   "motivo": "scope test"
+  },
+  {
+   "artefato": "spring-test",
+   "motivo": "scope test"
+  }
+ ],
+ "modulo_de_boot": false,
+ "transitivas_resolvidas": true,
+ "aviso_sem_transitivas": null,
+ "como_ler_deps": {
+  "usadas_via_transitiva": "o codigo usa, o pom nao declara, mas veio resolvida (tipico de starter Spring Boot). Risco: quebra se o intermediario parar de trazer. Ordenado por 'referencias' - quanto maior, mais o codigo depende dela e mais vale declarar explicitamente.",
+  "usadas_ausentes_do_pom": "usada e NEM resolvida - o caso que merece atencao imediata.",
+  "declaradas_sem_uso": "sem referencia no bytecode. Confirme antes de remover: uso por reflexao, SPI ou so em runtime nao aparece aqui.",
+  "ignoradas_na_analise": "fora da comparacao de proposito - veja o motivo de cada uma."
+ }
+}

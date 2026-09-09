@@ -1,0 +1,30 @@
+{
+ "fato": "layout",
+ "modulo": "cache",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:12Z",
+ "derivado_de": {
+  "cache/src/main/java/br/com/sawcunhaos/foundation/cache/PolymorphicRedisSerializer.java": "e69b4e8",
+  "cache/src/main/java/br/com/sawcunhaos/foundation/cache/ScosCacheConfiguration.java": "455673d",
+  "cache/src/main/java/br/com/sawcunhaos/foundation/cache/ScosCacheKeyGenerator.java": "fb5d9f6",
+  "cache/src/main/java/br/com/sawcunhaos/foundation/cache/properties/ScosCacheModel.java": "b6d45ea",
+  "cache/src/main/java/br/com/sawcunhaos/foundation/cache/properties/ScosCacheProperties.java": "00f63e6"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.cache",
+ "arquivos": 6,
+ "por_extensao": {
+  ".java": 5,
+  ".xml": 1
+ },
+ "por_tipo": {
+  "codigo": 5,
+  "build": 1
+ },
+ "areas": [],
+ "entrypoints": []
+}

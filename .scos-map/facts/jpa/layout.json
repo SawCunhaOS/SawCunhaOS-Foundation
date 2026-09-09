@@ -1,0 +1,35 @@
+{
+ "fato": "layout",
+ "modulo": "jpa",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:13Z",
+ "derivado_de": {
+  "jpa/src/main/java/br/com/sawcunhaos/foundation/jpa/SpecificationRepository.java": "fedfdf0",
+  "jpa/src/main/java/br/com/sawcunhaos/foundation/jpa/entity/BaseEntity.java": "fb72b46",
+  "jpa/src/main/java/br/com/sawcunhaos/foundation/jpa/hibernate/JacksonCustomJsonFormatMapper.java": "71f7c06",
+  "jpa/src/main/java/br/com/sawcunhaos/foundation/jpa/liquibase/BaseLiquibaseProperties.java": "d3b6217"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.jpa",
+ "arquivos": 5,
+ "por_extensao": {
+  ".java": 4,
+  ".xml": 1
+ },
+ "por_tipo": {
+  "codigo": 4,
+  "build": 1
+ },
+ "areas": [
+  {
+   "caminho": "jpa/src/main/java/br/com/sawcunhaos/foundation/jpa/entity",
+   "papel": "dominio",
+   "arquivos": 1
+  }
+ ],
+ "entrypoints": []
+}

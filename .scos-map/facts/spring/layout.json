@@ -1,0 +1,41 @@
+{
+ "fato": "layout",
+ "modulo": "spring",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:10Z",
+ "derivado_de": {
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/annotation/normalizestrings/NormalizeStrings.java": "34ed67f",
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/annotation/rules/ScosRule.java": "73222c0",
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/annotation/rules/ScosRuleService.java": "9e85e35",
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/aspect/StringProcessingAspect.java": "b3ccfc1",
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/enums/StringTransformRule.java": "d8f4577",
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/listener/ScosOnStartupListener.java": "0909e73",
+  "spring/src/main/java/br/com/sawcunhaos/foundation/spring/specification/ScosStartupListener.java": "976fafb",
+  "spring/src/test/java/br/com/sawcunhaos/foundation/spring/ArchitectureTest.java": "8777668",
+  "spring/src/test/java/br/com/sawcunhaos/foundation/spring/enums/StringTransformRuleTest.java": "5de803b"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src/test/java",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.spring",
+ "arquivos": 10,
+ "por_extensao": {
+  ".java": 9,
+  ".xml": 1
+ },
+ "por_tipo": {
+  "codigo": 9,
+  "build": 1
+ },
+ "areas": [
+  {
+   "caminho": "spring/src/main/java/br/com/sawcunhaos/foundation/spring/listener",
+   "papel": "evento",
+   "arquivos": 1
+  }
+ ],
+ "entrypoints": []
+}

@@ -1,0 +1,229 @@
+{
+ "fato": "config",
+ "modulo": "audit",
+ "fonte": "leitura de chaves (valores omitidos por seguranca)",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:17Z",
+ "derivado_de": {
+  "audit/src/main/resources/db/changelog/db_audit.changelog-master.yaml": "fc187f7",
+  "audit/src/main/resources/db/changelog/audit/property.yml": "686a88e",
+  "audit/src/main/resources/db/changelog/audit/init/create_db.yml": "caf4c31",
+  "audit/src/main/resources/db/changelog/audit/init/init.yml": "11e6552",
+  "audit/src/main/resources/db/changelog/audit/v2/audit_accountability.yml": "3252c76",
+  "audit/src/main/resources/db/changelog/audit/v2/init.yml": "f4fe099",
+  "audit/src/test/resources/application-postgres.yml": "a463997",
+  "audit/src/test/resources/messages.properties": "2825163",
+  "audit/src/test/resources/testcontainer.properties": "cb547a1",
+  "audit/src/test/resources/test/db/changelog/db_audit.changelog-master.yaml": "090e6f8",
+  "audit/src/test/resources/test/db/changelog/audit/property.yml": "686a88e",
+  "audit/src/test/resources/test/db/changelog/audit/init/create_db.yml": "7408a07",
+  "audit/src/test/resources/test/db/changelog/audit/init/init.yml": "ad000e0"
+ },
+ "aviso": "apenas nomes de chave e placeholders; nenhum valor foi lido",
+ "perfis_detectados": [
+  "postgres"
+ ],
+ "arquivos": [
+  {
+   "path": "audit/src/main/resources/db/changelog/db_audit.changelog-master.yaml",
+   "bytes": 197,
+   "last_modified": "2026-06-04",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.file"
+   ]
+  },
+  {
+   "path": "audit/src/main/resources/db/changelog/audit/property.yml",
+   "bytes": 868,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.dbms",
+    "databaseChangeLog.name",
+    "databaseChangeLog.value"
+   ]
+  },
+  {
+   "path": "audit/src/main/resources/db/changelog/audit/init/create_db.yml",
+   "bytes": 3926,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.id",
+    "databaseChangeLog.author",
+    "databaseChangeLog.changes",
+    "databaseChangeLog.changes.tag",
+    "databaseChangeLog.changes.tableName",
+    "databaseChangeLog.changes.dbms",
+    "databaseChangeLog.changes.columns",
+    "databaseChangeLog.changes.columns.name",
+    "databaseChangeLog.changes.columns.autoIncrement",
+    "databaseChangeLog.changes.columns.type",
+    "databaseChangeLog.changes.columns.constraints",
+    "databaseChangeLog.changes.clustered",
+    "databaseChangeLog.changes.indexName"
+   ],
+   "placeholders": [
+    "UUIDType"
+   ]
+  },
+  {
+   "path": "audit/src/main/resources/db/changelog/audit/init/init.yml",
+   "bytes": 83,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.file"
+   ]
+  },
+  {
+   "path": "audit/src/main/resources/db/changelog/audit/v2/audit_accountability.yml",
+   "bytes": 2160,
+   "last_modified": "2026-06-04",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.id",
+    "databaseChangeLog.author",
+    "databaseChangeLog.changes",
+    "databaseChangeLog.changes.tableName",
+    "databaseChangeLog.changes.dbms",
+    "databaseChangeLog.changes.columns",
+    "databaseChangeLog.changes.columns.name",
+    "databaseChangeLog.changes.columns.type",
+    "databaseChangeLog.changes.columns.constraints",
+    "databaseChangeLog.changes.indexName",
+    "databaseChangeLog.changes.columns.autoIncrement",
+    "databaseChangeLog.changes.columns.defaultValueNumeric"
+   ],
+   "placeholders": [
+    "UUIDType"
+   ]
+  },
+  {
+   "path": "audit/src/main/resources/db/changelog/audit/v2/init.yml",
+   "bytes": 91,
+   "last_modified": "2026-06-04",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.file"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/application-postgres.yml",
+   "bytes": 1533,
+   "last_modified": "2026-08-23",
+   "chaves": [
+    "scos",
+    "scos.audit",
+    "scos.audit.system",
+    "scos.audit.enabled",
+    "scos.audit.performance",
+    "scos.audit.performance.flush-interval-ms",
+    "scos.audit.performance.batch-size",
+    "scos.audit.durability",
+    "scos.audit.durability.dlq-reprocess-interval-ms",
+    "scos.audit.liquibase",
+    "scos.audit.liquibase.enabled",
+    "scos.audit.liquibase.contexts",
+    "scos.audit.liquibase.database-change-log-lock-table",
+    "scos.audit.liquibase.database-change-log-table",
+    "scos.audit.liquibase.change-log",
+    "scos.audit.liquibase.default-schema",
+    "spring",
+    "spring.cloud",
+    "spring.cloud.compatibility-verifier",
+    "spring.cloud.compatibility-verifier.enabled",
+    "spring.datasource",
+    "spring.datasource.audit",
+    "spring.datasource.audit.url",
+    "spring.datasource.audit.username",
+    "spring.datasource.audit.password",
+    "spring.datasource.audit.hikari",
+    "spring.jpa",
+    "spring.jpa.show-sql",
+    "spring.jpa.properties",
+    "spring.jpa.properties.hibernate",
+    "spring.aop",
+    "spring.aop.proxy-target-class",
+    "spring.aop.auto"
+   ],
+   "perfis": [
+    "postgres"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/messages.properties",
+   "bytes": 401,
+   "last_modified": "2026-02-15",
+   "chaves": [
+    "INS-001",
+    "INS-002"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/testcontainer.properties",
+   "bytes": 377,
+   "last_modified": "2026-02-15",
+   "chaves": [
+    "docker.host"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/test/db/changelog/db_audit.changelog-master.yaml",
+   "bytes": 187,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.file",
+    "databaseChangeLog.relativeToChangelogFile"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/test/db/changelog/audit/property.yml",
+   "bytes": 868,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.dbms",
+    "databaseChangeLog.name",
+    "databaseChangeLog.value"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/test/db/changelog/audit/init/create_db.yml",
+   "bytes": 1936,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.id",
+    "databaseChangeLog.author",
+    "databaseChangeLog.changes",
+    "databaseChangeLog.changes.tag",
+    "databaseChangeLog.changes.tableName",
+    "databaseChangeLog.changes.dbms",
+    "databaseChangeLog.changes.columns",
+    "databaseChangeLog.changes.columns.name",
+    "databaseChangeLog.changes.columns.autoIncrement",
+    "databaseChangeLog.changes.columns.type",
+    "databaseChangeLog.changes.columns.constraints",
+    "databaseChangeLog.changes.columns.remarks",
+    "databaseChangeLog.changes.constraintName",
+    "databaseChangeLog.changes.columnNames",
+    "databaseChangeLog.rollback",
+    "databaseChangeLog.rollback.cascadeConstraints",
+    "databaseChangeLog.rollback.tableName"
+   ]
+  },
+  {
+   "path": "audit/src/test/resources/test/db/changelog/audit/init/init.yml",
+   "bytes": 98,
+   "last_modified": "2026-02-14",
+   "chaves": [
+    "databaseChangeLog",
+    "databaseChangeLog.file",
+    "databaseChangeLog.relativeToChangelogFile"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,31 @@
+{
+ "fato": "docs",
+ "modulo": "validation-api",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:08Z",
+ "derivado_de": {
+  "validation-api/README.md": "f94b6fc"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "validation-api/README.md",
+   "bytes": 1725,
+   "last_modified": "2026-08-22",
+   "last_commit": "764461b",
+   "commits_90d": 1,
+   "titulo": "scos-foundation-validation-api",
+   "secoes": [
+    "Conteúdo",
+    "`validatedBy` vazio, ligado por XML",
+    "Regra de fronteira"
+   ],
+   "modulos_citados": [
+    "spring",
+    "validation",
+    "validation-api"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,166 @@
+{
+ "fato": "layout",
+ "modulo": "audit",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:17Z",
+ "derivado_de": {
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/ScosAuditConfiguration.java": "df5e27b",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/ScosAuditLiquibaseConfiguration.java": "2b35f64",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/ScosLogDataSourceConfiguration.java": "74d3103",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/ThreadsScosAuditConfiguration.java": "17741ab",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditDurabilityProperties.java": "8f22904",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditHikariConfigProperties.java": "fc3701f",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditImmutabilityProperties.java": "426a432",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditLiquibaseProperties.java": "3222775",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditLogProperties.java": "dedb7c6",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditPerformanceProperties.java": "04e39a6",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration/properties/ScosAuditRetentionProperties.java": "af84272",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/entity/ActionType.java": "e9a1894",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/entity/ScosAuditDlqLog.java": "21911a8",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/entity/ScosAuditLog.java": "87e0067",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/repository/ScosAuditDlqRepository.java": "8c1d1bf",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/repository/ScosAuditLogRepository.java": "491da64",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/listener/AuditableAnnotationCountListener.java": "4b42654",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditBatchConsumer.java": "0d3b3fe",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditDlqJob.java": "1354eaa",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashService.java": "4677ed1",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditIntegrityServiceBean.java": "7a383cf",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditLogService.java": "0b03140",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditQueryServiceBean.java": "7548a94",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditQueue.java": "124ab45",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditRetentionJob.java": "bb3bcf3",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditServiceBean.java": "29e46fa",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosHibernateAuditListener.java": "485cb8c",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/specification/ScosAuditIntegrityService.java": "a9cfe4f",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/specification/ScosAuditQueryService.java": "a6503f9",
+  "audit/src/main/java/br/com/sawcunhaos/foundation/audit/specification/ScosAuditService.java": "1d5ede6",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AbstractAuditIntegrationTest.java": "f69cb24",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditBackpressureIntegrationTest.java": "0f7ddd3",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditBatchPipelineIntegrationTest.java": "ddc9886",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditDlqIntegrationTest.java": "ddd7938",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditEncryptionRoundTripTest.java": "8938a2e",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditErrorTest.java": "c9d237a",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditHashChainIntegrationTest.java": "6d6ca73",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditIntegrationTest.java": "57e2fc6",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditMetricsIntegrationTest.java": "83c3c7f",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditPostgresTest.java": "70c5eaa",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditQueryIntegrationTest.java": "d5f6c9d",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditRetentionIntegrationTest.java": "560fa01",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditRetryIntegrationTest.java": "38fa9d1",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditSecurityTest.java": "e623ca6",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditTestApplication.java": "0c741e4",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration/LocaleUtilsBean.java": "1688572",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration/ScosLiquibaseTestConfiguration.java": "30e448f",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration/ScosUserAuthenticationBean.java": "3d49889",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/entity/Country.java": "a89cc15",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/repository/CountryRepository.java": "554c0b1",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/enums/ErrorCode.java": "ca5a19e",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener/AuditableAnnotationCountListenerTest.java": "cbb5ffc",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener/empty/SampleNoAuditableUsage.java": "01f312f",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener/sample/SampleAuditableUsage.java": "9a7a9ed",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/CountryReadService.java": "8004716",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/InsideAuditExampleService.java": "0fa3d2d",
+  "audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashServiceCanonicalizationTest.java": "c029dbb"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src/test/java",
+  "src/main/resources",
+  "src/test/resources",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.audit",
+ "arquivos": 75,
+ "por_extensao": {
+  ".java": 57,
+  ".yml": 9,
+  ".md": 2,
+  ".yaml": 2,
+  ".properties": 2,
+  ".iml": 1,
+  ".xml": 1,
+  ".imports": 1
+ },
+ "por_tipo": {
+  "codigo": 57,
+  "config": 13,
+  "doc": 2,
+  "nao_classificado": 2,
+  "build": 1
+ },
+ "areas": [
+  {
+   "caminho": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/configuration",
+   "papel": "config",
+   "arquivos": 4
+  },
+  {
+   "caminho": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/entity",
+   "papel": "dominio",
+   "arquivos": 3
+  },
+  {
+   "caminho": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/domain/repository",
+   "papel": "repositorio",
+   "arquivos": 2
+  },
+  {
+   "caminho": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/listener",
+   "papel": "evento",
+   "arquivos": 1
+  },
+  {
+   "caminho": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service",
+   "papel": "service",
+   "arquivos": 10
+  },
+  {
+   "caminho": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration",
+   "papel": "config",
+   "arquivos": 3
+  },
+  {
+   "caminho": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/entity",
+   "papel": "dominio",
+   "arquivos": 1
+  },
+  {
+   "caminho": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/repository",
+   "papel": "repositorio",
+   "arquivos": 1
+  },
+  {
+   "caminho": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener",
+   "papel": "evento",
+   "arquivos": 1
+  },
+  {
+   "caminho": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/service",
+   "papel": "service",
+   "arquivos": 3
+  }
+ ],
+ "entrypoints": [
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/listener/AuditableAnnotationCountListener.java",
+   "tipo": "app"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditBatchConsumer.java",
+   "tipo": "agendado"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditDlqJob.java",
+   "tipo": "agendado"
+  },
+  {
+   "path": "audit/src/main/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditRetentionJob.java",
+   "tipo": "agendado"
+  },
+  {
+   "path": "audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditTestApplication.java",
+   "tipo": "app"
+  }
+ ]
+}

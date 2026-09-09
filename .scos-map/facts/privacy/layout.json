@@ -1,0 +1,90 @@
+{
+ "fato": "layout",
+ "modulo": "privacy",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:16Z",
+ "derivado_de": {
+  "privacy/src/jmh/java/br/com/sawcunhaos/foundation/privacy/jmh/MaskingEngineBenchmark.java": "dd4e6ad",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/DataMaskingService.java": "036abc1",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/SanitizationBodyComponent.java": "a219567",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/SanitizationHeadersComponent.java": "2828156",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/config/BuiltinPackLoader.java": "1c64491",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfig.java": "9df4d31",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfigException.java": "c018077",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfigLoader.java": "10f9660",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/config/ReDoSGuard.java": "eab9609",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/AhoCorasick.java": "f42ddeb",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/DocumentValidators.java": "1f8644b",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/JsonMasker.java": "846cf4a",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/MaskStrategies.java": "cac990b",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/core/MaskingEngine.java": "0978e07",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/crypto/JasyptCryptoKeyProvider.java": "42da6c7",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/crypto/ScosCryptoKeyProvider.java": "87b50f3",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/crypto/ScosFieldCipher.java": "7d7dbcc",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/logback/ScosMaskingConverter.java": "5d115dc",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/logback/ScosMaskingConverterSupport.java": "09a8514",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/logback/ScosMaskingMdcConverter.java": "ae3b75f",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/model/DataMask.java": "496bca9",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/model/MaskStrategy.java": "ed052f7",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/specification/DataMaskingValues.java": "5eedbfd",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/spring/ScosPrivacyAutoConfiguration.java": "7c88d12",
+  "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/spring/ScosPrivacyProperties.java": "5ea8aed",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/BuiltinPackLoaderTest.java": "a5b391b",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfigLoaderTest.java": "42f079a",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfigSourceResolutionTest.java": "df639aa",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/ReDoSGuardTest.java": "ccf305b",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/DocumentValidatorsTest.java": "2ddc1d8",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/JsonMaskerTest.java": "f56221e",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/MaskingEngineConcurrencyTest.java": "4436403",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/MaskingEngineTest.java": "0c0d604",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/MaskingInvariantPropertyTest.java": "6dd5450",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/StandaloneNoSpringTest.java": "9aa2cd4",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/crypto/ScosFieldCipherTest.java": "5532860",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/logback/ScosMaskingLogE2ETest.java": "e1d4cc5",
+  "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/spring/ScosPrivacyAutoConfigurationTest.java": "78ce148"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src/test/java",
+  "src/main/resources",
+  "src/test/resources",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.privacy",
+ "arquivos": 52,
+ "por_extensao": {
+  ".java": 38,
+  ".yml": 8,
+  ".md": 2,
+  "(sem)": 1,
+  ".xml": 1,
+  ".json": 1,
+  ".imports": 1
+ },
+ "por_tipo": {
+  "codigo": 38,
+  "config": 8,
+  "nao_classificado": 3,
+  "doc": 2,
+  "build": 1
+ },
+ "areas": [
+  {
+   "caminho": "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/config",
+   "papel": "config",
+   "arquivos": 5
+  },
+  {
+   "caminho": "privacy/src/main/java/br/com/sawcunhaos/foundation/privacy/model",
+   "papel": "dominio",
+   "arquivos": 2
+  },
+  {
+   "caminho": "privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config",
+   "papel": "config",
+   "arquivos": 4
+  }
+ ],
+ "entrypoints": []
+}

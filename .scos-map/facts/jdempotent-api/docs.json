@@ -1,0 +1,29 @@
+{
+ "fato": "docs",
+ "modulo": "jdempotent-api",
+ "fonte": "cabecalhos markdown / declaracoes proto",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:07Z",
+ "derivado_de": {
+  "jdempotent-api/README.md": "72a3f51"
+ },
+ "aviso": "indice apenas - abra o arquivo pelo caminho para ler o conteudo",
+ "itens": [
+  {
+   "path": "jdempotent-api/README.md",
+   "bytes": 1789,
+   "last_modified": "2026-09-08",
+   "last_commit": "e369e8a",
+   "commits_90d": 2,
+   "titulo": "scos-foundation-jdempotent-api",
+   "secoes": [
+    "Conteúdo",
+    "Regra de fronteira"
+   ],
+   "modulos_citados": [
+    "jdempotent",
+    "jdempotent-api"
+   ]
+  }
+ ]
+}

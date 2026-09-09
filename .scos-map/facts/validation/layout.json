@@ -1,0 +1,50 @@
+{
+ "fato": "layout",
+ "modulo": "validation",
+ "fonte": "varredura de diretorio + regex de anotacao",
+ "confianca": "alta",
+ "gerado_em": "2026-09-09T22:10:11Z",
+ "derivado_de": {
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/taxidentifier/constraint/CnpjValidator.java": "8d29f82",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/taxidentifier/constraint/CpfValidator.java": "af79cb2",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/taxidentifier/constraint/TaxIdentifierValidator.java": "8453fbc",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/valueobjects/Cnpj.java": "b94234a",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/valueobjects/Cpf.java": "103e986",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/valueobjects/Email.java": "e75f5ae",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/valueobjects/TaxIdentifier.java": "d2c639a",
+  "validation/src/main/java/br/com/sawcunhaos/foundation/validation/zipcode/constraint/ZipCodeValidator.java": "10bd2d0",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/taxidentifier/constraint/TaxIdentifierAnnotationsValidatorTest.java": "e70aef2",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/CnpjTest.java": "1bb1e8a",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/CpfTest.java": "36471c0",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/EmailTest.java": "197747f",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/TaxIdentifierTest.java": "6e3ab7d",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/ValueObjectJacksonSerializationTest.java": "8aa239d",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/zipcode/constraint/ZipCodeDTO.java": "f8041d5",
+  "validation/src/test/java/br/com/sawcunhaos/foundation/validation/zipcode/constraint/ZipCodeValidatorTest.java": "fa33f25"
+ },
+ "raizes_fonte": [
+  "src/main/java",
+  "src/test/java",
+  "src/main/resources",
+  "src"
+ ],
+ "pacote_base": "br.com.sawcunhaos.foundation.validation",
+ "arquivos": 19,
+ "por_extensao": {
+  ".java": 16,
+  ".xml": 3
+ },
+ "por_tipo": {
+  "codigo": 16,
+  "config": 2,
+  "build": 1
+ },
+ "areas": [
+  {
+   "caminho": "validation",
+   "papel": "validacao",
+   "arquivos": 1
+  }
+ ],
+ "entrypoints": []
+}
