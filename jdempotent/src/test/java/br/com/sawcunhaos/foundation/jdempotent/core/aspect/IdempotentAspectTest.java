@@ -312,4 +312,46 @@ class IdempotentAspectTest {
         }
     }
 
+    /**
+     * Story 3.15 (Task 4, gap flagged in Story 3.19's 2026-08-30 review): the only test with a
+     * custom TTL ({@code PrimeNumbersJdempotentEnableITTest}, {@code ttl=30, ttlTimeUnit=SECONDS})
+     * only confirmed the key gets written, never waited for it to actually expire. This exercises
+     * the real {@code @JdempotentResource} -> {@code IdempotentAspect.execute()} -> repository
+     * path (not the repository in isolation) with a short TTL, proving the annotation's
+     * configured TTL is genuinely honored end-to-end — including that the protected method
+     * actually executes again afterward (the real gap: a test that only checks
+     * {@code contains()}/{@code getResponse()} would pass even if a stale cached response were
+     * silently replayed instead of a genuine re-execution).
+     */
+    @Test
+    void given_short_ttl_when_ttl_configured_on_the_annotation_elapses_then_the_method_executes_again() throws InterruptedException, NoSuchAlgorithmException {
+        //given
+        IdempotentTestPayload test = new IdempotentTestPayload("short-ttl");
+        IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
+        wrapper.getNonIgnoredFields().put("name", "short-ttl");
+        wrapper.getNonIgnoredFields().put("transactionId", null);
+        IdempotencyKey idempotencyKey = defaultKeyGenerator.generateIdempotentKey(new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(), MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
+
+        //when: the annotated method runs through the real AOP-proxied aspect, which stores the
+        //response with the annotation's ttl=200ms via setResponse()
+        testIdempotentResource.idempotentMethodWithShortTtl(test);
+
+        //then: present right away, executed exactly once
+        assertTrue(idempotentRepository.contains(idempotencyKey));
+        assertEquals(1, testIdempotentResource.getShortTtlInvocationCount());
+
+        //when: the configured TTL elapses
+        Thread.sleep(500);
+
+        //then: the repository no longer honors the expired entry
+        assertFalse(idempotentRepository.contains(idempotencyKey));
+        assertNull(idempotentRepository.getResponse(idempotencyKey));
+
+        //when: the same call is retried after the TTL elapsed
+        testIdempotentResource.idempotentMethodWithShortTtl(test);
+
+        //then: the method genuinely re-executed instead of replaying a stale cached response
+        assertEquals(2, testIdempotentResource.getShortTtlInvocationCount());
+    }
+
 }

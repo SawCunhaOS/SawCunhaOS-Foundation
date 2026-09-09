@@ -26,6 +26,11 @@ import java.util.concurrent.TimeUnit;
  */
 public interface IdempotentRepository {
     /**
+     * Note (Story 3.15): an implementation that enforces TTL lazily (no native per-entry
+     * expiration in its backing store) may evict an expired entry as a side effect of this
+     * call — the caller only ever observes "absent" either way, but the store itself can
+     * shrink as a result of what looks like a read.
+     *
      * @param key
      * @return
      */
@@ -53,7 +58,10 @@ public interface IdempotentRepository {
     Lease tryAcquire(IdempotencyKey key, String payloadHash, Duration ttl);
 
     /**
-     * Checks the cache for an existing call for this request
+     * Checks the cache for an existing call for this request.
+     *
+     * <p>Note (Story 3.15): same side effect as {@link #contains(IdempotencyKey)} — an
+     * implementation with lazy TTL enforcement may evict an expired entry here too.
      *
      * @param key
      * @return

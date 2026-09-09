@@ -20,12 +20,14 @@ import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import br.com.sawcunhaos.foundation.jdempotent.api.KeySource;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class TestIdempotentResource {
 
     private final AtomicInteger keepFailedInvocationCount = new AtomicInteger();
+    private final AtomicInteger shortTtlInvocationCount = new AtomicInteger();
 
     @JdempotentResource
     public void idempotentMethod(IdempotentTestPayload testObject) {
@@ -76,5 +78,17 @@ public class TestIdempotentResource {
     // AOP-proxied flow, exercised by IdempotentAspectTest.
     @JdempotentResource(cachePrefix = "TestIdempotentResource", keySource = KeySource.HEADER_THEN_FIELDS, headerName = "Idempotency-Key")
     public void idempotentMethodWithHeaderKeySource(IdempotentTestPayload testObject) {
+    }
+
+    // Story 3.15 (Task 4, Story 3.19 review gap): a custom, short TTL exercised end-to-end
+    // through the real AOP-proxied IdempotentAspect.execute() -> repository path, not just
+    // against the repository in isolation.
+    @JdempotentResource(cachePrefix = "TestIdempotentResource", ttl = 200, ttlTimeUnit = TimeUnit.MILLISECONDS)
+    public void idempotentMethodWithShortTtl(IdempotentTestPayload testObject) {
+        shortTtlInvocationCount.incrementAndGet();
+    }
+
+    public int getShortTtlInvocationCount() {
+        return shortTtlInvocationCount.get();
     }
 }

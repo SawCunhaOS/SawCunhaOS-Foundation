@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  *
@@ -41,6 +42,17 @@ public class IdempotentRequestResponseWrapper implements Serializable {
      * duplicate call apart from a different payload colliding on the same key.
      */
     private String payloadHash;
+
+    /**
+     * Instant this entry stops being valid, or {@code null} if it never expires
+     * (Story 3.15). Only meaningful for the in-memory repository — Redis enforces
+     * TTL natively at the key level and does not read this field.
+     */
+    private Instant expiresAt;
+
+    public boolean isExpired() {
+        return expiresAt != null && Instant.now().isAfter(expiresAt);
+    }
 
     public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request) {
         this.request = request;

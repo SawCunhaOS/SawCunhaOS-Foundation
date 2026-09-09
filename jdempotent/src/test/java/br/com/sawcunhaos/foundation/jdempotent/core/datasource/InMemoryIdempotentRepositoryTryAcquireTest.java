@@ -106,6 +106,29 @@ class InMemoryIdempotentRepositoryTryAcquireTest {
     }
 
     /**
+     * Story 3.15 (AC #1): once the finished call's TTL has elapsed, a new {@code tryAcquire}
+     * for the same key must actually reacquire the lock — not replay the stale cached
+     * response nor report "in progress" — this is the exact path
+     * {@code @JdempotentResource} -> {@code IdempotentAspect.execute()} depends on, since
+     * the aspect calls {@code tryAcquire} directly rather than {@code contains()}/
+     * {@code getResponse()}.
+     */
+    @Test
+    void given_a_finished_call_whose_ttl_has_elapsed_when_tryAcquire_again_then_lease_is_acquired_again() throws InterruptedException {
+        InMemoryIdempotentRepository repository = new InMemoryIdempotentRepository();
+        IdempotencyKey key = new IdempotencyKey("expired-finished-key");
+
+        repository.tryAcquire(key, "hash", Duration.ofSeconds(30));
+        repository.setResponse(key, null, new IdempotentResponseWrapper("done"), 200L, java.util.concurrent.TimeUnit.MILLISECONDS);
+
+        Thread.sleep(500);
+
+        Lease lease = repository.tryAcquire(key, "hash", Duration.ofSeconds(30));
+        assertTrue(lease.isAcquired(), "an expired entry must not block reacquiring the lock");
+        assertFalse(lease.hasCachedResponse());
+    }
+
+    /**
      * Story 3.6, AC #1: same key, second call finished the first with a different
      * payload hash -> the second call must see a mismatch instead of replaying the
      * cached response of the first payload.

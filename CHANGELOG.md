@@ -177,6 +177,25 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   constructor no longer reads `System.getenv` either, it just never adds a prefix).
 - `EnvironmentVariableUtils` (and its `APP_NAME` constant) removed — no longer used.
 
+### Fixed — `scos-foundation-jdempotent`
+
+- **In-memory repository now honors TTL (Story 3.15)**: `InMemoryIdempotentRepository`'s
+  `store()`/`setResponse()` used to ignore their `ttl`/`timeUnit` parameters entirely — an
+  entry cached without Redis never expired. `IdempotentRequestResponseWrapper` now carries
+  an `expiresAt` instant, checked (and lazily evicted) by `contains()`/`getResponse()`, and
+  by `tryAcquire()` — the method `IdempotentAspect.execute()` actually calls on every request
+  — so an expired entry no longer blocks reacquiring the key or gets replayed as a stale
+  cached response. `ttl<=0`/`null` (the `@JdempotentResource` default, "no custom TTL") keeps
+  the pre-existing never-expires behavior. `RedisIdempotentRepository` was already correct
+  (native Redis TTL) and needed no change.
+- **`IdempotentRequestWrapper#equals()` fixed (Story 3.15)**: it used to compare `obj` against
+  each element of the wrapped `request` list instead of comparing two wrapper instances,
+  breaking both reflexivity (`x.equals(x)` could be `false`) and symmetry. Now follows the
+  standard `equals()` contract (`Objects.equals(this.request, other.request)`); `hashCode()`
+  unchanged in spirit (`Objects.hashCode(request)`). No production code was found using
+  `IdempotentRequestWrapper` as a `Map`/`Set` key, so this could not have masked a dedup bug
+  elsewhere.
+
 ### Added — `scos-foundation-privacy` module
 
 - New base-layer module **`scos-foundation-privacy`** providing a high-performance, multithread-safe

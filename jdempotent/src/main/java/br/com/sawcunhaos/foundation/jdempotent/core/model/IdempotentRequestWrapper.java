@@ -32,9 +32,8 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor
 @SuppressWarnings("serial")
-@SuppressFBWarnings(value = {"EI_EXPOSE_REP2", "EQ_UNUSUAL"},
-        justification = "Mutable serializable DTO (Lombok @Getter/@Setter) shared across the idempotency pipeline by design (EI_EXPOSE_REP2). "
-                + "equals() intentionally matches the wrapped request elements for idempotency-key comparison; changing it would alter dedup behavior (EQ_UNUSUAL).")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+        justification = "Mutable serializable DTO (Lombok @Getter/@Setter) shared across the idempotency pipeline by design.")
 public class IdempotentRequestWrapper implements Serializable {
     private List<Object> request;
 
@@ -48,12 +47,19 @@ public class IdempotentRequestWrapper implements Serializable {
 
     @Override
     public int hashCode() {
-        return request == null ? 0 : request.hashCode();
+        return Objects.hashCode(request);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return !Objects.isNull(request) && request.stream().anyMatch(req -> req.equals(obj));
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IdempotentRequestWrapper)) {
+            return false;
+        }
+        IdempotentRequestWrapper other = (IdempotentRequestWrapper) obj;
+        return Objects.equals(request, other.request);
     }
 
     @Override
