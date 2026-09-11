@@ -196,6 +196,33 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   `IdempotentRequestWrapper` as a `Map`/`Set` key, so this could not have masked a dedup bug
   elsewhere.
 
+### Security — `scos-foundation-cache`
+
+- **`PolymorphicRedisSerializer` allowlist for polymorphic deserialization (Story 3.16)**: `deserialize()`
+  used to call `Class.forName(payload.type())` on whatever class name was stored in Redis, with no
+  validation — a write to the Redis instance backing this serializer (shared instance, leaked
+  credential, a bug in another consumer) could force deserialization of any class on the classpath.
+  `payload.type()` (and, for a collection, the newly-tracked `payload.elementType()`) is now checked
+  against an allowlist *before* either is resolved; a disallowed name is rejected with
+  `SerializationException` and never reaches `Class.forName`. Default allowlist: the
+  `br.com.sawcunhaos.` package convention (already the implicit contract for every existing consumer —
+  `jdempotent`'s `IdempotentRequestResponseWrapper`, `security-starter`'s `ScosSecurityContext`) plus
+  `java.math`/`java.time`/`java.util` (needed for `BigDecimal`, `java.time.*`, and every JDK
+  collection/`Optional`/`UUID` type) and exactly `java.lang.String` — not a blanket `java.lang.` trust,
+  which was found to also admit `java.lang.Thread` with no legitimate reason to ever be a cached value
+  here; extensible per instance via `new PolymorphicRedisSerializer(Set.of("com.example.MyType"))`.
+- **Fixed a related type-erasure bug found while adding coverage**: a generically-parameterized
+  collection value (e.g. `List<CustomType>`) lost its element type on deserialize — elements came back
+  as `LinkedHashMap` instead of `CustomType` — because the raw container class alone (`ArrayList`)
+  carries no generic information. The element's concrete class is now captured at serialize time and
+  used to rebuild the precise collection `JavaType` on the way back.
+- Module had zero unit tests before this story; `PolymorphicRedisSerializerTest` now covers the
+  allowlist (allowed/disallowed/unknown/malformed types, consumer-configured extension) and
+  round-trips String, a custom object, `BigDecimal`, `LocalDate`/`LocalDateTime`/`Instant`, an enum,
+  `UUID`, arrays, `Map`, `Optional<T>` as a field, a nested object, `List<T>` of a custom object, and
+  whole-value `null`. A circular reference documents (doesn't fix — out of scope) the existing
+  behavior: an uncaught `StackOverflowError`, not a hang.
+
 ### Added — `scos-foundation-privacy` module
 
 - New base-layer module **`scos-foundation-privacy`** providing a high-performance, multithread-safe
