@@ -1,13 +1,1 @@
-{
- "fato": "callgraph",
- "modulo": "codegen",
- "fonte": "java-callgraph",
- "confianca": "ausente",
- "gerado_em": "2026-09-09T22:10:39Z",
- "derivado_de": {},
- "estado": "indisponivel",
- "motivo": "java-callgraph.jar nao encontrado",
- "comando_sugerido": "baixe o jar e passe --callgraph-jar <caminho> ou coloque em ~/.scos-map/java-callgraph.jar",
- "lacunas_conhecidas": [],
- "entrypoints": []
-}
+{"fato":"callgraph","modulo":"codegen","base":"java-callgraph","estado":"indisponivel","motivo":"java-callgraph.jar nao encontrado","comando_sugerido":"baixe o jar e passe --callgraph-jar <caminho> ou coloque em ~/.scos-map/java-callgraph.jar"}

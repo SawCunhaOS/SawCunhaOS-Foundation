@@ -1,0 +1,57 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/IdempotentAspectTest.java	unit	IdempotentAspect	358	2026-09-09	5
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/IdempotentAspectTransactionalRollbackTest.java	unit	IdempotentAspectTransactionalRollback	203	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/IdempotentAspectUTTest.java	unit	IdempotentAspectUT	471	2026-09-08	8
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/IdempotentWithoutAspectTest.java	unit	IdempotentWithoutAspect	47	2026-08-29	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/RollbackTrackingTransactionManager.java	recurso		74	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/TestAopContext.java	recurso		44	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/aspect/TestAopTransactionalContext.java	recurso		58	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/callback/IdempotentAspectWithErrorCallbackTest.java	unit	IdempotentAspectWithErrorCallback	100	2026-08-29	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/callback/TestAopWithErrorCallbackContext.java	recurso		50	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/callback/TestCustomErrorCallback.java	recurso		36	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/chain/JdempotentDefaultChainTest.java	unit	JdempotentDefaultChain	66	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/chain/JdempotentIdAnnotationChainTest.java	unit	JdempotentIdAnnotationChain	75	2026-09-08	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/chain/JdempotentIgnoreAnnotationChainTest.java	unit	JdempotentIgnoreAnnotationChain	73	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/chain/JdempotentNoAnnotationChainTest.java	unit	JdempotentNoAnnotationChain	78	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/chain/JdempotentPropertyAnnotationChainTest.java	unit	JdempotentPropertyAnnotationChain	66	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/datasource/InMemoryIdempotentRepositoryTryAcquireTest.java	unit	InMemoryIdempotentRepositoryTryAcquire	224	2026-09-09	3
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/datasource/InMemoryIdempotentRepositoryTtlTest.java	unit	InMemoryIdempotentRepositoryTtl	198	2026-09-09	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/exception/IdempotentPayloadMismatchExceptionTest.java	unit	IdempotentPayloadMismatchException	46	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/generator/DefaultKeyGeneratorTest.java	unit	DefaultKeyGenerator	97	2026-08-30	2
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/generator/IdempotencyKeyResolverHeaderSourceTest.java	unit	IdempotencyKeyResolverHeaderSource	194	2026-09-08	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/generator/IdempotencyKeyResolverTest.java	unit	IdempotencyKeyResolver	123	2026-09-08	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/listener/JdempotentAnnotationCountListenerTest.java	unit	JdempotentAnnotationCountListener	41	2026-08-23	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/listener/empty/SampleNoJdempotentUsage.java	recurso		29	2026-08-23	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/listener/sample/SampleJdempotentUsage.java	recurso		40	2026-08-23	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/metrics/MicrometerIdempotencyMetricsTest.java	unit	MicrometerIdempotencyMetrics	72	2026-09-06	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/model/IdempotentRequestWrapperTest.java	unit	IdempotentRequestWrapper	75	2026-09-09	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/utils/IdempotentTestPayload.java	recurso		43	2026-09-08	2
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/utils/TestException.java	recurso		25	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/utils/TestIdempotentResource.java	recurso		95	2026-09-09	4
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/core/utils/TestTransactionalIdempotentResource.java	recurso		40	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentConfigTest.java	unit	ScosJdempotentConfig	71	2026-09-08	4
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentMetricsConfigurationTest.java	unit	ScosJdempotentMetricsConfiguration	78	2026-09-06	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentPropertiesTest.java	unit	ScosJdempotentProperties	116	2026-09-08	3
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentRedisConfigurationTest.java	unit	ScosJdempotentRedisConfiguration	146	2026-08-30	3
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentRedisEnvironmentPostProcessorRegistrationTest.java	unit	ScosJdempotentRedisEnvironmentPostProcessorRegistration	79	2026-09-08	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/configuration/ScosJdempotentRedisPropertiesTest.java	unit	ScosJdempotentRedisProperties	108	2026-09-08	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryFailOpenITTest.java	integration	RedisIdempotentRepositoryFailOpenIT	287	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryTest.java	integration	RedisIdempotentRepository	509	2026-09-06	3
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryTopologyITTest.java	integration	RedisIdempotentRepositoryTopologyIT	323	2026-08-30	8
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryTopologySmokeITTest.java	integration	RedisIdempotentRepositoryTopologySmokeIT	325	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryTpsSpringContextITTest.java	integration	RedisIdempotentRepositoryTpsSpringContextIT	133	2026-08-30	3
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisIdempotentRepositoryTpsSweepITTest.java	integration	RedisIdempotentRepositoryTpsSweepIT	161	2026-08-30	2
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/RedisTemplateMocker.java	recurso		60	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/repository/SentinelContainerFixture.java	recurso		94	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/PrimeNumbersJdempotentDisableITTest.java	integration	PrimeNumbersJdempotentDisableIT	108	2026-08-30	2
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/PrimeNumbersJdempotentEnableITTest.java	integration	PrimeNumbersJdempotentEnableIT	152	2026-08-30	3
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/PrimeNumbersJdempotentRedisUnavailableITTest.java	integration	PrimeNumbersJdempotentRedisUnavailableIT	115	2026-08-30	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/JdempotentTestApplication.java	recurso		39	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/controller/PrimeNumbersController.java	recurso		41	2026-08-22	1
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/exception/CustomExceptionHandler.java	recurso		38	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/model/ErrorResponse.java	recurso		36	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/model/PrimeNumberResponse.java	recurso		35	2026-02-15	0
+jdempotent/src/test/java/br/com/sawcunhaos/foundation/jdempotent/redis/test/app/service/PrimeNumberService.java	recurso		47	2026-02-15	0
+jdempotent/src/test/resources/application.yml	recurso		39	2026-09-08	3
+jdempotent/src/test/resources/logback-spring.xml	recurso		30	2026-02-15	0
+jdempotent/src/test/resources/testcontainer.properties	recurso		15	2026-02-15	0

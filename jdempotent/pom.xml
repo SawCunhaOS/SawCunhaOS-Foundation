@@ -289,7 +289,8 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- AD-6 (_bmad-output/planning-artifacts/architecture/architecture-SawCunhaOS-Foundation-2026-08-29/ARCHITECTURE-SPINE.md):
+            <!-- AD-6 (Architecture Spine 2026-08-29 da Foundation, no workspace SCOS, fora deste repo:
+                 _bmad-output/SawCunhaOS-Foundation/planning-artifacts/architecture/architecture-SawCunhaOS-Foundation-2026-08-29/ARCHITECTURE-SPINE.md):
                  não gerenciado pelo scos-bom; mesma versão do maven-surefire-plugin já herdado
                  (Surefire e Failsafe são liberados em lockstep pelo Apache Maven). -->
             <plugin>

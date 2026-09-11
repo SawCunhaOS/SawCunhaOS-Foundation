@@ -1,0 +1,9 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/taxidentifier/constraint/TaxIdentifierAnnotationsValidatorTest.java	unit	TaxIdentifierAnnotationsValidator	97	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/CnpjTest.java	unit	Cnpj	357	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/CpfTest.java	unit	Cpf	324	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/EmailTest.java	unit	Email	271	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/TaxIdentifierTest.java	unit	TaxIdentifier	257	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/valueobjects/ValueObjectJacksonSerializationTest.java	unit	ValueObjectJacksonSerialization	60	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/zipcode/constraint/ZipCodeDTO.java	recurso		22	2026-08-22	1
+validation/src/test/java/br/com/sawcunhaos/foundation/validation/zipcode/constraint/ZipCodeValidatorTest.java	unit	ZipCodeValidator	71	2026-08-22	1

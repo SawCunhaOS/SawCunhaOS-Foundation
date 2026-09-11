@@ -1,6 +1,3 @@
-<!-- bmad:context -->
-<!-- Verified 2026-08-29 against 4dcab58. Managed by bmad-project-context; edits inside this block are replaced on refresh. Keep anything you want preserved outside the markers. -->
-
 ## archtest
 
 ## Conventions that differ from defaults
@@ -10,5 +7,3 @@
 ## Known pitfalls
 
 - `README.md` deste módulo diz "Nenhuma [regra] ainda" — desatualizado, há 2 regras hoje (`ArchitectureTest.java`). Não confie no README, leia o teste.
-
-<!-- /bmad:context -->

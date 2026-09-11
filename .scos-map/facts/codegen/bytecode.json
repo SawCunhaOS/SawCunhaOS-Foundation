@@ -1,11 +1,1 @@
-{
- "fato": "bytecode",
- "modulo": "codegen",
- "fonte": "jdeps",
- "confianca": "ausente",
- "gerado_em": "2026-09-09T22:10:25Z",
- "derivado_de": {},
- "estado": "ausente",
- "motivo": "compilou mas nao achou classes",
- "comando_sugerido": "cd codegen && mvn compile"
-}
+{"fato":"bytecode","modulo":"codegen","base":"mvn compile","estado":"nao_aplicavel","motivo":"compilou e o modulo nao gera classes (so resources/testes)"}

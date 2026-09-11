@@ -1,0 +1,6 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+core/src/test/java/br/com/sawcunhaos/foundation/core/ArchitectureTest.java	architecture	Architecture	38	2026-08-22	1
+core/src/test/java/br/com/sawcunhaos/foundation/core/enums/ScosExceptionCodeTest.java	unit	ScosExceptionCode	73	2026-08-22	1
+core/src/test/java/br/com/sawcunhaos/foundation/core/utils/DateUtilsTest.java	unit	DateUtils	161	2026-08-22	1
+core/src/test/java/br/com/sawcunhaos/foundation/core/utils/StringFieldUtilsTest.java	unit	StringFieldUtils	77	2026-08-22	1
+core/src/test/java/br/com/sawcunhaos/foundation/core/utils/dto/TestDTO.java	recurso		35	2026-08-22	1

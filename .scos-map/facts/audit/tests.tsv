@@ -1,0 +1,35 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AbstractAuditIntegrationTest.java	integration	AbstractAuditIntegration	105	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditBackpressureIntegrationTest.java	integration	AuditBackpressureIntegration	63	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditBatchPipelineIntegrationTest.java	integration	AuditBatchPipelineIntegration	93	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditDlqIntegrationTest.java	integration	AuditDlqIntegration	105	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditEncryptionRoundTripTest.java	integration	AuditEncryptionRoundTrip	139	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditErrorTest.java	integration	AuditError	272	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditHashChainIntegrationTest.java	integration	AuditHashChainIntegration	130	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditIntegrationTest.java	integration	AuditIntegration	309	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditMetricsIntegrationTest.java	integration	AuditMetricsIntegration	83	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditPostgresTest.java	integration	AuditPostgres	308	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditQueryIntegrationTest.java	integration	AuditQueryIntegration	169	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditRetentionIntegrationTest.java	integration	AuditRetentionIntegration	136	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditRetryIntegrationTest.java	integration	AuditRetryIntegration	72	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditSecurityTest.java	integration	AuditSecurity	285	2026-06-04	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/AuditTestApplication.java	recurso		33	2026-08-23	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration/LocaleUtilsBean.java	recurso		52	2026-08-23	2
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration/ScosLiquibaseTestConfiguration.java	recurso		66	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/configuration/ScosUserAuthenticationBean.java	recurso		26	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/entity/Country.java	recurso		53	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/domain/repository/CountryRepository.java	recurso		27	2026-02-15	0
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/enums/ErrorCode.java	recurso		31	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener/AuditableAnnotationCountListenerTest.java	unit	AuditableAnnotationCountListener	41	2026-08-23	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener/empty/SampleNoAuditableUsage.java	recurso		27	2026-08-23	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/listener/sample/SampleAuditableUsage.java	recurso		33	2026-08-23	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/CountryReadService.java	recurso		41	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/InsideAuditExampleService.java	recurso		44	2026-08-22	1
+audit/src/test/java/br/com/sawcunhaos/foundation/audit/service/ScosAuditHashServiceCanonicalizationTest.java	unit	ScosAuditHashServiceCanonicalization	65	2026-08-22	1
+audit/src/test/resources/application-postgres.yml	recurso		49	2026-08-23	1
+audit/src/test/resources/messages.properties	recurso		16	2026-02-15	0
+audit/src/test/resources/test/db/changelog/audit/init/create_db.yml	recurso		56	2026-02-14	0
+audit/src/test/resources/test/db/changelog/audit/init/init.yml	recurso		5	2026-02-14	0
+audit/src/test/resources/test/db/changelog/audit/property.yml	recurso		42	2026-02-14	0
+audit/src/test/resources/test/db/changelog/db_audit.changelog-master.yaml	recurso		8	2026-02-14	0
+audit/src/test/resources/testcontainer.properties	recurso		15	2026-02-15	0

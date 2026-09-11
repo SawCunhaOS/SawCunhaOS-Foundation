@@ -1,11 +1,1 @@
-{
- "fato": "bytecode",
- "modulo": "archtest",
- "fonte": "jdeps",
- "confianca": "ausente",
- "gerado_em": "2026-09-09T22:10:39Z",
- "derivado_de": {},
- "estado": "ausente",
- "motivo": "compilou mas nao achou classes",
- "comando_sugerido": "cd archtest && mvn compile"
-}
+{"fato":"bytecode","modulo":"archtest","base":"n/d","estado":"nao_aplicavel","motivo":"modulo sem codigo-fonte JVM de producao (so resources/testes)"}

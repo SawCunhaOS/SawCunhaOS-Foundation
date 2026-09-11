@@ -86,7 +86,8 @@ class ScosJdempotentRedisConfigurationTest {
      * Cobre a Story 3.18/AD-8: configuração malformada (tipo inválido, sem depender de rede)
      * deve falhar a subida do contexto com causa raiz identificável, nunca silenciosamente.
      * Não cobre "Redis alcançável mas fora do ar" — esse é fail-open (AD-2 herdado).
-     * Ver {@code _bmad-output/planning-artifacts/architecture/architecture-SawCunhaOS-Foundation-2026-08-29/ARCHITECTURE-SPINE.md}.
+     * Ver o Architecture Spine 2026-08-29 da Foundation, no workspace SCOS (fora deste repo):
+     * {@code _bmad-output/SawCunhaOS-Foundation/planning-artifacts/architecture/architecture-SawCunhaOS-Foundation-2026-08-29/}.
      */
     @Test
     void contextoFalhaComConfigClusterMalformada() {

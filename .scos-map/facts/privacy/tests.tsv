@@ -1,0 +1,15 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/BuiltinPackLoaderTest.java	unit	BuiltinPackLoader	54	2026-06-14	1
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfigLoaderTest.java	unit	PrivacyConfigLoader	124	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/PrivacyConfigSourceResolutionTest.java	unit	PrivacyConfigSourceResolution	71	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/config/ReDoSGuardTest.java	unit	ReDoSGuard	35	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/DocumentValidatorsTest.java	unit	DocumentValidators	49	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/JsonMaskerTest.java	unit	JsonMasker	103	2026-08-22	1
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/MaskingEngineConcurrencyTest.java	unit	MaskingEngineConcurrency	63	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/MaskingEngineTest.java	unit	MaskingEngine	129	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/MaskingInvariantPropertyTest.java	unit	MaskingInvariantProperty	80	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/core/StandaloneNoSpringTest.java	unit	StandaloneNoSpring	52	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/crypto/ScosFieldCipherTest.java	unit	ScosFieldCipher	49	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/logback/ScosMaskingLogE2ETest.java	unit	ScosMaskingLogE2E	64	2026-05-30	0
+privacy/src/test/java/br/com/sawcunhaos/foundation/privacy/spring/ScosPrivacyAutoConfigurationTest.java	unit	ScosPrivacyAutoConfiguration	69	2026-05-30	0
+privacy/src/test/resources/test-masking-basic.yml	recurso		30	2026-05-30	0

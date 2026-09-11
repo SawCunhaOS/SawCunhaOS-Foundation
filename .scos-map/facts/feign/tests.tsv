@@ -1,0 +1,3 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+feign/src/test/java/br/com/sawcunhaos/foundation/feign/JacksonDecoderCustomTest.java	unit	JacksonDecoderCustom	89	2026-08-23	1
+feign/src/test/java/br/com/sawcunhaos/foundation/feign/JacksonEncoderCustomTest.java	unit	JacksonEncoderCustom	40	2026-08-23	1

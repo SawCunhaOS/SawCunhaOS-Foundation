@@ -1,0 +1,26 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerAccessDeniedTest.java	unit	ExceptionsHandlerAccessDenied	66	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerDomainDispatchTest.java	unit	ExceptionsHandlerDomainDispatch	97	2026-08-29	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerHandleExceptionInternalTest.java	unit	ExceptionsHandlerHandleExceptionInternal	93	2026-08-29	2
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerInternalErrorTest.java	unit	ExceptionsHandlerInternalError	66	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerJackson3DeserializationTest.java	unit	ExceptionsHandlerJackson3Deserialization	228	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerLogLevelTest.java	unit	ExceptionsHandlerLogLevel	295	2026-08-29	2
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerMdcTest.java	unit	ExceptionsHandlerMdc	98	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerMethodNotImplementedTest.java	unit	ExceptionsHandlerMethodNotImplemented	67	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerResolveTitleTest.java	unit	ExceptionsHandlerResolveTitle	89	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerScosExceptionTest.java	unit	ExceptionsHandlerScosException	75	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ExceptionsHandlerValidationTest.java	unit	ExceptionsHandlerValidation	209	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/PaginationUtilsTest.java	unit	PaginationUtils	131	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/ScosWebErrorHandlerAutoConfigurationTest.java	unit	ScosWebErrorHandlerAutoConfiguration	64	2026-08-29	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/TestBootConfiguration.java	recurso		28	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/annotation/ScosRequestAnnotationCachingTest.java	unit	ScosRequestAnnotationCaching	121	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/filter/LoggingFilterMaskingE2ETest.java	unit	LoggingFilterMaskingE2E	132	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/filter/LoggingFinalFilterTest.java	unit	LoggingFinalFilter	83	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/filter/LoggingInitialFilterTest.java	unit	LoggingInitialFilter	154	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/listener/ValidationAnnotationCountListenerTest.java	unit	ValidationAnnotationCountListener	41	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/listener/empty/SampleNoValidationUsage.java	recurso		26	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/listener/sample/SampleValidationUsage.java	recurso		42	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/message/ScosMessageSourceConfigurationTest.java	unit	ScosMessageSourceConfiguration	111	2026-08-29	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/model/ScosFieldErrorTest.java	unit	ScosFieldError	45	2026-08-23	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/support/DomainErrorController.java	recurso		53	2026-08-29	1
+web/src/test/java/br/com/sawcunhaos/foundation/web/support/PingController.java	recurso		34	2026-08-23	1
