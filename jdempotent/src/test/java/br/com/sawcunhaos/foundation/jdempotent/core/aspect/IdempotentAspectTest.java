@@ -25,6 +25,7 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapp
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestException;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResourceSubclass;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         IdempotentAspectTest.class,
         TestAopContext.class,
         TestIdempotentResource.class,
+        TestIdempotentResourceSubclass.class,
         DefaultKeyGenerator.class,
         InMemoryIdempotentRepository.class
 })
@@ -62,6 +64,9 @@ class IdempotentAspectTest {
 
     @Autowired
     private TestIdempotentResource testIdempotentResource;
+
+    @Autowired
+    private TestIdempotentResourceSubclass testIdempotentResourceSubclass;
 
     @Autowired
     private InMemoryIdempotentRepository idempotentRepository;
@@ -269,7 +274,7 @@ class IdempotentAspectTest {
         IdempotentTestPayload test = new IdempotentTestPayload();
         test.setName("resolver-direct");
         IdempotentIgnorableWrapper wrapper =
-                new IdempotentAspect().getIdempotentNonIgnorableWrapper(List.of(test));
+                IdempotentAspect.builder().build().getIdempotentNonIgnorableWrapper(List.of(test));
 
         IdempotencyKey idempotencyKey = new IdempotencyKeyResolver(defaultKeyGenerator)
                 .resolve(new IdempotentRequestWrapper(wrapper), "");
@@ -352,6 +357,114 @@ class IdempotentAspectTest {
 
         //then: the method genuinely re-executed instead of replaying a stale cached response
         assertEquals(2, testIdempotentResource.getShortTtlInvocationCount());
+    }
+
+    @Test
+    void given_ignored_field_and_custom_named_property_together_when_trigger_aspect_then_hash_reflects_each_correctly() throws NoSuchAlgorithmException {
+        // Story 3.20 (AC #3): @JdempotentIgnore (age) and @JdempotentProperty (eventId, custom
+        // key "transactionId") on different fields of the same object, validated end to end
+        // through the real IdempotentAspect -- not just via the isolated chain-level tests
+        // JdempotentIgnoreAnnotationChainTest/JdempotentPropertyAnnotationChainTest already cover
+        // separately. The ignored field must never affect the composed key/hash; the property
+        // field, under its custom name, must.
+        //given
+        IdempotentTestPayload sameEventFirstAge = new IdempotentTestPayload("combo");
+        sameEventFirstAge.setEventId(42L);
+        sameEventFirstAge.setAge(10L);
+
+        IdempotentTestPayload sameEventDifferentAge = new IdempotentTestPayload("combo");
+        sameEventDifferentAge.setEventId(42L);
+        sameEventDifferentAge.setAge(999L);
+
+        IdempotentTestPayload differentEventSameAge = new IdempotentTestPayload("combo");
+        differentEventSameAge.setEventId(7L);
+        differentEventSameAge.setAge(10L);
+
+        IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
+        wrapper.getNonIgnoredFields().put("name", "combo");
+        wrapper.getNonIgnoredFields().put("transactionId", 42L);
+        IdempotencyKey expectedKey = defaultKeyGenerator.generateIdempotentKey(
+                new IdempotentRequestWrapper(wrapper), "TestIdempotentResource", new StringBuilder(),
+                MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
+
+        //when: first call stores under the key derived only from name+transactionId
+        testIdempotentResource.idempotentMethodWithThreeParameter(sameEventFirstAge, sameEventFirstAge, sameEventFirstAge);
+        assertTrue(idempotentRepository.contains(expectedKey));
+
+        //then: a different @JdempotentIgnore value (age) on an otherwise identical payload does
+        //not change the key at all -- both the idempotency key and the payload hash used for the
+        //mismatch check are derived from the same ignored-field-free composition, so this
+        //replays as a genuine duplicate instead of throwing IdempotentPayloadMismatchException
+        Assertions.assertDoesNotThrow(() ->
+                testIdempotentResource.idempotentMethodWithThreeParameter(sameEventDifferentAge, sameEventDifferentAge, sameEventDifferentAge));
+
+        //then: a different @JdempotentProperty value (eventId/"transactionId"), by contrast,
+        //composes a genuinely different key
+        IdempotentIgnorableWrapper otherWrapper = new IdempotentIgnorableWrapper();
+        otherWrapper.getNonIgnoredFields().put("name", "combo");
+        otherWrapper.getNonIgnoredFields().put("transactionId", 7L);
+        IdempotencyKey otherExpectedKey = defaultKeyGenerator.generateIdempotentKey(
+                new IdempotentRequestWrapper(otherWrapper), "TestIdempotentResource", new StringBuilder(),
+                MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
+        assertFalse(idempotentRepository.contains(otherExpectedKey));
+
+        testIdempotentResource.idempotentMethodWithThreeParameter(differentEventSameAge, differentEventSameAge, differentEventSameAge);
+        assertTrue(idempotentRepository.contains(otherExpectedKey));
+        assertNotEquals(expectedKey, otherExpectedKey);
+    }
+
+    @Test
+    void given_jdempotent_resource_method_overridden_without_repeating_annotation_when_called_twice_then_aspect_does_not_activate() {
+        // Story 3.20 (AC #5): @JdempotentResource is a method-level annotation -- Java does not
+        // carry it over to an overriding method that doesn't repeat it (unlike a class-level
+        // @Inherited annotation), so TestIdempotentResourceSubclass#idempotentMethod runs
+        // directly, with no aspect interception at all.
+        //given
+        IdempotentTestPayload test = new IdempotentTestPayload("subclass-override");
+
+        //when: called twice with the exact same payload
+        testIdempotentResourceSubclass.idempotentMethod(test);
+        testIdempotentResourceSubclass.idempotentMethod(test);
+
+        //then: both calls actually ran the real method body -- had the aspect activated, the
+        //second call would have short-circuited (cached response) instead of incrementing again
+        assertEquals(2, testIdempotentResourceSubclass.getOverriddenMethodInvocationCount());
+    }
+
+    @Test
+    void given_default_cache_prefix_when_key_is_composed_then_no_prefix_segment_is_added() throws NoSuchAlgorithmException {
+        // Story 3.20 (AC #6): @JdempotentResource#cachePrefix() defaults to "". Confirms what
+        // that blank default actually does to the generated key end to end, instead of only
+        // reusing the same blank listenerName value production code already passes in (as the
+        // pre-existing "given_new_payload_..." test above does, without asserting on the literal
+        // shape of the result).
+        //given
+        IdempotentTestPayload test = new IdempotentTestPayload("default-prefix");
+        IdempotentIgnorableWrapper wrapper = new IdempotentIgnorableWrapper();
+        wrapper.getNonIgnoredFields().put("name", "default-prefix");
+        wrapper.getNonIgnoredFields().put("transactionId", null);
+
+        IdempotencyKey keyWithBlankPrefix = defaultKeyGenerator.generateIdempotentKey(
+                new IdempotentRequestWrapper(wrapper), "", new StringBuilder(),
+                MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
+        IdempotencyKey keyWithExplicitPrefix = defaultKeyGenerator.generateIdempotentKey(
+                new IdempotentRequestWrapper(wrapper), "SomePrefix", new StringBuilder(),
+                MessageDigest.getInstance(CryptographyAlgorithm.SHA256.value()));
+
+        //then: a blank cachePrefix contributes no separator/segment at all -- the key is exactly
+        //the raw hex digest, distinguishable from a non-blank prefix which always prepends
+        //"prefix-"
+        assertFalse(keyWithBlankPrefix.getKeyValue().contains("-"));
+        assertTrue(keyWithExplicitPrefix.getKeyValue().startsWith("SomePrefix-"));
+        assertNotEquals(keyWithBlankPrefix.getKeyValue(), keyWithExplicitPrefix.getKeyValue());
+
+        //when: the real annotated method (its @JdempotentResource has no explicit cachePrefix)
+        //runs through the actual AOP-proxied aspect
+        testIdempotentResource.idempotentMethod(test);
+
+        //then: it is stored under exactly the blank-prefix key computed above, confirming the
+        //annotation's default genuinely produces a prefix-less key in production
+        assertTrue(idempotentRepository.contains(keyWithBlankPrefix));
     }
 
 }

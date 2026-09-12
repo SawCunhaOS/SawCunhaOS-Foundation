@@ -47,7 +47,7 @@ class IdempotencyKeyResolverHeaderSourceTest {
 
     private static final String HEADER_NAME = "Idempotency-Key";
 
-    private final IdempotentAspect idempotentAspect = new IdempotentAspect();
+    private final IdempotentAspect idempotentAspect = IdempotentAspect.builder().build();
     private final IdempotencyKeyResolver resolver = new IdempotencyKeyResolver();
 
     @AfterEach

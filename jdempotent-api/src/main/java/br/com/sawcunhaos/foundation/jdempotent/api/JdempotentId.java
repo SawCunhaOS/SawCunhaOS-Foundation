@@ -20,6 +20,8 @@ import java.lang.annotation.Target;
 /**
  *
  * Places the generated idempotency identifier into annotated field.
+ * Honored whether the annotated field is declared directly on the request class or inherited
+ * from a superclass (Story 3.20).
  *
  */
 @Target(ElementType.FIELD)

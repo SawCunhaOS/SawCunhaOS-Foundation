@@ -25,6 +25,9 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentResponseWrap
 import br.com.sawcunhaos.foundation.jdempotent.core.model.Lease;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.IdempotentTestPayload;
 import br.com.sawcunhaos.foundation.jdempotent.core.utils.TestIdempotentResource;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentId;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentIgnore;
+import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentProperty;
 import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource;
 import lombok.Data;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -447,6 +450,148 @@ class IdempotentAspectUTTest {
         assertEquals(requestWrapperRequest.getNonIgnoredFields().size(), 1);
         assertEquals(requestWrapperRequest.getNonIgnoredFields().get("name"), "childValue");
         verify(joinPoint).getArgs();
+    }
+
+    @Test
+    void given_multiple_jdempotent_id_fields_across_hierarchy_when_set_jdempotent_id_then_all_fields_receive_the_value() throws IllegalAccessException {
+        // Story 3.20 (AC #2): 2+ fields annotated @JdempotentId on the same object -- both the
+        // superclass-declared one and the two declared on the leaf class -- must all receive
+        // the generated value, not just the first one found.
+        //given
+        JdempotentIdChildPayload payload = new JdempotentIdChildPayload();
+
+        //when
+        idempotentAspect.setJdempotentId(new Object[]{payload}, "generated-key-456");
+
+        //then
+        assertEquals("generated-key-456", payload.getBaseGeneratedId());
+        assertEquals("generated-key-456", payload.getChildGeneratedIdOne());
+        assertEquals("generated-key-456", payload.getChildGeneratedIdTwo());
+    }
+
+    @Test
+    void given_a_payload_with_jdempotent_property_default_value_when_find_idempotent_request_then_field_is_excluded_from_key() throws Throwable {
+        // Story 3.20 (AC #4): @JdempotentProperty with no explicit value() defaults to "".
+        // JdempotentPropertyAnnotationChain returns that blank value as the key, which the
+        // aspect's blank-key filter (StringUtils.isBlank in getIdempotentNonIgnorableWrapper)
+        // then drops entirely -- the field is excluded from the composed key material
+        // altogether, it does NOT fall back to the field's own name nor an empty-string key.
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        PropertyDefaultValuePayload payload = new PropertyDefaultValuePayload();
+        payload.setName("name");
+        payload.setCustomField("custom-value");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+
+        //when
+        var idempotentRequestWrapper = idempotentAspect.findIdempotentRequestArg(joinPoint);
+
+        //then
+        List<Object> requestWrapperRequests = idempotentRequestWrapper.getRequest();
+        IdempotentIgnorableWrapper requestWrapperRequest = (IdempotentIgnorableWrapper) requestWrapperRequests.get(0);
+        assertEquals(1, requestWrapperRequest.getNonIgnoredFields().size());
+        assertEquals("name", requestWrapperRequest.getNonIgnoredFields().get("name"));
+        assertNull(requestWrapperRequest.getNonIgnoredFields().get("customField"));
+        verify(joinPoint).getArgs();
+    }
+
+    @Test
+    void given_ignore_and_property_fields_declared_in_superclass_when_find_idempotent_request_then_hash_material_reflects_both() throws Throwable {
+        // Story 3.20 (review): Task 2's "herança combinada com @JdempotentId/@JdempotentProperty/
+        // @JdempotentIgnore (campo anotado na superclasse, não só na classe folha)" subtask --
+        // previously only covered by a hierarchy fixture carrying @JdempotentId
+        // (JdempotentIdChildPayload) and, separately, @JdempotentIgnore/@JdempotentProperty on a
+        // non-hierarchical payload (IdempotentTestPayload, in IdempotentAspectTest). Here both
+        // annotations are declared on the superclass, validated through the real IdempotentAspect
+        // (not an isolated chain test).
+        //given
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        IgnorePropertyChildPayload payload = new IgnorePropertyChildPayload();
+        payload.setName("leaf-value");
+        payload.setBaseIgnoredField("must-never-appear");
+        payload.setBasePropertyField("custom-value");
+
+        when(joinPoint.getArgs()).thenReturn(new Object[]{payload});
+
+        //when
+        var idempotentRequestWrapper = idempotentAspect.findIdempotentRequestArg(joinPoint);
+
+        //then
+        IdempotentIgnorableWrapper requestWrapperRequest =
+                (IdempotentIgnorableWrapper) idempotentRequestWrapper.getRequest().get(0);
+        assertEquals(2, requestWrapperRequest.getNonIgnoredFields().size());
+        assertEquals("leaf-value", requestWrapperRequest.getNonIgnoredFields().get("name"));
+        assertEquals("custom-value", requestWrapperRequest.getNonIgnoredFields().get("baseCustomKey"));
+        assertNull(requestWrapperRequest.getNonIgnoredFields().get("baseIgnoredField"));
+        verify(joinPoint).getArgs();
+    }
+
+    @Data
+    private static class IgnorePropertyBasePayload {
+        @JdempotentIgnore
+        private String baseIgnoredField;
+        @JdempotentProperty("baseCustomKey")
+        private String basePropertyField;
+    }
+
+    @Data
+    private static class IgnorePropertyChildPayload extends IgnorePropertyBasePayload {
+        private String name;
+    }
+
+    @Test
+    void given_jdempotent_id_field_shadowed_from_superclass_when_set_jdempotent_id_then_only_subclass_field_is_considered() throws IllegalAccessException, NoSuchFieldException {
+        // Story 3.20 (review): mirrors
+        // given_a_payload_with_field_name_shadowed_from_superclass_when_find_idempotent_request_then_key_uses_subclass_value
+        // for setJdempotentId() -- getAllFieldsInHierarchy() only keeps the subclass's field when
+        // a name is shadowed, so the @JdempotentId on the (now-shadowed) superclass field is
+        // never reached even though it carries the annotation; the unannotated subclass field is
+        // the one actually visited, and is left untouched since it has no @JdempotentId itself.
+        //given
+        ShadowingIdChildPayload payload = new ShadowingIdChildPayload();
+        Field baseSharedIdField = ShadowingIdBasePayload.class.getDeclaredField("sharedId");
+        baseSharedIdField.setAccessible(true);
+
+        //when
+        idempotentAspect.setJdempotentId(new Object[]{payload}, "generated-key-789");
+
+        //then: the subclass's own (unannotated, shadowing) field is left untouched
+        assertNull(payload.getSharedId());
+        //then: the shadowed superclass field (annotated) is also left untouched -- shadowed out
+        //of the hierarchy walk entirely, never visited
+        assertNull(baseSharedIdField.get(payload));
+    }
+
+    private static class ShadowingIdBasePayload {
+        @JdempotentId
+        private String sharedId;
+    }
+
+    @Data
+    private static class ShadowingIdChildPayload extends ShadowingIdBasePayload {
+        private String sharedId;
+    }
+
+    @Data
+    private static class JdempotentIdBasePayload {
+        @JdempotentId
+        private String baseGeneratedId;
+    }
+
+    @Data
+    private static class JdempotentIdChildPayload extends JdempotentIdBasePayload {
+        @JdempotentId
+        private String childGeneratedIdOne;
+        @JdempotentId
+        private String childGeneratedIdTwo;
+    }
+
+    @Data
+    private static class PropertyDefaultValuePayload {
+        private String name;
+        @JdempotentProperty
+        private String customField;
     }
 
     @Data

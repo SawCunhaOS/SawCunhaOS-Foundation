@@ -28,7 +28,11 @@ public class TestAopWithErrorCallbackContext {
 
     @Bean
     public IdempotentAspect idempotentAspect (InMemoryIdempotentRepository inMemoryIdempotentRepository, DefaultKeyGenerator defaultKeyGenerator, TestCustomErrorCallback testCustomErrorCallback) {
-        return new IdempotentAspect(inMemoryIdempotentRepository,testCustomErrorCallback, defaultKeyGenerator);
+        return IdempotentAspect.builder()
+                .repository(inMemoryIdempotentRepository)
+                .errorCallback(testCustomErrorCallback)
+                .keyGenerator(defaultKeyGenerator)
+                .build();
     }
 
     @Bean

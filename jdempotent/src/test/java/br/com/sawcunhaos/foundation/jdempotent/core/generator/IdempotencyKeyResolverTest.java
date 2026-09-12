@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 class IdempotencyKeyResolverTest {
 
-    private final IdempotentAspect idempotentAspect = new IdempotentAspect();
+    private final IdempotentAspect idempotentAspect = IdempotentAspect.builder().build();
     private final IdempotencyKeyResolver resolver = new IdempotencyKeyResolver();
 
     @Test

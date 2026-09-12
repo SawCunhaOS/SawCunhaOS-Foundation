@@ -123,57 +123,69 @@ public class IdempotentAspect {
             };
 
 
-    public IdempotentAspect() {
-        this.idempotentRepository = new InMemoryIdempotentRepository();
-        this.keyGenerator = new DefaultKeyGenerator();
-        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
-        this.annotationChain = fillChains();
-    }
-
-    public IdempotentAspect(ErrorConditionalCallback errorCallback) {
-        this.errorCallback = errorCallback;
-        this.idempotentRepository = new InMemoryIdempotentRepository();
-        this.keyGenerator = new DefaultKeyGenerator();
-        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
-        this.annotationChain = fillChains();
-    }
-
-    public IdempotentAspect(IdempotentRepository idempotentRepository) {
-        this.idempotentRepository = idempotentRepository;
-        this.keyGenerator = new DefaultKeyGenerator();
-        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
-        this.annotationChain = fillChains();
-    }
-
-    public IdempotentAspect(IdempotentRepository idempotentRepository, ErrorConditionalCallback errorCallback) {
-        this.idempotentRepository = idempotentRepository;
-        this.errorCallback = errorCallback;
-        this.keyGenerator = new DefaultKeyGenerator();
-        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
-        this.annotationChain = fillChains();
-    }
-
-    public IdempotentAspect(ErrorConditionalCallback errorCallback, DefaultKeyGenerator keyGenerator) {
-        this.errorCallback = errorCallback;
-        this.idempotentRepository = new InMemoryIdempotentRepository();
-        this.keyGenerator = keyGenerator;
-        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
-        this.annotationChain = fillChains();
-    }
-
-    public IdempotentAspect(IdempotentRepository idempotentRepository, DefaultKeyGenerator keyGenerator) {
-        this.idempotentRepository = idempotentRepository;
-        this.keyGenerator = keyGenerator;
-        this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
-        this.annotationChain = fillChains();
-    }
-
-    public IdempotentAspect(IdempotentRepository idempotentRepository, ErrorConditionalCallback errorCallback, DefaultKeyGenerator keyGenerator) {
+    /**
+     * Story 3.17 (AC #1): the single constructor left after removing the 7 telescoping
+     * overloads this class used to expose (one per combination of repository/error-callback/
+     * key-generator). Kept private — {@link #builder()} is the only supported way to obtain an
+     * instance now. This is a deliberate breaking change, not a deprecation: the module is on a
+     * {@code SNAPSHOT} version, and ADD-5 explicitly allows breaking changes on {@code SNAPSHOT}
+     * without a compatibility shim. See the story's Completion Notes for why the old
+     * constructors were removed outright instead of kept {@code @Deprecated}.
+     */
+    private IdempotentAspect(IdempotentRepository idempotentRepository, ErrorConditionalCallback errorCallback, DefaultKeyGenerator keyGenerator) {
         this.idempotentRepository = idempotentRepository;
         this.errorCallback = errorCallback;
         this.keyGenerator = keyGenerator;
         this.keyResolver = new IdempotencyKeyResolver(this.keyGenerator);
         this.annotationChain = fillChains();
+    }
+
+    /**
+     * Story 3.17 (AC #1): fluent replacement for the 7 telescoping constructors this class used
+     * to expose. Every setter is optional and defaults exactly the way the old no-arg/partial
+     * constructors did: {@link InMemoryIdempotentRepository} when {@link Builder#repository} is
+     * not called, {@link DefaultKeyGenerator} when {@link Builder#keyGenerator} is not called,
+     * and no error callback ({@code null}, the pre-existing behavior) when
+     * {@link Builder#errorCallback} is not called. Scope is intentionally frozen to parity with
+     * those constructors — no configuration option is exposed here that they did not already
+     * support.
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * @see #builder()
+     */
+    public static final class Builder {
+        private IdempotentRepository idempotentRepository;
+        private ErrorConditionalCallback errorCallback;
+        private DefaultKeyGenerator keyGenerator;
+
+        private Builder() {
+        }
+
+        public Builder repository(IdempotentRepository idempotentRepository) {
+            this.idempotentRepository = idempotentRepository;
+            return this;
+        }
+
+        public Builder errorCallback(ErrorConditionalCallback errorCallback) {
+            this.errorCallback = errorCallback;
+            return this;
+        }
+
+        public Builder keyGenerator(DefaultKeyGenerator keyGenerator) {
+            this.keyGenerator = keyGenerator;
+            return this;
+        }
+
+        public IdempotentAspect build() {
+            IdempotentRepository repository =
+                    idempotentRepository != null ? idempotentRepository : new InMemoryIdempotentRepository();
+            DefaultKeyGenerator generator = keyGenerator != null ? keyGenerator : new DefaultKeyGenerator();
+            return new IdempotentAspect(repository, errorCallback, generator);
+        }
     }
 
     /**
@@ -346,8 +358,17 @@ public class IdempotentAspect {
     public void setJdempotentId(Object[] args, String idempotencyKey) throws IllegalAccessException {
         for (Object arg: args) {
             if (!isTypePrimitive(arg)) {
-                for (Field declaredField : arg.getClass().getDeclaredFields()) {
-                    declaredField.setAccessible(true);
+                // Story 3.20 (AC #1): was arg.getClass().getDeclaredFields(), which only sees
+                // fields declared on the leaf class -- a @JdempotentId field declared on a
+                // superclass was silently skipped (no exception, field just never set). Reuses
+                // the same hierarchy walk getIdempotentNonIgnorableWrapper() already relies on.
+                for (Field declaredField : getAllFieldsInHierarchy(arg.getClass())) {
+                    try {
+                        declaredField.setAccessible(true);
+                    } catch (InaccessibleObjectException e) {
+                        log.debug("Skipping field {} of {}: not accessible", declaredField.getName(), arg.getClass(), e);
+                        continue;
+                    }
                     for (Annotation annotation : declaredField.getDeclaredAnnotations()) {
                         if (annotation instanceof JdempotentId) {
                             declaredField.set(arg, idempotencyKey);

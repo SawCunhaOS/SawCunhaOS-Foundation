@@ -177,6 +177,15 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   constructor no longer reads `System.getenv` either, it just never adds a prefix).
 - `EnvironmentVariableUtils` (and its `APP_NAME` constant) removed — no longer used.
 
+- **`IdempotentAspect`'s 7 telescoping constructors removed (Story 3.17)**: replaced outright by
+  a fluent builder (`IdempotentAspect.builder().repository(...).errorCallback(...).keyGenerator(...).build()`),
+  same defaults as before (`InMemoryIdempotentRepository`/`DefaultKeyGenerator` when not set). Not
+  kept `@Deprecated` alongside the builder — the module is still `SNAPSHOT` (ADD-5 allows breaking
+  changes without a compatibility shim) and no consumer outside this repo's own tests/
+  `ScosJdempotentConfig` was found instantiating `IdempotentAspect` directly. **Action required
+  before upgrading**: any code calling `new IdempotentAspect(...)` no longer compiles; switch to
+  `IdempotentAspect.builder()`. See `jdempotent/README.md` for the builder example.
+
 ### Fixed — `scos-foundation-jdempotent`
 
 - **In-memory repository now honors TTL (Story 3.15)**: `InMemoryIdempotentRepository`'s
@@ -195,6 +204,11 @@ All notable changes to SCOS Foundation are documented here. The format is based 
   unchanged in spirit (`Objects.hashCode(request)`). No production code was found using
   `IdempotentRequestWrapper` as a `Map`/`Set` key, so this could not have masked a dedup bug
   elsewhere.
+- **`@JdempotentId` now honored across inheritance (Story 3.20)**: `IdempotentAspect.setJdempotentId()`
+  used to look only at `arg.getClass().getDeclaredFields()`, so a `@JdempotentId` field declared on a
+  superclass was silently skipped — no exception, the field simply never received the generated key.
+  Now walks the full class hierarchy via the same `getAllFieldsInHierarchy()` helper
+  `getIdempotentNonIgnorableWrapper()` already used for key composition.
 
 ### Security — `scos-foundation-cache`
 

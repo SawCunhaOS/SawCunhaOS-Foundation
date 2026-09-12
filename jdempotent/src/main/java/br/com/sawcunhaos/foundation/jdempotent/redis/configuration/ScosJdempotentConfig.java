@@ -58,7 +58,11 @@ public class ScosJdempotentConfig {
     @ConditionalOnBean(ErrorConditionalCallback.class)
     public IdempotentAspect getIdempotentAspectOnErrorConditionalCallback(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate, ErrorConditionalCallback errorConditionalCallback) {
         IdempotencyMetrics idempotencyMetrics = idempotencyMetricsProvider.getIfAvailable(NoOpIdempotencyMetrics::new);
-        IdempotentAspect aspect = new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties, idempotencyMetrics), errorConditionalCallback, keyGenerator());
+        IdempotentAspect aspect = IdempotentAspect.builder()
+                .repository(new RedisIdempotentRepository(redisTemplate, redisProperties, idempotencyMetrics))
+                .errorCallback(errorConditionalCallback)
+                .keyGenerator(keyGenerator())
+                .build();
         aspect.setIdempotencyMetrics(idempotencyMetrics);
         return aspect;
     }
@@ -67,7 +71,10 @@ public class ScosJdempotentConfig {
     @ConditionalOnMissingBean(IdempotentAspect.class)
     public IdempotentAspect getIdempotentAspect(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate) {
         IdempotencyMetrics idempotencyMetrics = idempotencyMetricsProvider.getIfAvailable(NoOpIdempotencyMetrics::new);
-        IdempotentAspect aspect = new IdempotentAspect(new RedisIdempotentRepository(redisTemplate, redisProperties, idempotencyMetrics), keyGenerator());
+        IdempotentAspect aspect = IdempotentAspect.builder()
+                .repository(new RedisIdempotentRepository(redisTemplate, redisProperties, idempotencyMetrics))
+                .keyGenerator(keyGenerator())
+                .build();
         aspect.setIdempotencyMetrics(idempotencyMetrics);
         return aspect;
     }

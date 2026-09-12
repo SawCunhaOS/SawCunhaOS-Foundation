@@ -27,7 +27,10 @@ class TestAopContext {
 
     @Bean
     IdempotentAspect idempotentAspect(InMemoryIdempotentRepository inMemoryIdempotentRepository, DefaultKeyGenerator defaultKeyGenerator) {
-        return new IdempotentAspect(inMemoryIdempotentRepository, defaultKeyGenerator);
+        return IdempotentAspect.builder()
+                .repository(inMemoryIdempotentRepository)
+                .keyGenerator(defaultKeyGenerator)
+                .build();
     }
 
     @Bean
