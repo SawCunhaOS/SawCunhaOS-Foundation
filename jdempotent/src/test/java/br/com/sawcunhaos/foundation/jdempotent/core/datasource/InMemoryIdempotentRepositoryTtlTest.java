@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -133,44 +134,68 @@ class InMemoryIdempotentRepositoryTtlTest {
      * {@code setResponse()} that refreshes that very same object, and still "match" the
      * identity comparison after the refresh, wiping out the just-written update. This drives
      * {@code setResponse()} (refreshing the TTL far faster than it can elapse) concurrently
-     * against {@code contains()} (the expiry check) for a sustained duration: under the fixed,
-     * atomic ({@code computeIfPresent}/{@code compute}) implementation the entry must never be
-     * observed absent, since the refresher never lets the real TTL lapse.
+     * against {@code contains()} (the expiry check) for a sustained duration.
+     *
+     * <p><strong>Story 3.20 debt:</strong> the identity race above is nanosecond-scale (a
+     * handful of instructions between the expiry check and the evict), while any wall-clock
+     * TTL large enough to survive real thread contention (originally 1ms, now 100ms — see the
+     * in-method comment) is orders of magnitude larger. No TTL value here can reliably
+     * re-catch that specific race if it regressed; this test is kept as a concurrent-load
+     * smoke test (no entry lost, and its response not corrupted, under sustained concurrent
+     * refresh+read). The identity race itself is now prevented structurally — a single atomic
+     * {@code computeIfPresent} path, no separate get+remove anywhere in
+     * {@code AbstractIdempotentRepository} — not by this test's assertions. A deterministic,
+     * scheduling-independent regression test for that specific race is still missing (tracked
+     * in {@code deferred-work.md}).
      */
     @Test
     void given_setResponse_repeatedly_refreshes_the_ttl_while_contains_races_the_expiry_check_then_the_entry_is_never_incorrectly_evicted() throws Exception {
+        // Generous refresh TTL (was 1ms — deferred-work, story 3.20): with 8 threads hammering
+        // ConcurrentHashMap's per-key lock on the very same key, the gap between two
+        // consecutive refreshes can itself exceed a couple of ms under real contention — a
+        // legitimate expiry, not a lost update. At 1ms this failed on ~100% of runs (tens of
+        // millions of false "observed absent" results per run), independent of whether the
+        // atomic fix was in place. Verified empirically (locally, 24 cores) that 100ms is
+        // stable for both the fixed implementation and a temporarily-reintroduced broken one.
+        long refreshTtlMs = 100L;
         InMemoryIdempotentRepository repository = new InMemoryIdempotentRepository();
         IdempotencyKey key = new IdempotencyKey("ttl-refresh-race-key");
         IdempotentResponseWrapper response = new IdempotentResponseWrapper("alive");
 
-        // Seed the entry so setResponse() (present-only) has something to refresh.
-        repository.store(key, new IdempotentRequestWrapper("payload"), 1L, TimeUnit.MILLISECONDS);
-
         AtomicBoolean stop = new AtomicBoolean(false);
         AtomicInteger observedAbsent = new AtomicInteger();
+        AtomicLong readAttempts = new AtomicLong();
         int threadsPerRole = 4;
         ExecutorService pool = Executors.newFixedThreadPool(threadsPerRole * 2);
         try {
-            // Multiple refresher threads, each re-setting the response with a deliberately tiny
-            // (1ms) TTL in a tight loop. A tiny TTL (rather than a generous one) is intentional
-            // here, unlike the fixed-deadline tests above: it lets the entry go transiently
-            // expired between writes, which is exactly the window the old check-then-act
-            // eviction could race against this method's in-place mutation of the shared
-            // wrapper. Several concurrent refreshers/readers (real parallelism, not just
-            // interleaving on one core) make that exact overlap far more likely to actually
-            // occur within the test's duration than a single reader/writer pair would.
+            // Seed the entry so setResponse() (present-only) has something to refresh.
+            repository.store(key, new IdempotentRequestWrapper("payload"), refreshTtlMs, TimeUnit.MILLISECONDS);
+
+            // Multiple refresher threads, each re-setting the response in a tight loop, so the
+            // entry keeps going transiently expired between writes — exactly the window the
+            // old check-then-act eviction could race against this method's in-place mutation
+            // of the shared wrapper. Several concurrent refreshers/readers (real parallelism,
+            // not just interleaving on one core) make that overlap far more likely to occur
+            // within the test's duration than a single reader/writer pair would.
             List<Future<?>> refreshers = new ArrayList<>();
             for (int i = 0; i < threadsPerRole; i++) {
                 refreshers.add(pool.submit(() -> {
                     while (!stop.get()) {
-                        repository.setResponse(key, null, response, 1L, TimeUnit.MILLISECONDS);
+                        repository.setResponse(key, null, response, refreshTtlMs, TimeUnit.MILLISECONDS);
                     }
                 }));
             }
+            // Let refreshers reach steady state before readers start counting. Thread-pool
+            // worker creation is lazy and JIT/class-loading warm-up is otherwise unbounded —
+            // without this, the seeded entry could expire for real before any refresher thread
+            // actually runs, misreporting a legitimate cold-start expiry as a race failure.
+            Thread.sleep(refreshTtlMs);
+
             List<Future<?>> readers = new ArrayList<>();
             for (int i = 0; i < threadsPerRole; i++) {
                 readers.add(pool.submit(() -> {
                     while (!stop.get()) {
+                        readAttempts.incrementAndGet();
                         if (!repository.contains(key)) {
                             observedAbsent.incrementAndGet();
                         }
@@ -187,8 +212,14 @@ class InMemoryIdempotentRepositoryTtlTest {
                 f.get(2, TimeUnit.SECONDS);
             }
 
+            // Guards against a vacuous pass (observedAbsent == 0 because the readers barely
+            // ran, not because the fix holds) on a starved/overloaded box.
+            assertTrue(readAttempts.get() > 1000,
+                    "test did not exercise enough concurrent reads to be a meaningful signal: " + readAttempts.get());
             assertEquals(0, observedAbsent.get(),
                     "a concurrent setResponse() refreshing the TTL must never be lost to a racing expiry check");
+            assertEquals("alive", repository.getResponse(key).getResponse(),
+                    "the response must survive concurrent refreshes unmodified");
         } finally {
             pool.shutdown();
             pool.awaitTermination(2, TimeUnit.SECONDS);

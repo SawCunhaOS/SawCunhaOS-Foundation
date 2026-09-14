@@ -75,15 +75,20 @@ class IdempotentAspectTest {
     private DefaultKeyGenerator defaultKeyGenerator;
 
 
+    // Story 3.20 debt: getDeclaredMethods()[1] indexed into reflection array order, which the
+    // JVM never guarantees — flaky ~2/3 runs of the full module suite. Look up the specific
+    // method by name instead.
     @Test
-    void given_aop_context_then_run_with_aop_context() {
-        JdempotentResource jdempotentResource = TestIdempotentResource.class.getDeclaredMethods()[1].getAnnotation(JdempotentResource.class);
+    void given_aop_context_then_run_with_aop_context() throws NoSuchMethodException {
+        JdempotentResource jdempotentResource = TestIdempotentResource.class
+                .getDeclaredMethod("idempotentMethod", IdempotentTestPayload.class)
+                .getAnnotation(JdempotentResource.class);
 
         assertNotEquals(testIdempotentResource.getClass(), TestIdempotentResource.class);
         assertTrue
                 (AopUtils.isAopProxy(testIdempotentResource));
         assertTrue(AopUtils.isCglibProxy(testIdempotentResource));
-        assertNotNull(jdempotentResource);
+        assertNotNull(jdempotentResource, "TestIdempotentResource.idempotentMethod is no longer annotated with @JdempotentResource");
 
         assertEquals(AopProxyUtils.ultimateTargetClass(testIdempotentResource), TestIdempotentResource.class);
         assertEquals(AopTestUtils.getTargetObject(testIdempotentResource).getClass(), TestIdempotentResource.class);
