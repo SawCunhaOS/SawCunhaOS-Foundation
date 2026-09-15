@@ -12,6 +12,13 @@
 
 package br.com.sawcunhaos.foundation.audit.api;
 
+/**
+ * Audit action recorded for an {@link Auditable} operation.
+ *
+ * <p>Referenced by {@link Auditable#action()} to declare which action a method-level annotation
+ * records. Type-level usage does not reference this enum directly: insert/update/delete are
+ * captured automatically, and {@link Auditable#auditRead()} controls whether reads are recorded.
+ */
 public enum AuditAction {
     INSERT,
     UPDATE,

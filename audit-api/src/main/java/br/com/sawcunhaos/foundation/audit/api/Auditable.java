@@ -17,6 +17,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks an entity class or a method as subject to audit trail recording.
+ *
+ * <p>On a type: insert/update/delete operations are captured automatically, and
+ * {@link #auditRead()} additionally opts the type into read recording. On a method: declares an
+ * audit point for a read operation — {@link #action()}, {@link #entity()} and
+ * {@link #idEntitySpEL()} compose the recorded event; how the annotation is invoked at this level
+ * is defined by the implementation module, not by this contract.
+ *
+ * <p>This annotation alone has no runtime effect — it only takes effect when
+ * {@code scos-foundation-audit} is present on the classpath to process it.
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Auditable {

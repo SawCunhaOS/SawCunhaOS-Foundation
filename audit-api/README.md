@@ -10,6 +10,29 @@ Depender só deste módulo compila, mas não audita nada em tempo de execução:
 `scos-foundation-audit` no classpath, não há listener para ler a anotação. Nenhum erro, nenhum
 aviso — inclua sempre o módulo de implementação junto.
 
+## Fluxo típico de uso
+
+```mermaid
+flowchart LR
+    App[Aplicação consumidora]
+
+    subgraph api["audit-api (contrato)"]
+        Auditable["@Auditable"]
+        Action[AuditAction]
+    end
+
+    subgraph impl["scos-foundation-audit (implementação)"]
+        Listener["listener Hibernate: C/U/D automático + leitura se auditRead()=true"]
+        Invoker["invocação de leitura por método definida pela implementação"]
+    end
+
+    App -->|anota entidade| Auditable
+    App -->|anota método, com action| Action
+    Auditable --> Action
+    Auditable -.efeito só com.-> Listener
+    Action -.efeito só com.-> Invoker
+```
+
 ## Conteúdo
 
 | Tipo | Descrição |
