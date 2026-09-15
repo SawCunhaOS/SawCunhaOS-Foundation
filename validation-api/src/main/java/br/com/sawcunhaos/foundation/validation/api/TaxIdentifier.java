@@ -34,7 +34,26 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TaxIdentifier {
+
+    /**
+     * Error code carried on the violation when the annotated value is neither a valid CPF nor a
+     * valid CNPJ — not a literal message. It is a {@code SCOS-XXX} code (see
+     * {@code ScosExceptionCode}, in {@code scos-foundation-core}), resolved to human text outside
+     * this module. Overriding this with a literal message (e.g.
+     * {@code @TaxIdentifier(message = "...")}) bypasses that resolution — the violation surfaces
+     * the literal text instead of the translated code.
+     */
     String message() default "SCOS-006";
+
+    /**
+     * Jakarta Bean Validation group(s) this constraint belongs to. Not used by
+     * {@code TaxIdentifierValidator} — present only to satisfy the {@code @Constraint} contract.
+     */
     Class<?>[] groups() default {};
+
+    /**
+     * Client-supplied metadata attached to a violation. Not used by
+     * {@code TaxIdentifierValidator} — present only to satisfy the {@code @Constraint} contract.
+     */
     Class<? extends Payload>[] payload() default {};
 }

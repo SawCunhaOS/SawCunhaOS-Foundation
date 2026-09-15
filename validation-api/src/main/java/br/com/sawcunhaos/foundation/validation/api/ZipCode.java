@@ -35,10 +35,27 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {})
 public @interface ZipCode {
 
+    /**
+     * Error code carried on the violation when the annotated value is not a valid CEP — not a
+     * literal message. It is a {@code SCOS-XXX} code (see {@code ScosExceptionCode}, in
+     * {@code scos-foundation-core}), resolved to human text outside this module. Overriding this
+     * with a literal message bypasses that resolution — the violation surfaces the literal text
+     * instead of the translated code. This default currently reuses {@code SCOS-009}, which
+     * {@code ScosExceptionCode} also assigns to {@code EMAIL_INVALID} — the registry has no
+     * dedicated CEP code yet.
+     */
     String message() default "SCOS-009";
 
+    /**
+     * Jakarta Bean Validation group(s) this constraint belongs to. Not used by
+     * {@code ZipCodeValidator} — present only to satisfy the {@code @Constraint} contract.
+     */
     Class<?>[] groups() default {};
 
+    /**
+     * Client-supplied metadata attached to a violation. Not used by {@code ZipCodeValidator} —
+     * present only to satisfy the {@code @Constraint} contract.
+     */
     Class<? extends Payload>[] payload() default {};
 
 }

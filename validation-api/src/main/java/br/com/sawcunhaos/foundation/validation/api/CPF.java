@@ -34,7 +34,25 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CPF {
+
+    /**
+     * Error code carried on the violation when the annotated value is not a valid CPF — not a
+     * literal message. It is a {@code SCOS-XXX} code (see {@code ScosExceptionCode}, in
+     * {@code scos-foundation-core}), resolved to human text outside this module. Overriding this
+     * with a literal message (e.g. {@code @CPF(message = "...")}) bypasses that resolution — the
+     * violation surfaces the literal text instead of the translated code.
+     */
     String message() default "SCOS-007";
+
+    /**
+     * Jakarta Bean Validation group(s) this constraint belongs to. Not used by
+     * {@code CpfValidator} — present only to satisfy the {@code @Constraint} contract.
+     */
     Class<?>[] groups() default {};
+
+    /**
+     * Client-supplied metadata attached to a violation. Not used by {@code CpfValidator} —
+     * present only to satisfy the {@code @Constraint} contract.
+     */
     Class<? extends Payload>[] payload() default {};
 }

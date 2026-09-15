@@ -10,6 +10,36 @@ Depender só deste módulo compila, mas não valida nada em tempo de execução:
 `scos-foundation-validation` no classpath, não há `ConstraintValidator` para as anotações abaixo.
 Nenhum erro, nenhum aviso — inclua sempre o módulo de implementação junto.
 
+## Fluxo típico de uso
+
+```mermaid
+flowchart LR
+    App[Aplicação consumidora]
+
+    subgraph api["validation-api (contrato)"]
+        Cpf["@CPF"]
+        Cnpj["@CNPJ"]
+        TaxId["@TaxIdentifier"]
+        Zip["@ZipCode"]
+    end
+
+    subgraph impl["scos-foundation-validation (implementação)"]
+        CpfV["CpfValidator"]
+        CnpjV["CnpjValidator"]
+        TaxIdV["TaxIdentifierValidator"]
+        ZipV["ZipCodeValidator"]
+    end
+
+    App -->|anota campo/DTO| Cpf
+    App -->|anota campo/DTO| Cnpj
+    App -->|anota campo/DTO| TaxId
+    App -->|anota campo/DTO| Zip
+    Cpf -.só tem efeito com, ligado via META-INF/validation.xml.-> CpfV
+    Cnpj -.só tem efeito com, ligado via META-INF/validation.xml.-> CnpjV
+    TaxId -.só tem efeito com, ligado via META-INF/validation.xml.-> TaxIdV
+    Zip -.só tem efeito com, ligado via META-INF/validation.xml.-> ZipV
+```
+
 ## Conteúdo
 
 | Tipo | Descrição |
