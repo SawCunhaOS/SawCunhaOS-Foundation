@@ -18,8 +18,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- * That annotation needs to ignore annotation field
+ * Excludes the annotated field from the idempotency key hash: the field is dropped entirely from
+ * the composed key material, the same way {@link JdempotentId} is. Takes precedence over
+ * {@link JdempotentProperty} when both annotate the same field — the field is still excluded, not
+ * renamed.
  *
  */
 @Retention(RetentionPolicy.RUNTIME)

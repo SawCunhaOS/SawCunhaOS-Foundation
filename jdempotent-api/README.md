@@ -10,6 +10,36 @@ Depender só deste módulo compila, mas não garante idempotência nenhuma em te
 `scos-foundation-jdempotent` no classpath, não há aspecto para interceptar a chamada anotada.
 Nenhum erro, nenhum aviso — inclua sempre o módulo de implementação junto.
 
+## Fluxo típico de uso
+
+```mermaid
+flowchart LR
+    App[Aplicação consumidora]
+
+    subgraph api["jdempotent-api (contrato)"]
+        Resource["@JdempotentResource"]
+        Id["@JdempotentId"]
+        Ignore["@JdempotentIgnore"]
+        Property["@JdempotentProperty"]
+        Payload["@JdempotentRequestPayload"]
+    end
+
+    subgraph impl["scos-foundation-jdempotent (implementação)"]
+        Aspect["aspecto AOP: intercepta a chamada, calcula o hash da chave a partir dos campos do payload (padrão) ou de um header, conforme keySource"]
+    end
+
+    App -->|anota método| Resource
+    App -->|anota campo, recebe o id gerado| Id
+    App -->|anota campo, exclui do hash| Ignore
+    App -->|anota campo, renomeia a chave no hash| Property
+    App -->|anota parâmetro| Payload
+    Resource -.só tem efeito com.-> Aspect
+    Id -.só tem efeito com.-> Aspect
+    Ignore -.só tem efeito com.-> Aspect
+    Property -.só tem efeito com.-> Aspect
+    Payload -.só tem efeito com.-> Aspect
+```
+
 ## Conteúdo
 
 | Tipo | Descrição |
