@@ -22,6 +22,8 @@ import java.net.URI;
  * metadata required by RFC 9457 (Problem Details for HTTP APIs): a {@code type}
  * URI and a human-readable {@code title}. Both are provided as {@code default}
  * methods so existing implementors keep compiling without changes.</p>
+ *
+ * @since 1.2.0
  */
 public interface ExceptionCode {
 
@@ -60,6 +62,12 @@ public interface ExceptionCode {
         return "Error";
     }
 
+    /**
+     * HTTP status this problem maps to. Defaults to {@code 400}.
+     *
+     * <p>Implementors SHOULD override this to reflect the actual status
+     * (e.g. {@code 401}, {@code 403}, {@code 501}).</p>
+     */
     default int getHttpCode() {
         return 400;
     }

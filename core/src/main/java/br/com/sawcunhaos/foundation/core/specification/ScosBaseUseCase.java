@@ -13,8 +13,23 @@
 
 package br.com.sawcunhaos.foundation.core.specification;
 
+/**
+ * Contract for a single-input, single-output use case, so application layers
+ * can depend on this instead of hand-rolling a service interface per use case.
+ * No implementor in this reactor uses it yet.
+ *
+ * @param <P> the parameter type the use case receives
+ * @param <R> the result type the use case returns
+ * @since 1.2.0
+ */
 public interface ScosBaseUseCase<P,R> {
 
+    /**
+     * Executes the use case.
+     *
+     * @param parameter the input to the use case
+     * @return the use case's result
+     */
     R execute(P parameter);
 
 }

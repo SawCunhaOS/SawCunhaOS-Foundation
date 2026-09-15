@@ -25,6 +25,8 @@ import lombok.Getter;
  * through the Lombok-generated {@code getTitle()} which overrides the
  * {@link ExceptionCode#getTitle()} default. The {@code type} URI is derived from
  * the code by {@link ExceptionCode#getType()} and is not overridden here.</p>
+ *
+ * @since 1.2.0
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter

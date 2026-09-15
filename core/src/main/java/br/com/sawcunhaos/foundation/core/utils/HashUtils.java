@@ -35,6 +35,8 @@ import java.security.NoSuchAlgorithmException;
  *   <li>{@link #pseudonymize(String, String)} is a keyed HMAC-SHA256. Because the secret key is required to
  *       reproduce the token, it is a sound pseudonymization primitive for personal data.</li>
  * </ul>
+ *
+ * @since 1.2.0
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -49,8 +51,9 @@ public final class HashUtils {
      * <p><strong>Not a privacy mechanism.</strong> Use only for checksums, idempotency keys, cache keys and
      * similar non-sensitive fingerprints. To pseudonymize personal data, use {@link #pseudonymize(String, String)}.</p>
      *
-     * @param value the input to digest
+     * @param value the input to digest, must not be {@code null}
      * @return the lowercase hex SHA-256, or {@code null} if the algorithm is unavailable
+     * @throws NullPointerException if {@code value} is {@code null}
      */
     public static String createHash(String value) {
         try {

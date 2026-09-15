@@ -17,6 +17,14 @@ import lombok.NoArgsConstructor;
 
 // Story 2.8: moved here from `exception` alongside ScosException/ExceptionCode/ScosExceptionCode
 // so the domain exception hierarchy has no Spring dependency (Story 2.8's own AC #1).
+/**
+ * Marker exception for "nothing to return" outcomes. {@code web.ExceptionsHandler}
+ * maps this to an empty HTTP 204 (No Content) response, discarding any
+ * {@code ExceptionCode}/message that would otherwise be built from a
+ * {@link ScosException}.
+ *
+ * @since 1.2.0
+ */
 @NoArgsConstructor
 public class ScosNoContentException extends ScosException {
 

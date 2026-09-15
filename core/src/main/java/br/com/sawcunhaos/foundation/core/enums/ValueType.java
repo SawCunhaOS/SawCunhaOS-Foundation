@@ -13,6 +13,13 @@
 
 package br.com.sawcunhaos.foundation.core.enums;
 
+/**
+ * Primitive value categories a foundation consumer may need to tag a field or
+ * parameter with (e.g. to pick a formatter, validator, or comparison strategy).
+ * No consumer in this reactor uses it yet.
+ *
+ * @since 1.2.0
+ */
 public enum ValueType {
     STRING, DOUBLE, NUMBER, INT, DATE, DATE_TIME, BOOLEAN;
 }
