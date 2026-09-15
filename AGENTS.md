@@ -1,11 +1,13 @@
+<!-- bmad:context -->
+<!-- Verificado em 2026-09-14 contra a8e5569. Gerenciado por bmad-project-context; edições dentro deste bloco são substituídas no refresh. Guarde o que quiser preservar fora dos marcadores. -->
+
 ## SawCunhaOS-Foundation
 
-Biblioteca fundamental Java 25 / Spring Boot para o ecossistema SCOS, multi-módulo Maven (módulos em `pom.xml`). Consumida por uma base piloto/restrita (ver PRD da 1.2.0). Planejamento e notas técnicas em `etc/doc/ideia/` e `etc/doc/plano/`; convenção de commits em `etc/doc/commit-convention.md`.
+Biblioteca fundacional Java 25 / Spring Boot para o ecossistema SCOS, multi-módulo Maven (módulos em `pom.xml`). Consumida por uma base piloto/restrita (ver PRD da 1.2.0). Planejamento e notas técnicas em `etc/doc/ideia/` e `etc/doc/plano/`; convenção de commits em `etc/doc/commit-convention.md`.
 
 ## Policy
 
-- Nunca faça commit ou push sem liberação explícita do humano.
-- PRs: o branch de destino é validado por `scripts/validate-pr-target.sh` no CI — confira antes de propor um alvo (ex.: `fix/X.Y.Z` → `release/X.(Y+1).0`; `release/X.Y.Z` → `develop` ou `release/X.(Y+1).0`).
+- PRs: o branch de destino é validado por `scripts/validate-pr-target.sh` no CI — confira antes de propor um alvo (ex.: `fix/X.Y.Z` → `release/X.(Y+1).0` ou `fix/X.Y.(Z+1)`; `release/X.Y.Z` → `develop` ou `release/X.(Y+1).0`).
 
 ## Where things are
 
@@ -14,6 +16,7 @@ Biblioteca fundamental Java 25 / Spring Boot para o ecossistema SCOS, multi-mód
 - Diagrama ER e changelogs Liquibase do módulo `audit`: `etc/audit/database.md`.
 - Especificação da release 1.2.0 (PRD, Architecture Spine, Epics/Stories): fora deste repo, no workspace SCOS (repo `ScosWorkspace`), em `../_bmad-output/SawCunhaOS-Foundation/planning-artifacts/` — `prds/prd-SawCunhaOS-Foundation-2026-08-18/prd.md`, `architecture/architecture-SawCunhaOS-Foundation-2026-08-19/ARCHITECTURE-SPINE.md`, `epics.md`. Estado do sprint: `../_bmad-output/SawCunhaOS-Foundation/implementation-artifacts/sprint-status.yaml`.
 - Módulos com AGENTS.md próprio: `audit/AGENTS.md`, `privacy/AGENTS.md`, `web/AGENTS.md`, `archtest/AGENTS.md`.
+- Para organização de código/dependências: leia `.scos-map/index.json` primeiro (confira `confianca`/`estado` de cada fato); se ausente ou obsoleto, use a skill `scos-map`/`scos-map-build` (só instalada no workspace SCOS raiz) para consultar/gerar o mapa.
 
 ## Running and verifying
 
@@ -23,3 +26,5 @@ Biblioteca fundamental Java 25 / Spring Boot para o ecossistema SCOS, multi-mód
 ## Conventions that differ from defaults
 
 - Beans de módulos de biblioteca (`audit`, `jdempotent`, `web`, `privacy`) são registrados via `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`, não por `@ComponentScan` da app consumidora — um bean novo com só `@Component` nunca é criado numa aplicação real. Bug real pego em revisão antes do merge, Story 1.15 (commit `d97e006`).
+
+<!-- /bmad:context -->

@@ -1,0 +1,2 @@
+path	tipo	alvo_heuristico	linhas	last_modified	commits_90d
+cache/src/test/java/br/com/sawcunhaos/foundation/cache/PolymorphicRedisSerializerTest.java	unit	PolymorphicRedisSerializer	366	2026-09-11	1
