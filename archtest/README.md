@@ -18,3 +18,9 @@ continuam nascendo dentro do próprio módulo protegido, no mesmo commit que o c
 Ver `ArchitectureTest.java`. Um módulo novo do reactor só é coberto por estas regras se for
 adicionado como dependência de teste no `pom.xml` deste módulo — ausência da lista o torna invisível
 às regras, não isento delas.
+
+## Gate de Javadoc
+
+Não se aplica. O módulo é `scope=test` (sem `src/main/java`), e o `maven-checkstyle-plugin`
+configurado no perfil `analyze` da raiz varre só `compileSourceRoots` (código de produção) — não há
+nada para o gate de Javadoc checar aqui.
