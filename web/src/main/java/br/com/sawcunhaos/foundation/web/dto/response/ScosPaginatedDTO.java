@@ -18,6 +18,15 @@ import lombok.Builder;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * Metadados de paginação devolvidos junto com os dados (ver {@link ScosResponseDTO}).
+ *
+ * @param sizePerPage          tamanho de página solicitado
+ * @param totalPages           total de páginas
+ * @param totalElements        total de elementos em todas as páginas
+ * @param totalElementsPerPage elementos efetivamente presentes na página atual
+ * @since 1.2.0
+ */
 @Builder
 public record ScosPaginatedDTO(
         int sizePerPage,

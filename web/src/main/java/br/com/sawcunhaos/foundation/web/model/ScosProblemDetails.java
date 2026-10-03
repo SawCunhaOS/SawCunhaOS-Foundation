@@ -40,6 +40,11 @@ import static br.com.sawcunhaos.foundation.core.enums.Constant.REQUEST_ID_HEADER
  * <p>SCOS extension fields added on top of the standard
  * {@code type/title/status/detail/instance}: {@code code}, optional
  * {@code errors}, optional {@code requestId} (from MDC) and {@code timestamp}.</p>
+ *
+ * <p>O {@code requestId} vem da chave de MDC {@code Constant.REQUEST_ID_HEADER} (única, definida em
+ * {@code core}); quem a popula é o {@link br.com.sawcunhaos.foundation.web.filter.LoggingInitialFilter}.</p>
+ *
+ * @since 1.2.0
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ScosProblemDetails {
@@ -101,6 +106,7 @@ public final class ScosProblemDetails {
         return problem;
     }
 
+    // Monta o núcleo RFC 9457; instance é opcional (null = não define).
     private static ProblemDetail base(HttpStatusCode status, URI type, String title, String detail, String instance) {
         ProblemDetail problem = ProblemDetail.forStatus(status);
         problem.setType(type);

@@ -90,9 +90,12 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
 			FilterChain chain
 	) throws IOException, ServletException {
 
+		// Embrulha a requisição para que o corpo logado aqui possa ser relido pelo controller.
 		final MultiReadHttpServletRequest req = new MultiReadHttpServletRequest(request);
 
 		try {
+			// A chave do MDC é a constante única de core (Constant.REQUEST_ID_HEADER, "X-Request-ID"),
+			// a mesma que ScosProblemDetails.enrich lê para devolver "requestId" no corpo do erro.
 			MDC.put(REQUEST_ID_HEADER.getValue(), resolveRequestId(req));
 			MDC.put("IS_IP", getClientIp(req));
 			response.setHeader(REQUEST_ID_HEADER.getValue(), MDC.get(REQUEST_ID_HEADER.getValue()));
@@ -100,6 +103,8 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
 			if (req.getRequestURI().contains(scosFilterProperties.getURI())) {
 				String headers = getRequestHeaders(req);
 				String body = getRequestBody(req);
+				// Campos do log "Initial API Call": entram no MDC só para esta linha e são removidos logo
+				// abaixo, para não vazarem para os logs seguintes da mesma requisição.
 				MDC.put("Request-Time", DateUtils.returnDateCurrent());
 				MDC.put("Request-Method", req.getMethod());
 				MDC.put("Request-URI", createURI(req));
@@ -117,6 +122,8 @@ public class LoggingInitialFilter extends OncePerRequestFilter {
 
 			chain.doFilter(req, response);
 		} finally {
+			// Único MDC.clear() do ciclo: roda mesmo se a cadeia lançar, evitando vazar contexto entre
+			// requisições na mesma thread do pool. LoggingFinalFilter depende de que isto só ocorra aqui.
 			MDC.clear();
 		}
 	}

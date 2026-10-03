@@ -69,14 +69,35 @@ import static br.com.sawcunhaos.foundation.web.utils.ExceptionUtils.getArgsValid
  *
  * <p>Plus the additions {@code type}, {@code title}, {@code status},
  * {@code instance}, {@code requestId} and {@code timestamp}.</p>
+ *
+ * <p><b>Ativação:</b> o handler é registrado por {@link ScosWebErrorHandlerAutoConfiguration}
+ * (via {@code AutoConfiguration.imports}), controlada pela property
+ * {@code scos.web.error-handler.enabled} ({@code true} por padrão, inclusive quando ausente).
+ * Com {@code false} nenhum handler é registrado e a aplicação volta ao tratamento padrão do Spring.
+ * O bean tem {@code @Order(LOWEST_PRECEDENCE)}: um {@code @ControllerAdvice} da aplicação com
+ * maior precedência (valor de {@code @Order} menor) vence.</p>
+ *
+ * <p><b>Mapeamento:</b> {@code ScosException}/{@code ScosNoRollbackException} usam o {@code httpCode}
+ * da exceção (inválido vira 400); {@code ScosNoContentException} responde 204 sem corpo; acesso negado
+ * é 403; {@code MethodNotImplementedException} é 501; validação (corpo, parâmetros e
+ * {@code ConstraintViolationException}) é 400 com {@code errors[]}; qualquer outra exceção é 500.
+ * Mensagens são localizadas por {@code LocaleService} (módulo {@code core}) e todo problema é
+ * enriquecido com {@code requestId} (MDC) e {@code timestamp}.</p>
+ *
+ * @since 1.2.0
  */
 @ControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
 public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 
+	/** Resolve as mensagens (i18n) de {@code detail}, {@code title} e dos erros de campo. */
 	private final LocaleService localeService;
 
+	/**
+	 * Corpo JSON ilegível ou com valor inválido (ex.: texto fora de um enum): resposta com código
+	 * {@code ENUM_ERROR}, citando o campo que falhou e, se o tipo alvo for enum, as constantes aceitas.
+	 */
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(
 			HttpMessageNotReadableException ex,
@@ -117,6 +138,10 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(status).body(problem);
 	}
 
+	/**
+	 * Falha de {@code @Valid} em corpo de requisição: um {@link ScosFieldError} por campo inválido em
+	 * {@code errors[]}, código {@code ATTRIBUTE_NOT_VALID}.
+	 */
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(
 			MethodArgumentNotValidException ex,
@@ -144,6 +169,10 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(status).body(problem);
 	}
 
+	/**
+	 * Falha de validação em parâmetros de método (Spring 6.1+): cobre tanto beans {@code @Valid}
+	 * quanto parâmetros simples anotados diretamente; mesmo formato de {@code errors[]}.
+	 */
 	@Override
 	protected ResponseEntity<Object> handleHandlerMethodValidationException(
 			HandlerMethodValidationException ex,
@@ -232,6 +261,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(statusCode).headers(headers).body(problem);
 	}
 
+	/** {@code ConstraintViolationException} (validação fora do binding do Spring, ex.: em services): 400 com {@code errors[]}; o campo é o último segmento do caminho da propriedade. */
 	@ExceptionHandler(ConstraintViolationException.class)
 	protected ResponseEntity<ProblemDetail> handleConstraintViolationException(
 			ConstraintViolationException exception,
@@ -268,6 +298,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
 	}
 
+	/** {@link ScosException}: status vem de {@code getHttpCode()} (código inválido vira 400); {@code detail} localizado com os argumentos da exceção. 4xx loga {@code WARN} sem stack trace, 5xx loga {@code ERROR}. */
 	@ExceptionHandler(ScosException.class)
 	protected ResponseEntity<ProblemDetail> handleScosException(ScosException exception, HttpServletRequest request){
 		HttpStatus status = resolveHttpCode(exception.getHttpCode());
@@ -282,6 +313,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(status).body(problem);
 	}
 
+	/** {@link ScosNoRollbackException}: igual a {@link ScosException}, mas a mensagem é localizada sem argumentos. */
 	@ExceptionHandler(ScosNoRollbackException.class)
 	protected ResponseEntity<ProblemDetail> handleScosNoRollbackException(
 			ScosNoRollbackException exception, HttpServletRequest request
@@ -298,12 +330,14 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(status).body(problem);
 	}
 
+	/** {@link ScosNoContentException}: sinaliza "sem conteúdo"; responde 204 sem corpo (só log {@code DEBUG}). */
 	@ExceptionHandler(ScosNoContentException.class)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	protected void handleScosNoContentException(ScosNoContentException exception){
 		log.debug("handleSecurity - ScosNoContentException: ", exception);
 	}
 
+	/** {@link AccessDeniedException}: 403 {@code ACCESS_DENIED}, sem expor o motivo. */
 	@ExceptionHandler(AccessDeniedException.class)
 	protected ResponseEntity<ProblemDetail> handleAccessDeniedException(
 			AccessDeniedException ex, HttpServletRequest request
@@ -311,6 +345,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return forbidden(ex, request);
 	}
 
+	/** {@link AuthorizationDeniedException} (autorização por método do Spring Security 6+): mesmo 403 de {@link AccessDeniedException}. */
 	@ExceptionHandler(AuthorizationDeniedException.class)
 	protected ResponseEntity<ProblemDetail> handleAuthorizationDeniedException(
 			AuthorizationDeniedException ex, HttpServletRequest request
@@ -318,6 +353,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return forbidden(ex, request);
 	}
 
+	/** Resposta 403 compartilhada por {@code AccessDeniedException} e {@code AuthorizationDeniedException}. */
 	private ResponseEntity<ProblemDetail> forbidden(Exception ex, HttpServletRequest request) {
 		logByStatus(HttpStatus.FORBIDDEN, ex.getClass().getSimpleName(), ex);
 		String detail = localeService.getMessage(ScosExceptionCode.ACCESS_DENIED.getCode());
@@ -329,6 +365,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
 	}
 
+	/** {@link MethodNotImplementedException}: 501 {@code NOT_IMPLEMENTED}. */
 	@ExceptionHandler(MethodNotImplementedException.class)
 	protected ResponseEntity<ProblemDetail> handleMethodNotImplementedException(
 			MethodNotImplementedException ex, HttpServletRequest request
@@ -343,6 +380,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(problem);
 	}
 
+	/** Rede de segurança: qualquer exceção não tratada acima vira 500 {@code GENERIC} com mensagem genérica (a causa só vai ao log, nunca ao cliente). */
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<ProblemDetail> handleGenericException(Exception ex, HttpServletRequest request) {
 		logByStatus(HttpStatus.INTERNAL_SERVER_ERROR, "Unhandled exception", ex);

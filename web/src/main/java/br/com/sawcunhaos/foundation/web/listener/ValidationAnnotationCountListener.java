@@ -44,6 +44,9 @@ import java.util.Set;
 @Log4j2
 public class ValidationAnnotationCountListener implements ApplicationListener<ApplicationReadyEvent> {
 
+    /**
+     * Ao ficar pronta, varre o(s) pacote(s) base da aplicação e loga a contagem; nunca derruba o startup.
+     */
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         List<String> basePackages;

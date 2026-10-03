@@ -19,6 +19,12 @@ import lombok.NoArgsConstructor;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.dataformat.xml.XmlMapper;
 
+/**
+ * Acesso a um {@link XmlMapper} (Jackson 3) compartilhado, tolerante a propriedades desconhecidas,
+ * ignoradas e {@code null} em primitivos.
+ *
+ * @since 1.2.0
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JacksonXmlUtils {
 
@@ -28,6 +34,9 @@ public final class JacksonXmlUtils {
             .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .build();
 
+    /**
+     * @return instância única e imutável (thread-safe) do {@link XmlMapper}
+     */
     @SuppressFBWarnings(value = "MS_EXPOSE_REP",
             justification = "tools.jackson XmlMapper (Jackson 3) is immutable and thread-safe; the shared instance is meant to be reused")
     public static XmlMapper getInstance() {

@@ -24,9 +24,24 @@ import org.springframework.data.domain.Sort;
 
 import java.util.Objects;
 
+/**
+ * Converte os parâmetros de paginação do SCOS em {@link Pageable} do Spring Data e monta o
+ * {@link ScosPaginatedDTO} de resposta. A API externa conta páginas a partir de <b>1</b>; o
+ * {@code PageRequest} do Spring conta a partir de 0, por isso toda página recebida é decrementada em 1.
+ *
+ * <p>Não há validação: {@code page < 1} faz o {@code PageRequest} lançar
+ * {@link IllegalArgumentException}.</p>
+ *
+ * @since 1.2.0
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PaginationUtils {
 
+    /**
+     * Monta o DTO de paginação da resposta (apenas copia os valores).
+     *
+     * @return DTO de paginação
+     */
     public static ScosPaginatedDTO createPaginated(
             final int totalPages,
             final long totalElements,
@@ -40,10 +55,20 @@ public final class PaginationUtils {
                 .build();
     }
 
+    // API 1-based -> Spring 0-based.
     private static int calculatePage(final int page){
         return page - 1;
     }
 
+    /**
+     * Cria o {@link Pageable} a partir do filtro (que já aplica os padrões página 1, 10 por página,
+     * {@code ASC}). O campo de ordenação passa por {@code orderDefault.value(order)}; se o resultado
+     * for {@code null}, a consulta fica sem ordenação.
+     *
+     * @param scosPaginationFilterDTO filtro vindo do cliente
+     * @param orderDefault            mapeia/valida o nome da ordenação (módulo {@code core})
+     * @return paginação, com {@link Sort} quando houver campo de ordenação
+     */
     public static Pageable createPageable(
             final ScosPaginationFilterDTO scosPaginationFilterDTO,
             final PropertiesOrder orderDefault
@@ -61,6 +86,16 @@ public final class PaginationUtils {
                 );
     }
 
+    /**
+     * Variante com parâmetros soltos; mesma regra de ordenação da variante com filtro.
+     *
+     * @param page         página, a partir de 1
+     * @param sizePerPage  itens por página
+     * @param direction    sentido da ordenação
+     * @param order        nome da ordenação solicitada (passa por {@code orderDefault})
+     * @param orderDefault mapeia/valida o nome da ordenação
+     * @return paginação, com {@link Sort} quando houver campo de ordenação
+     */
     public static Pageable createPageable(
             final int page,
             final int sizePerPage,
@@ -75,6 +110,15 @@ public final class PaginationUtils {
                 PageRequest.of( calculatePage(page), sizePerPage);
     }
 
+    /**
+     * Variante simplificada: ordena sempre pela propriedade {@code id}.
+     *
+     * @param page        página, a partir de 1
+     * @param sizePerPage itens por página
+     * @param direction   {@code "asc"} ou {@code "desc"} (sem diferenciar maiúsculas); outro valor lança
+     *                    {@link IllegalArgumentException}
+     * @return paginação ordenada por {@code id}
+     */
     public static Pageable createPageable(
             final int page,
             final int sizePerPage,

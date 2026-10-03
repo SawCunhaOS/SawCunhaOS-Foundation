@@ -21,6 +21,15 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * Envelope padrão de resposta de sucesso: {@code data} com o conteúdo e, em listagens paginadas,
+ * {@code scosPaginatedDTO} com os metadados (fica {@code null} nas respostas não paginadas).
+ * Erros <b>não</b> usam este envelope: são {@code application/problem+json}
+ * (ver {@link br.com.sawcunhaos.foundation.web.ExceptionsHandler}).
+ *
+ * @param <T> tipo do conteúdo
+ * @since 1.2.0
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

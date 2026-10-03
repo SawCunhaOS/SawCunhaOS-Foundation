@@ -22,6 +22,22 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Determina o IP do cliente de uma requisição, olhando cabeçalhos de proxy/CDN em ordem de
+ * prioridade ({@code CF-Connecting-IP}, {@code True-Client-IP}, {@code X-Real-IP},
+ * {@code X-Forwarded-For}, {@code Forwarded}, ...) e, por fim, {@code request.getRemoteAddr()}.
+ * Só aceita IP <b>público</b> nos cabeçalhos; se nenhum servir, devolve o {@code remoteAddr} mesmo
+ * privado, ou {@code "unknown"} quando ele é {@code null}.
+ *
+ * <p>Usado por {@link br.com.sawcunhaos.foundation.web.filter.LoggingInitialFilter} para o campo
+ * {@code IS_IP} do MDC.</p>
+ *
+ * <p>Limitações conhecidas: os cabeçalhos são aceitos sem verificar se vieram de um proxy confiável
+ * (o cliente pode forjá-los); a validação usa {@code InetAddress.getByName}, que pode resolver
+ * nomes via DNS; e a porta é removida com {@code split(":")}, o que não distingue IPv6.</p>
+ *
+ * @since 1.2.0
+ */
 @Component
 public class IpAddressExtractor {
 
@@ -80,6 +96,7 @@ public class IpAddressExtractor {
     /**
      * Extrai o IP real do cliente
      */
+    // Retorna o valor ORIGINAL do cabeçalho (o split de porta ocorre só dentro da validação).
     public String extractClientIp(HttpServletRequest request) {
         // 1. Tentar headers conhecidos
         for (String header : IP_HEADERS) {

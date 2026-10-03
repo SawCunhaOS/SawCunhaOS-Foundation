@@ -26,6 +26,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Mapeia um método de controller para atender requisições HTTP GET sob a convenção SCOS (meta-anotação sobre
+ * {@link ScosRequestMapping}). Não impõe {@code consumes}.
+ *
+ * <p>Cache: aplica {@code @Cacheable} usando o {@code keyGenerator} {@code "ScosCacheKeyGenerator"} (bean do módulo {@code cache}). Com o padrão {@code condition = "false"} o cache fica <b>desligado</b>: é preciso passar {@code condition} (SpEL) e um {@code nameCache} real para cachear.</p>
+ *
+ * <p>Atributos: {@code uri} (caminho, obrigatório), {@code httpCode} (status de sucesso,
+ * obrigatório) e {@code nameCache} (nome(s) do cache; o padrão {@code "DISABLE"} não é um cache real).</p>
+ *
+ * @since 1.2.0
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -35,18 +46,23 @@ import java.lang.annotation.Target;
 @Cacheable
 public @interface ScosRequestGET {
 
+    /** Caminho(s) da requisição (alias de {@code RequestMapping.value}); obrigatório. */
     @AliasFor(annotation = RequestMapping.class, attribute = "value")
     String[] uri();
 
+    /** Status HTTP de sucesso devolvido (alias de {@code ResponseStatus.code}); obrigatório. */
     @AliasFor(annotation = ResponseStatus.class, attribute = "code")
     HttpStatus httpCode();
 
+    /** Nome(s) do cache; o padrão {@code "DISABLE"} não é um cache real. */
     @AliasFor(annotation = Cacheable.class, attribute = "value")
     String[] nameCache() default "DISABLE";
 
+    /** Bean {@code KeyGenerator} usado para gerar a chave do cache; padrão {@code "ScosCacheKeyGenerator"}. */
     @AliasFor(annotation = Cacheable.class, attribute = "keyGenerator")
     String keyGenerator() default "ScosCacheKeyGenerator";
 
+    /** Condição SpEL que habilita a operação de cache; o padrão {@code "false"} a mantém desligada. */
     @AliasFor(annotation = Cacheable.class, attribute = "condition")
     String condition() default "false";
 }

@@ -73,8 +73,12 @@ public class LoggingFinalFilter extends OncePerRequestFilter {
 
 		ContentCachingResponseWrapper servletResponse = new ContentCachingResponseWrapper(response);
 
+		// O corpo da resposta só pode ser lido depois da cadeia; ContentCachingResponseWrapper guarda
+		// uma cópia e copyBodyToResponse() (abaixo) devolve o conteúdo ao cliente.
 		chain.doFilter(request, servletResponse);
 		if(request.getRequestURI().contains(scosFilterProperties.getURI())) {
+			// MDC ainda contém X-Request-ID/IS_IP: o LoggingInitialFilter (Order 0, mais externo) só limpa
+			// o MDC depois que este filtro termina.
 			String responseBody = getResponseBody(servletResponse);
             MDC.put("Response-Time", DateUtils.returnDateCurrent());
             MDC.put("Response-Code", servletResponse.getStatus() + "");

@@ -26,15 +26,31 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Wrapper de requisição que permite ler o corpo mais de uma vez. O {@code ServletInputStream} do
+ * container só pode ser consumido uma vez; como {@link LoggingInitialFilter} precisa ler o corpo
+ * para logá-lo e o controller precisa lê-lo de novo para desserializar, o primeiro acesso copia
+ * todos os bytes para a memória e cada chamada seguinte recebe um stream novo sobre essa cópia.
+ *
+ * <p>Limitações: o corpo inteiro fica em memória (sem limite de tamanho) e leitura assíncrona não é
+ * suportada ({@code setReadListener} lança {@link RuntimeException}) — por isso os filtros ignoram
+ * requisições {@code application/grpc}.</p>
+ *
+ * @since 1.2.0
+ */
 public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
     private ByteArrayOutputStream cachedBytes;
 
+    /**
+     * @param request requisição original, ainda não lida
+     */
     public MultiReadHttpServletRequest(HttpServletRequest request) {
         super(request);
     }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
+        // Cache lazy: só consome o stream original na primeira leitura; as demais reutilizam os bytes.
         if (cachedBytes == null) cacheInputStream();
 
         return new CachedServletInputStream(cachedBytes.toByteArray());

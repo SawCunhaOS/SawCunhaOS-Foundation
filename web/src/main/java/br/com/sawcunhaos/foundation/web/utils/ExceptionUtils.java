@@ -25,9 +25,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Auxiliares do {@link br.com.sawcunhaos.foundation.web.ExceptionsHandler} para montar os
+ * argumentos das mensagens de validação localizadas.
+ *
+ * @since 1.2.0
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ExceptionUtils {
 
+    /**
+     * Extrai os limites numéricos de uma restrição para preencher os placeholders da mensagem:
+     * {@code @Max} e {@code @Min} dão {@code [value]}; {@code @Size} dá {@code [min, max]}; qualquer
+     * outra anotação dá lista vazia.
+     *
+     * @param annotation anotação da restrição violada
+     * @return valores como texto, na ordem dos placeholders
+     */
     public static List<String> findValuesAnnotation(Annotation annotation){
         List<String> values = new ArrayList<>();
         if(annotation instanceof Max max){
@@ -43,6 +57,14 @@ public final class ExceptionUtils {
         return values;
     }
 
+    /**
+     * Prepara os argumentos de uma violação para {@code LocaleService.getMessage}: troca cada
+     * {@link DefaultMessageSourceResolvable} (como o nome do campo) pela sua mensagem padrão e mantém
+     * os demais valores.
+     *
+     * @param arguments argumentos do erro de validação do Spring
+     * @return lista com os argumentos já resolvidos
+     */
     public static List<Object> getArgsValidation(Object[] arguments) {
 
         return Arrays.stream(arguments)

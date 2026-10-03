@@ -23,6 +23,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Estereótipo de controller REST SCOS: {@code @RestController} com prefixo de caminho fixo
+ * {@code /api} e {@code produces = application/json}. O prefixo {@code /api} é o mesmo que
+ * {@link br.com.sawcunhaos.foundation.web.filter.ScosFilterProperties#getURI()} usa para decidir
+ * quais requisições os filtros de log registram.
+ *
+ * <p>Erros lançados pelo controller são convertidos em RFC 9457 pelo
+ * {@link br.com.sawcunhaos.foundation.web.ExceptionsHandler}.</p>
+ *
+ * @since 1.2.0
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

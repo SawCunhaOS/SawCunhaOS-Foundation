@@ -27,6 +27,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Mapeia um método de controller para atender requisições HTTP DELETE sob a convenção SCOS (meta-anotação sobre
+ * {@link ScosRequestMapping}). Não impõe {@code consumes}.
+ *
+ * <p>Cache: aplica {@code @CacheEvict(allEntries = true)}: após o método, esvazia todas as entradas do(s) cache(s) em {@code nameCache}. Com o padrão {@code condition = "false"} a limpeza fica <b>desligada</b> até o chamador passar uma condição SpEL verdadeira (ex.: {@code condition = "true"}).</p>
+ *
+ * <p>Atributos: {@code uri} (caminho, obrigatório), {@code httpCode} (status de sucesso,
+ * obrigatório) e {@code nameCache} (nome(s) do cache; o padrão {@code "DISABLE"} não é um cache real).</p>
+ *
+ * @since 1.2.0
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -38,15 +49,19 @@ import java.lang.annotation.Target;
 )
 public @interface ScosRequestDELETE {
 
+    /** Caminho(s) da requisição (alias de {@code RequestMapping.value}); obrigatório. */
     @AliasFor(annotation = RequestMapping.class, attribute = "value")
     String[] uri();
 
+    /** Status HTTP de sucesso devolvido (alias de {@code ResponseStatus.code}); obrigatório. */
     @AliasFor(annotation = ResponseStatus.class, attribute = "code")
     HttpStatus httpCode();
 
+    /** Nome(s) do cache; o padrão {@code "DISABLE"} não é um cache real. */
     @AliasFor(annotation = CacheEvict.class, attribute = "value")
     String[] nameCache() default "DISABLE";
 
+    /** Condição SpEL que habilita a operação de cache; o padrão {@code "false"} a mantém desligada. */
     @AliasFor(annotation = CacheEvict.class, attribute = "condition")
     String condition() default "false";
 

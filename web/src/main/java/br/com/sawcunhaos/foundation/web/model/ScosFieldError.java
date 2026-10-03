@@ -31,6 +31,9 @@ import java.net.URI;
  *                {@code "#/email"} for {@code email} or {@code "#/address/street"}
  *                for the nested {@code address.street}.
  * @param detail  localized validation message for the field.
+ * @param code    stable error code (e.g. {@code "VALIDATION_ERROR"}).
+ * @param type    URI de tipo RFC 9457 derivada do {@code code}.
+ * @since 1.2.0
  */
 public record ScosFieldError(
         String pointer,

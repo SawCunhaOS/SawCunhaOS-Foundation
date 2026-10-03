@@ -25,6 +25,11 @@ import java.util.Set;
  * {@link MessageSourceAutoConfiguration}, and explicitly before it, so this bean claims the
  * {@code messageSource} name first and Spring Boot's own auto-configuration backs off via its
  * {@code @ConditionalOnMissingBean} instead of racing for the bean name.
+ *
+ * <p>Registrada via {@code AutoConfiguration.imports}; não tem toggle. Mensagens do {@code LocaleService}
+ * (e, portanto, do {@link br.com.sawcunhaos.foundation.web.ExceptionsHandler}) saem destes bundles.</p>
+ *
+ * @since 1.2.0
  */
 @AutoConfiguration(before = MessageSourceAutoConfiguration.class)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
@@ -34,6 +39,14 @@ public class ScosMessageSourceConfiguration {
     private static final String SCAN_PATTERN = "classpath*:scos_message/*.properties";
     private static final String LOCALE_SUFFIX_PATTERN = "(_[a-z]{2}(_[A-Z]{2})?)?\\.properties$";
 
+    /**
+     * Varre {@code classpath*:scos_message/*.properties} e monta um único {@link MessageSource} com um
+     * basename por família de bundle. Sem cache ({@code cacheSeconds = -1}, carrega uma vez), sem cair
+     * para o locale do sistema e sem usar o código como mensagem padrão.
+     *
+     * @return o {@code messageSource} agregado
+     * @throws IOException se a varredura do classpath falhar
+     */
     @Bean
     public MessageSource messageSource() throws IOException {
 

@@ -29,11 +29,23 @@ import org.springframework.core.annotation.Order;
  * internal logic is unchanged by this move); this class only wraps it into an explicit
  * {@code @Bean} method so Spring can apply {@link ConditionalOnProperty} and
  * {@link Order} to it.</p>
+ *
+ * <p>Ativação: property {@code scos.web.error-handler.enabled}, {@code true} por padrão (também
+ * quando ausente); {@code false} desliga o tratamento de erro HTTP do módulo.</p>
+ *
+ * @since 1.2.0
  */
 @AutoConfiguration
 @ConditionalOnProperty(prefix = "scos.web.error-handler", name = "enabled", matchIfMissing = true)
 public class ScosWebErrorHandlerAutoConfiguration {
 
+	/**
+	 * Registra o {@link ExceptionsHandler}. {@code LOWEST_PRECEDENCE}: um {@code @ControllerAdvice}
+	 * da aplicação com maior precedência (valor de {@code @Order} menor) é consultado antes e pode sobrescrever o tratamento.
+	 *
+	 * @param localeService serviço de mensagens localizadas (módulo {@code core})
+	 * @return o handler global de erros
+	 */
 	@Bean
 	@Order(Ordered.LOWEST_PRECEDENCE)
 	public ExceptionsHandler exceptionsHandler(LocaleService localeService) {

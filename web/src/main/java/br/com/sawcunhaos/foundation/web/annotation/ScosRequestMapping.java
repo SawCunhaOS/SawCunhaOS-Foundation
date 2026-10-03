@@ -25,6 +25,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Meta-anotação base (pacote-privada) das {@code ScosRequestGET/POST/PUT/PATCH/DELETE}: combina
+ * {@code @RequestMapping} e {@code @ResponseStatus} e expõe seus atributos por {@code @AliasFor}.
+ * Não é usada diretamente pela aplicação.
+ *
+ * <p>Padrões: {@code uri = ""}, {@code httpCode = 200 OK}, {@code consumes = {}}.</p>
+ *
+ * @since 1.2.0
+ */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

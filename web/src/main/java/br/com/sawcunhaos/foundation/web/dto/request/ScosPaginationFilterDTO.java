@@ -20,6 +20,18 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Filtro de paginação recebido do cliente. Campos ausentes assumem padrões nos getters:
+ * página {@code 1}, {@code 10} itens por página e ordenação {@code ASC}. Atenção: os getters aplicam
+ * o padrão, mas os acessores do record ({@code page()}, {@code sizePerPage()}, {@code direction()})
+ * devolvem o valor bruto, possivelmente {@code null}.
+ *
+ * @param page        página, a partir de 1
+ * @param sizePerPage itens por página
+ * @param direction   sentido da ordenação
+ * @param order       nome da ordenação (validado por {@code PropertiesOrder} em {@link br.com.sawcunhaos.foundation.web.PaginationUtils})
+ * @since 1.2.0
+ */
 @Builder
 public record ScosPaginationFilterDTO(
         Integer page,
