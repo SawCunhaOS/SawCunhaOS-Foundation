@@ -14,26 +14,26 @@
 package br.com.sawcunhaos.foundation.jdempotent.core.callback;
 
 /**
- * 
- * A callback interface that need to clear cache for custom error condition
+ * Callback que permite tratar como erro uma resposta "bem-sucedida" do método protegido.
  *
+ * <p>Se {@link #onErrorCondition(Object)} devolver {@code true}, o aspecto remove a chave do
+ * repositório (liberando um retry) e lança a exceção de {@link #onErrorCustomException()}.</p>
  */
 public interface ErrorConditionalCallback {
 
     /**
-     * a error state flag
+     * Indica se a resposta representa uma condição de erro.
      *
-     * @param response
-     * @return
+     * @param response valor devolvido pelo método protegido
+     * @return {@code true} para tratar a resposta como erro
      */
     boolean onErrorCondition(Object response);
 
     /**
+     * Exceção lançada quando {@link #onErrorCondition(Object)} devolve {@code true}.
      *
-     * exception to throw when custom error occurs
-     *
-     * @return
+     * @return a exceção a lançar
      */
     RuntimeException onErrorCustomException();
-    
+
 }

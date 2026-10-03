@@ -18,6 +18,9 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
 
 import java.lang.reflect.Field;
 
+/**
+ * Último elo da cadeia: usa o nome do campo e o seu valor, para campos sem anotação de controle.
+ */
 public class JdempotentDefaultChain extends AnnotationChain {
 
     @Override

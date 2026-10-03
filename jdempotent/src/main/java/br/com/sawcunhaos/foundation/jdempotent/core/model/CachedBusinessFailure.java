@@ -46,6 +46,12 @@ public final class CachedBusinessFailure {
         this.exceptionMessage = exceptionMessage;
     }
 
+    /**
+     * Captura a classe e a mensagem da exceção de negócio.
+     *
+     * @param exception a exceção lançada pelo método protegido
+     * @return a falha a ser codificada
+     */
     public static CachedBusinessFailure of(Throwable exception) {
         return new CachedBusinessFailure(exception.getClass().getName(), exception.getMessage());
     }

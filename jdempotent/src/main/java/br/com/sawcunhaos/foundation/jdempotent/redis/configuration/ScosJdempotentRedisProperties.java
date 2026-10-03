@@ -79,6 +79,13 @@ public class ScosJdempotentRedisProperties {
 
     private Boolean persistReqRes = true;
 
+    /**
+     * Falha a inicialização se alguma propriedade obrigatória estiver ausente, independentemente de
+     * haver um provider de Bean Validation no classpath.
+     *
+     * @throws IllegalStateException se alguma propriedade {@code scos.jdempotent.cache.redis.*}
+     *                               obrigatória não foi configurada
+     */
     @PostConstruct
     public void validateRequiredProperties() {
         requireConfigured(expirationTimeHour, "expirationTimeHour");

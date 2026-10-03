@@ -20,13 +20,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An implementation of the idempotent AbstractIdempotentRepository
- * that uses as a default map
+ * Repositório em memória, padrão do {@code IdempotentAspect}, apoiado em um
+ * {@link ConcurrentHashMap}.
+ *
+ * <p>Local à JVM: não deduplica entre instâncias da aplicação e perde o estado ao reiniciar. Útil
+ * em testes e uso programático; para ambientes com mais de uma instância use o repositório Redis.</p>
  */
 public class InMemoryIdempotentRepository extends AbstractIdempotentRepository {
 
     private final ConcurrentHashMap<IdempotencyKey, IdempotentRequestResponseWrapper> map;
 
+    /** Cria um repositório vazio. */
     public InMemoryIdempotentRepository() {
         this.map = new ConcurrentHashMap<>();
     }

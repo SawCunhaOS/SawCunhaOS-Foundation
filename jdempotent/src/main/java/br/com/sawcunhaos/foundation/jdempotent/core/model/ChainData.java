@@ -20,6 +20,9 @@ import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 
+/**
+ * Entrada de cada elo de {@code AnnotationChain}: o campo inspecionado e o objeto que o contém.
+ */
 @Getter
 @Data
 @NoArgsConstructor

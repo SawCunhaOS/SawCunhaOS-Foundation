@@ -17,24 +17,24 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
+ * Algoritmos de hash suportados para gerar a chave de idempotência.
  *
- * Supported hash algorithms to generate idempotency key
- *
+ * <p>O aspecto usa {@link #SHA256} tanto para a chave quanto para o {@code payloadHash}.</p>
  */
 public enum CryptographyAlgorithm {
 
     /**
-     * use md5 hash algorithm
+     * Usa o algoritmo de hash MD5.
      */
     MD5("MD5"),
 
     /**
-     * use SHA-256 hash algorithm
+     * Usa o algoritmo de hash SHA-256.
      */
     SHA256("SHA-256"),
 
     /**
-     * use SHA-1 hash algorithm
+     * Usa o algoritmo de hash SHA-1.
      */
     SHA1("SHA-1");
 
@@ -44,15 +44,23 @@ public enum CryptographyAlgorithm {
         this.algorithm = algorithm;
     }
 
+    /**
+     * Nome JCA do algoritmo, aceito por {@link MessageDigest#getInstance(String)}.
+     *
+     * @return o nome do algoritmo (por exemplo {@code SHA-256})
+     */
     public String value(){
         return algorithm;
     }
 
     /**
-     * Story 3.12 (patch): single point that turns an algorithm constant into a ready
-     * {@link MessageDigest}, so the {@code getInstance}/catch boilerplate isn't repeated at
-     * every call site (it was previously duplicated between {@code IdempotentAspect#execute}
-     * and {@code IdempotencyKeyResolver#resolve}).
+     * Cria um {@link MessageDigest} novo para o algoritmo (Story 3.12), evitando repetir o
+     * {@code getInstance}/catch em cada chamador ({@code IdempotentAspect#execute} e
+     * {@code IdempotencyKeyResolver#resolve}). Um digest por chamada: {@link MessageDigest} não é
+     * thread-safe.
+     *
+     * @return um digest novo
+     * @throws IllegalStateException se a JVM não suporta o algoritmo
      */
     public MessageDigest newDigest() {
         try {

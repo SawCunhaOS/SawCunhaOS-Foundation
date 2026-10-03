@@ -22,70 +22,87 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
- * an interface that the functionality required of a request store for idempotent method invocations.
+ * Contrato do armazenamento usado pelo {@code IdempotentAspect} para controlar chamadas
+ * idempotentes: lock atômico por chave, resposta em cache e remoção.
+ *
+ * <p>Implementações fornecidas: {@link InMemoryIdempotentRepository} (padrão, local à JVM) e
+ * {@code RedisIdempotentRepository} (distribuído, fail-open com circuit breaker). O repositório é
+ * um fast-path contra reprocessamento, não a garantia final contra duplicidade: essa é a constraint
+ * {@code UNIQUE} do banco de dados do consumidor.</p>
  */
 public interface IdempotentRepository {
     /**
-     * Note (Story 3.15): an implementation that enforces TTL lazily (no native per-entry
-     * expiration in its backing store) may evict an expired entry as a side effect of this
-     * call — the caller only ever observes "absent" either way, but the store itself can
-     * shrink as a result of what looks like a read.
+     * Informa se há uma entrada para a chave.
      *
-     * @param key
-     * @return
+     * <p>Nota (Story 3.15): uma implementação que aplica o TTL de forma preguiçosa (sem expiração
+     * nativa por entrada) pode remover uma entrada expirada como efeito colateral desta chamada;
+     * o chamador só observa "ausente", mas o armazenamento pode encolher.</p>
+     *
+     * @param key chave de idempotência
+     * @return {@code true} se há entrada válida (não expirada) para a chave
      */
     boolean contains(IdempotencyKey key);
 
     /**
-     * Atomically tries to acquire the idempotency lock for {@code key} (Story 3.5).
-     * Replaces the non-atomic {@code contains() -> store()} sequence: exactly one
-     * concurrent caller for the same key gets a {@link Lease} with {@code acquired == true},
-     * every other concurrent caller gets a {@link Lease} describing what is already
-     * stored for that key (an in-progress call, a finished one with a cached response,
-     * or, when the stored {@code payloadHash} differs from this call's, a payload
-     * collision — {@link Lease#isMismatch()}, Story 3.6). The mismatch comparison is
-     * done against the same value the lock-acquisition step already reads/writes, so
-     * implementations must not perform it as a second round trip to the store.
+     * Tenta adquirir atomicamente o lock de idempotência para a chave (Story 3.5).
      *
-     * @param key         the idempotency key
-     * @param payloadHash hash of the request payload, stored alongside the lease and
-     *                    compared against the hash already stored under the key (if any)
-     *                    to detect payload collisions (Story 3.6)
-     * @param ttl         how long the lease is held before it expires; a zero/negative
-     *                    duration lets the implementation fall back to its own default
-     * @return the lease
+     * <p>Substitui a sequência não atômica {@code contains() -> store()}: exatamente um chamador
+     * concorrente para a mesma chave recebe um {@link Lease} com {@code acquired == true}; os
+     * demais recebem um {@link Lease} descrevendo o que já está armazenado (chamada em andamento,
+     * chamada concluída com resposta em cache ou, quando o {@code payloadHash} armazenado difere
+     * do desta chamada, colisão de payload, {@link Lease#isMismatch()}, Story 3.6). A comparação
+     * de hash usa o mesmo valor lido/escrito pela aquisição do lock, então a implementação não
+     * deve fazê-la em uma segunda ida ao armazenamento.</p>
+     *
+     * @param key         chave de idempotência
+     * @param payloadHash hash do payload, gravado junto do lease e comparado com o hash já
+     *                    gravado sob a chave (se houver) para detectar colisão de payload
+     * @param ttl         por quanto tempo o lease é mantido; duração zero ou negativa faz a
+     *                    implementação usar o seu padrão; no repositório em memória o lease não expira até {@code setResponse}
+     * @return o lease (adquirido, em andamento ou colisão de payload)
      */
     Lease tryAcquire(IdempotencyKey key, String payloadHash, Duration ttl);
 
     /**
-     * Checks the cache for an existing call for this request.
+     * Consulta a resposta em cache de uma chamada anterior com esta chave.
      *
-     * <p>Note (Story 3.15): same side effect as {@link #contains(IdempotencyKey)} — an
-     * implementation with lazy TTL enforcement may evict an expired entry here too.
+     * <p>Nota (Story 3.15): mesmo efeito colateral de {@link #contains(IdempotencyKey)}: uma
+     * implementação com TTL preguiçoso pode remover aqui uma entrada expirada.</p>
      *
-     * @param key
-     * @return
+     * @param key chave de idempotência
+     * @return a resposta em cache, ou {@code null} se ausente, expirada ou ainda em andamento
      */
     IdempotentResponseWrapper getResponse(IdempotencyKey key);
 
     /**
+     * Grava a requisição sob a chave (sem resposta ainda). O aspecto não a usa mais:
+     * prefira {@link #tryAcquire}, que adquire e grava de forma atômica.
      *
-     * @param key
-     * @param requestObject
-     * @param ttl
-     * @param timeUnit
+     * @param key           chave de idempotência
+     * @param requestObject payload da requisição
+     * @param ttl           validade da entrada; {@code 0} usa o padrão da implementação
+     * @param timeUnit      unidade de {@code ttl}
      */
-    void store(IdempotencyKey key, IdempotentRequestWrapper requestObject,Long ttl, TimeUnit timeUnit);
-
+    void store(IdempotencyKey key, IdempotentRequestWrapper requestObject, Long ttl, TimeUnit timeUnit);
 
     /**
-     * @param key
+     * Remove a entrada da chave, liberando-a para uma nova execução (política
+     * {@code RELEASE} ou condição de erro do {@code ErrorConditionalCallback}).
+     *
+     * @param key chave de idempotência
      */
     void remove(IdempotencyKey key);
 
     /**
-     * @param request
-     * @param idempotentResponse
+     * Grava a resposta final sob a chave, preservando o {@code payloadHash} gravado por
+     * {@link #tryAcquire} e renovando a validade da entrada.
+     *
+     * @param key                chave de idempotência
+     * @param request            payload da requisição
+     * @param idempotentResponse resposta (ou falha codificada, política {@code KEEP_FAILED})
+     * @param ttl                validade da entrada; {@code 0} usa o padrão da implementação
+     * @param timeUnit           unidade de {@code ttl}
      */
-    void setResponse(IdempotencyKey key, IdempotentRequestWrapper request, IdempotentResponseWrapper idempotentResponse, Long ttl, TimeUnit timeUnit);
+    void setResponse(IdempotencyKey key, IdempotentRequestWrapper request,
+                     IdempotentResponseWrapper idempotentResponse, Long ttl, TimeUnit timeUnit);
 }

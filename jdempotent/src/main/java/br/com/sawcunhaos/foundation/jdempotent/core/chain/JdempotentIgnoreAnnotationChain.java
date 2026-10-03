@@ -19,6 +19,10 @@ import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentIgnore;
 
 import java.lang.reflect.Field;
 
+/**
+ * Elo de partida da cadeia: exclui da chave o campo anotado com {@code @JdempotentIgnore}
+ * devolvendo um {@link KeyValuePair} vazio.
+ */
 public class JdempotentIgnoreAnnotationChain extends AnnotationChain {
     @Override
     public KeyValuePair process(ChainData chainData) throws IllegalAccessException {

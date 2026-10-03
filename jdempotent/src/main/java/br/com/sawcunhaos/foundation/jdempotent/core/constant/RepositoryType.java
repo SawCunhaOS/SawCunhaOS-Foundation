@@ -16,24 +16,25 @@ package br.com.sawcunhaos.foundation.jdempotent.core.constant;
 import java.util.Arrays;
 
 /**
+ * Tipos de repositório de dados reconhecidos por nome de configuração.
  *
- * Supported datasource types
- *
+ * <p>Apenas {@link #REDIS} e {@link #INMEMORY} têm implementação neste módulo; {@link #HAZELCAST}
+ * é um valor reservado sem repositório correspondente.</p>
  */
 public enum RepositoryType {
 
     /**
-     *  Redis config value
+     * Valor de configuração do Redis.
      */
     REDIS("redis"),
 
     /**
-     *  Hazelcast config value
+     * Valor de configuração do Hazelcast (reservado, sem implementação neste módulo).
      */
     HAZELCAST("hazelcast"),
 
     /**
-     * Default config
+     * Configuração padrão (repositório em memória).
      */
     INMEMORY("default");
 
@@ -43,15 +44,20 @@ public enum RepositoryType {
         this.value = value;
     }
 
+    /**
+     * Valor de configuração associado ao tipo.
+     *
+     * @return o valor de configuração (por exemplo {@code redis})
+     */
     public String value() {
         return value;
     }
 
     /**
-     * return 
-     * 
-     * @param repositoryName
-     * @return
+     * Resolve o tipo pelo valor de configuração, ignorando maiúsculas e minúsculas.
+     *
+     * @param repositoryName valor de configuração (não nulo)
+     * @return o tipo correspondente, ou {@link #INMEMORY} se nenhum casar
      */
     public static RepositoryType getRepositoryTypeByValue(String repositoryName){
         return Arrays.stream(values()).filter(repositoryType -> repositoryName.equalsIgnoreCase(repositoryType.value)).findAny().orElse(RepositoryType.INMEMORY);

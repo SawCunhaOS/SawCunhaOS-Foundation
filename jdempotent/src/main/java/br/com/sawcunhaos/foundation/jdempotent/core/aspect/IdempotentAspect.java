@@ -75,7 +75,29 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * An aspect that used along with the @IdempotentResource annotation
+ * Aspecto que torna idempotentes os métodos anotados com {@link JdempotentResource}.
+ *
+ * <p>Fluxo de {@link #execute(ProceedingJoinPoint)}:</p>
+ * <ol>
+ *   <li>coleta o payload dos argumentos e compõe a chave via {@link IdempotencyKeyResolver};</li>
+ *   <li>chama {@link IdempotentRepository#tryAcquire}. Com o lease adquirido, executa o método;
+ *       com colisão de payload, lança {@link IdempotentPayloadMismatchException}; com resposta em
+ *       cache, devolve-a (ou relança a falha guardada como
+ *       {@link IdempotentReplayedFailureException}); sem resposta, lança
+ *       {@link IdempotentInProgressException};</li>
+ *   <li>após executar o método: sucesso grava a resposta; exceção segue
+ *       {@link IdempotentFailurePolicy} ({@code RELEASE} libera a chave, {@code KEEP_FAILED}
+ *       guarda a falha para replay).</li>
+ * </ol>
+ *
+ * <p>Fail-open: este aspecto não trata falha do backend. É o repositório Redis que absorve erros e
+ * indisponibilidade (circuit breaker) devolvendo um lease "adquirido"; a requisição de negócio
+ * prossegue sem o lock. A garantia real contra duplicidade é a constraint {@code UNIQUE} do banco,
+ * não este aspecto.</p>
+ *
+ * <p>Só {@link Exception} dispara a política de falha: um {@link Error} propaga sem liberar a
+ * chave, que expira pelo TTL. Executa com {@link Ordered#HIGHEST_PRECEDENCE}, ou seja, por fora de
+ * outros aspectos (por exemplo transação).</p>
  */
 @Aspect
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -155,6 +177,8 @@ public class IdempotentAspect {
     }
 
     /**
+     * Construtor fluente de {@link IdempotentAspect}; todos os passos são opcionais.
+     *
      * @see #builder()
      */
     public static final class Builder {
@@ -165,21 +189,45 @@ public class IdempotentAspect {
         private Builder() {
         }
 
+        /**
+         * Define o repositório; sem ele, usa {@link InMemoryIdempotentRepository}.
+         *
+         * @param idempotentRepository repositório de idempotência
+         * @return este builder
+         */
         public Builder repository(IdempotentRepository idempotentRepository) {
             this.idempotentRepository = idempotentRepository;
             return this;
         }
 
+        /**
+         * Define o callback que classifica respostas como erro; sem ele, nenhuma resposta é
+         * tratada como erro.
+         *
+         * @param errorCallback callback de condição de erro
+         * @return este builder
+         */
         public Builder errorCallback(ErrorConditionalCallback errorCallback) {
             this.errorCallback = errorCallback;
             return this;
         }
 
+        /**
+         * Define o gerador de chave; sem ele, usa {@link DefaultKeyGenerator} sem namespace.
+         *
+         * @param keyGenerator gerador de chave
+         * @return este builder
+         */
         public Builder keyGenerator(DefaultKeyGenerator keyGenerator) {
             this.keyGenerator = keyGenerator;
             return this;
         }
 
+        /**
+         * Cria o aspecto aplicando os padrões para o que não foi definido.
+         *
+         * @return o aspecto
+         */
         public IdempotentAspect build() {
             IdempotentRepository repository =
                     idempotentRepository != null ? idempotentRepository : new InMemoryIdempotentRepository();
@@ -189,11 +237,16 @@ public class IdempotentAspect {
     }
 
     /**
-     * An advice to make sure it returns at the same time for all subsequent calls
+     * Advice que garante o mesmo resultado para chamadas repetidas com a mesma chave.
      *
-     * @param pjp
-     * @return
-     * @throws Throwable
+     * @param pjp ponto de execução do método anotado com {@link JdempotentResource}
+     * @return o valor devolvido pelo método, ou a resposta em cache de uma chamada anterior
+     * @throws IdempotentPayloadMismatchException   se a chave já existe com outro payload
+     * @throws IdempotentInProgressException        se a chave está em andamento e sem resposta
+     * @throws IdempotentReplayedFailureException   se a chamada anterior falhou sob
+     *                                              {@code KEEP_FAILED}
+     * @throws Throwable                            a exceção do método protegido, relançada após
+     *                                              aplicar a política de falha
      */
     @Around("@annotation(br.com.sawcunhaos.foundation.jdempotent.api.JdempotentResource)")
     public Object execute(ProceedingJoinPoint pjp) throws Throwable {
@@ -210,6 +263,8 @@ public class IdempotentAspect {
         // not need to know about either.
         IdempotencyKey idempotencyKey = keyResolver.resolve(
                 requestObject, listenerName, resourceAnnotation.keySource(), resourceAnnotation.headerName());
+        // ttl == 0 (padrão da anotação) vira Duration zero: o repositório Redis o troca pelo TTL
+        // padrão (scos.jdempotent.cache.redis.expirationTimeHour); o em memória não expira.
         Long customTtl = resourceAnnotation.ttl();
         TimeUnit timeUnit = resourceAnnotation.ttlTimeUnit();
         Duration ttl = Duration.of(customTtl, timeUnit.toChronoUnit());
@@ -220,6 +275,8 @@ public class IdempotentAspect {
 
         log.debug(classAndMethodName + "starting for {}", requestObject);
 
+        // Fail-open: com Redis fora do ar o repositório Redis não lança, devolve um lease
+        // "adquirido" e a chamada segue sem lock (ver RedisIdempotentRepository#tryAcquire).
         Lease lease = idempotentRepository.tryAcquire(idempotencyKey, payloadHash, ttl);
         if (!lease.isAcquired()) {
             if (lease.isMismatch()) {
@@ -295,10 +352,10 @@ public class IdempotentAspect {
     }
 
     /**
-     * Generates log prefix for the incoming event
+     * Monta o prefixo de log {@code Classe.metodo() } do evento recebido.
      *
-     * @param pjp
-     * @return
+     * @param pjp ponto de execução do método anotado
+     * @return o prefixo de log
      */
     private String generateLogPrefixForIncomingEvent(ProceedingJoinPoint pjp) {
         StringBuilder builder = stringBuilders.get();
@@ -312,10 +369,16 @@ public class IdempotentAspect {
     }
 
     /**
-     * Finds the idempotent object
+     * Localiza o(s) argumento(s) que compõem o payload de idempotência.
      *
-     * @param pjp
-     * @return
+     * <p>Com um único argumento, ele é o payload. Com vários, valem só os parâmetros anotados com
+     * {@link JdempotentRequestPayload}; sem nenhum, a chamada é rejeitada.</p>
+     *
+     * @param pjp ponto de execução do método anotado
+     * @return o payload coletado
+     * @throws IllegalAccessException se um campo do payload não puder ser lido
+     * @throws IllegalStateException  se o método não tem argumentos ou nenhum está marcado como
+     *                                payload
      */
     public IdempotentRequestWrapper findIdempotentRequestArg(ProceedingJoinPoint pjp) throws IllegalAccessException {
         Object[] args = pjp.getArgs();
@@ -349,11 +412,12 @@ public class IdempotentAspect {
     }
 
     /**
-     * That function validate and set generated idempotency identifier into annotated field.
+     * Grava a chave gerada em todo campo anotado com {@link JdempotentId} dos argumentos
+     * (incluindo campos herdados), para que o método protegido a receba.
      *
-     * @param args
-     * @param idempotencyKey
-     * @throws IllegalAccessException
+     * @param args           argumentos do método protegido
+     * @param idempotencyKey valor da chave gerada
+     * @throws IllegalAccessException se um campo anotado não puder ser escrito
      */
     public void setJdempotentId(Object[] args, String idempotencyKey) throws IllegalAccessException {
         for (Object arg: args) {
@@ -379,6 +443,18 @@ public class IdempotentAspect {
         }
     }
 
+    /**
+     * Coleta os campos que compõem a chave, aplicando a cadeia de anotações a cada campo.
+     *
+     * <p>Argumentos de texto, booleanos e numéricos entram diretamente (indexados pelo seu
+     * {@code toString()}); os demais têm os campos percorridos, incluindo os herdados, e as
+     * anotações {@code @JdempotentIgnore}, {@code @JdempotentId} e {@code @JdempotentProperty}
+     * decidem o que cada campo contribui.</p>
+     *
+     * @param args argumentos que formam o payload
+     * @return os campos não ignorados, em ordem determinística
+     * @throws IllegalAccessException se o valor de um campo não puder ser lido
+     */
     public IdempotentIgnorableWrapper getIdempotentNonIgnorableWrapper(List<Object> args) throws IllegalAccessException {
         var wrapper = new IdempotentIgnorableWrapper();
         for (Object arg: args) {
@@ -444,6 +520,9 @@ public class IdempotentAspect {
         jdempotentIgnoreAnnotationChain.next(jdempotentIdAnnotationChain);
         jdempotentIdAnnotationChain.next(jdempotentPropertyAnnotationChain);
         jdempotentPropertyAnnotationChain.next(jdempotentDefaultChain);
+        // A cadeia efetiva começa em Ignore (Ignore -> Id -> Property -> Default). O elo
+        // o elo NoAnnotation não faz parte da cadeia efetiva: o Default produz o mesmo par
+        // (nome, valor) para um campo sem anotação, então o resultado não muda.
         return jdempotentIgnoreAnnotationChain;
     }
 

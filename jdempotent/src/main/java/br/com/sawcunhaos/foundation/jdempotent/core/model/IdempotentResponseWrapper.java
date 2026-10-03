@@ -20,8 +20,11 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Wraps the incoming event response
+ * Resposta do método protegido guardada no cache de idempotência.
  *
+ * <p>O campo é {@code Object}: no Redis, só o tipo da raiz do valor serializado é preservado, então
+ * um POJO aninhado volta como {@code LinkedHashMap}. Por isso a falha da política
+ * {@code KEEP_FAILED} é guardada como {@code String} (ver {@link CachedBusinessFailure}).</p>
  */
 @Getter
 @NoArgsConstructor
@@ -30,6 +33,11 @@ public class IdempotentResponseWrapper implements Serializable {
 
     private Object response;
 
+    /**
+     * Cria o wrapper com a resposta.
+     *
+     * @param response valor devolvido pelo método protegido
+     */
     public IdempotentResponseWrapper(Object response) {
         this.response = response;
     }

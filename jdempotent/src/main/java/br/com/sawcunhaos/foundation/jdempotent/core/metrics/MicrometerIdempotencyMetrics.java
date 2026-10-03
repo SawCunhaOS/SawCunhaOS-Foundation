@@ -38,6 +38,11 @@ public class MicrometerIdempotencyMetrics implements IdempotencyMetrics {
     /** Backing value for the {@code idempotency.degraded} gauge — 1 degraded, 0 normal. */
     private final AtomicInteger degradedState = new AtomicInteger(0);
 
+    /**
+     * Registra os medidores {@code idempotency.*} no registry informado.
+     *
+     * @param registry registry do Micrometer onde os contadores e o gauge são registrados
+     */
     public MicrometerIdempotencyMetrics(MeterRegistry registry) {
         this.acquiredCounter = Counter.builder("idempotency.acquired")
                 .description("Number of idempotency locks acquired")

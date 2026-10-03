@@ -18,6 +18,12 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.KeyValuePair;
 
 import java.lang.reflect.Field;
 
+/**
+ * Elo para campos sem nenhuma anotação: usa o nome do campo e o seu valor.
+ *
+ * <p>Não é o elo de partida da cadeia montada por {@code IdempotentAspect}: o resultado seria o
+ * mesmo do {@link JdempotentDefaultChain}, que já cobre o campo sem anotação.</p>
+ */
 public class JdempotentNoAnnotationChain extends AnnotationChain {
 
     @Override

@@ -19,6 +19,10 @@ import br.com.sawcunhaos.foundation.jdempotent.api.JdempotentProperty;
 
 import java.lang.reflect.Field;
 
+/**
+ * Elo que usa o nome declarado em {@code @JdempotentProperty#value()}, no lugar do nome do campo,
+ * como chave do valor na composição.
+ */
 public class JdempotentPropertyAnnotationChain extends AnnotationChain {
 
     @Override

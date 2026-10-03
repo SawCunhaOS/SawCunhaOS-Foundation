@@ -18,6 +18,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Saída de cada elo de {@code AnnotationChain}: nome e valor que o campo contribui para a chave.
+ *
+ * <p>Uma instância sem chave (criada por {@code new KeyValuePair()}) significa "campo excluído da
+ * composição da chave".</p>
+ */
 @Getter
 @Setter
 @NoArgsConstructor

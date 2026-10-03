@@ -49,6 +49,12 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 public class ScosJdempotentMetricsConfiguration {
 
+    /**
+     * Métricas Micrometer, se houver exatamente um {@code MeterRegistry}; caso contrário, no-op.
+     *
+     * @param meterRegistryProvider provedor do registry (pode estar vazio ou ser ambíguo)
+     * @return as métricas resolvidas
+     */
     @Bean
     @ConditionalOnClass(MeterRegistry.class)
     @ConditionalOnMissingBean(IdempotencyMetrics.class)
@@ -59,6 +65,11 @@ public class ScosJdempotentMetricsConfiguration {
         return registry != null ? new MicrometerIdempotencyMetrics(registry) : new NoOpIdempotencyMetrics();
     }
 
+    /**
+     * Implementação padrão (no-op), usada quando não há Micrometer nem bean próprio do consumidor.
+     *
+     * @return métricas que não registram nada
+     */
     @Bean
     @ConditionalOnMissingBean(IdempotencyMetrics.class)
     public IdempotencyMetrics noOpIdempotencyMetrics() {

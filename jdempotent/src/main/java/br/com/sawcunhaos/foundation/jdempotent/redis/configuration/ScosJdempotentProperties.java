@@ -47,6 +47,12 @@ public class ScosJdempotentProperties {
             + "evitar colisão de chaves de idempotência entre aplicações que compartilham o mesmo Redis")
     private String namespace;
 
+    /**
+     * Falha a inicialização se o namespace estiver ausente ou em branco, independentemente de haver
+     * um provider de Bean Validation no classpath.
+     *
+     * @throws IllegalStateException se {@code scos.jdempotent.namespace} não foi configurado
+     */
     @PostConstruct
     public void validateNamespace() {
         if (StringUtils.isBlank(namespace)) {

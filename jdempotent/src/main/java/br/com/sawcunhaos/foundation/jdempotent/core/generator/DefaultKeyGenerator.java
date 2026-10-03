@@ -22,8 +22,10 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 
 /**
+ * {@link KeyGenerator} padrão: a chave é {@code [namespace-][cachePrefix-]<hex do hash>}, onde o
+ * hash é o digest do {@code toString()} (canônico, campos ordenados) do payload.
  *
- *
+ * <p>O namespace e o prefixo só entram quando não estão em branco.</p>
  */
 public class DefaultKeyGenerator implements KeyGenerator {
 
@@ -41,6 +43,8 @@ public class DefaultKeyGenerator implements KeyGenerator {
     }
 
     /**
+     * Cria um gerador com namespace.
+     *
      * @param namespace prefix namespace resolved by the caller (e.g. from a Spring
      *                  {@code @ConfigurationProperties} bean); may be {@code null}/blank, in which
      *                  case no prefix is added.
@@ -50,14 +54,13 @@ public class DefaultKeyGenerator implements KeyGenerator {
     }
 
     /**
+     * Gera a chave {@code [namespace-][listenerName-]<hex do digest>} para o evento recebido.
      *
-     * Generates a idempotent key for incoming event
-     *
-     * @param requestObject
-     * @param listenerName
-     * @param builder
-     * @param messageDigest
-     * @return
+     * @param requestObject payload já coletado e canônico
+     * @param listenerName  prefixo de cache; ignorado se em branco
+     * @param builder       {@link StringBuilder} (vazio) usado para montar a chave
+     * @param messageDigest digest que calcula o hash do payload
+     * @return a chave de idempotência
      */
     public IdempotencyKey generateIdempotentKey(IdempotentRequestWrapper requestObject, String listenerName, StringBuilder builder, MessageDigest messageDigest) {
         messageDigest.update(requestObject.toString().getBytes(StandardCharsets.UTF_8));

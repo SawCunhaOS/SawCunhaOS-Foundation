@@ -24,9 +24,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Payload da requisição que compõe a chave de idempotência.
  *
- * Wraps the incoming event value
- *
+ * <p>O {@code toString()} concatena os elementos ordenados, para que a ordem dos argumentos não
+ * altere o hash.</p>
  */
 @Setter
 @Getter
@@ -37,10 +38,20 @@ import java.util.Objects;
 public class IdempotentRequestWrapper implements Serializable {
     private List<Object> request;
 
+    /**
+     * Cria o wrapper com um único elemento.
+     *
+     * @param request o valor do payload
+     */
     public IdempotentRequestWrapper(Object request) {
         this.request = Collections.singletonList(request);
     }
 
+    /**
+     * Cria o wrapper com uma lista de elementos.
+     *
+     * @param request os valores do payload
+     */
     public IdempotentRequestWrapper(List<Object> request) {
         this.request = request;
     }

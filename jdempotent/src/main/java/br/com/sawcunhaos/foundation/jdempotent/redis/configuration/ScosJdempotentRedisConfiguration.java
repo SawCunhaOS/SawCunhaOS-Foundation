@@ -42,7 +42,13 @@ import java.time.Duration;
 import java.util.Objects;
 
 /**
+ * Configura a conexão Redis própria do módulo (bean {@code JdempotentLettuceConnectionFactory}) e
+ * o {@code JdempotentRedisTemplate}, isolados do Redis da aplicação.
  *
+ * <p>A topologia (Sentinel, Cluster ou Standalone) vem das propriedades {@code spring.data.redis.*}.
+ * Os timeouts do cliente são fixos neste código (comando 5 s, conexão 3 s) e não são lidos de
+ * {@code spring.data.redis.timeout}; o timeout de comando é também o limiar de chamada lenta do
+ * circuit breaker do {@code RedisIdempotentRepository}.</p>
  */
 @Configuration
 @ConditionalOnProperty(
@@ -56,6 +62,12 @@ public class ScosJdempotentRedisConfiguration {
 
     private final DataRedisProperties redisProperties;
 
+    /**
+     * Fábrica de conexões Lettuce do módulo: timeout de comando 5 s, de conexão 3 s,
+     * reconexão automática e comandos rejeitados enquanto desconectado.
+     *
+     * @return a fábrica de conexões
+     */
     @Bean(name = "JdempotentLettuceConnectionFactory")
     public LettuceConnectionFactory lettuceConnectionFactory() {
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
@@ -144,6 +156,12 @@ public class ScosJdempotentRedisConfiguration {
         return standaloneConfig;
     }
 
+    /**
+     * Template com chave {@code String} e valor serializado por {@code PolymorphicRedisSerializer}.
+     *
+     * @param lettuceConnectionFactory fábrica de conexões do módulo
+     * @return o template usado pelo {@code RedisIdempotentRepository}
+     */
     @Bean("JdempotentRedisTemplate")
     @DependsOn({"JdempotentLettuceConnectionFactory"})
     public RedisTemplate<String, IdempotentResponseWrapper> redisTemplate(@Qualifier ("JdempotentLettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {

@@ -19,17 +19,18 @@ import br.com.sawcunhaos.foundation.jdempotent.core.model.IdempotentRequestWrapp
 import java.security.MessageDigest;
 
 /**
- *
+ * Estratégia de composição da chave de idempotência a partir do payload da requisição.
  */
 public interface KeyGenerator {
 
     /**
+     * Gera a chave de idempotência.
      *
-     * @param requestObject
-     * @param listenerName
-     * @param builder
-     * @param messageDigest
-     * @return
+     * @param requestObject payload já coletado e canônico
+     * @param listenerName  prefixo de cache ({@code cachePrefix} do {@code @JdempotentResource})
+     * @param builder       {@link StringBuilder} reutilizável para montar a chave
+     * @param messageDigest digest usado para o hash do payload
+     * @return a chave de idempotência
      */
     IdempotencyKey generateIdempotentKey(IdempotentRequestWrapper requestObject, String listenerName, StringBuilder builder, MessageDigest messageDigest);
 

@@ -31,7 +31,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
+ * Auto-configuração do {@code IdempotentAspect} com repositório Redis, ativada por
+ * {@code scos.jdempotent.enabled} (padrão {@code true}).
  *
+ * <p>Há dois beans de aspecto, mutuamente exclusivos: um que inclui o
+ * {@code ErrorConditionalCallback} do consumidor (quando existe um bean desse tipo) e outro sem
+ * callback ({@code @ConditionalOnMissingBean}). Ambos usam {@code RedisIdempotentRepository},
+ * {@code DefaultKeyGenerator} com o namespace {@code scos.jdempotent.namespace} e as métricas
+ * resolvidas (Micrometer ou no-op).</p>
  */
 @AutoConfiguration
 @ConditionalOnProperty(
@@ -50,6 +57,13 @@ public class ScosJdempotentConfig {
     // RedisIdempotentRepository entirely (NoSuchBeanDefinitionException) over an optional metric.
     private final ObjectProvider<IdempotencyMetrics> idempotencyMetricsProvider;
 
+    /**
+     * Aspecto com o {@link ErrorConditionalCallback} do consumidor.
+     *
+     * @param redisTemplate           template Redis do módulo
+     * @param errorConditionalCallback callback que classifica respostas como erro
+     * @return o aspecto configurado
+     */
     @Bean
     @ConditionalOnProperty(
             prefix="scos.jdempotent", name = "enabled",
@@ -67,6 +81,12 @@ public class ScosJdempotentConfig {
         return aspect;
     }
 
+    /**
+     * Aspecto padrão, sem callback de erro; só é criado se nenhum outro aspecto existir.
+     *
+     * @param redisTemplate template Redis do módulo
+     * @return o aspecto configurado
+     */
     @Bean
     @ConditionalOnMissingBean(IdempotentAspect.class)
     public IdempotentAspect getIdempotentAspect(@Qualifier("JdempotentRedisTemplate") RedisTemplate redisTemplate) {

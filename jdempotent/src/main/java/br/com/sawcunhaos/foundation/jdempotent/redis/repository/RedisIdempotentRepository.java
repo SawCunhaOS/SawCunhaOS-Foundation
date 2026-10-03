@@ -37,12 +37,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * {@link IdempotentRepository} distribuído sobre Redis.
  *
- * An implementation of the idempotent IdempotentRepository
- * that uses a distributed hash map from Redis
+ * <p>O lock é adquirido com um único comando {@code SET key value NX PX <ttl>} (via
+ * {@code setIfAbsent}), então só um chamador concorrente vê {@code acquired == true}; não há script
+ * Lua. O {@code GET} posterior, usado para descrever a chave em conflito, não é atômico com o
+ * {@code SET} e pode devolver dado levemente defasado.</p>
  *
- * That repository needs to store idempotent hash for idempotency check
- *
+ * <p>Fail-open: todas as operações passam por um único circuit breaker
+ * ({@code jdempotent-redis}) e, em qualquer falha (erro do Redis, timeout ou breaker aberto), o erro
+ * é registrado, a métrica {@code idempotency.backend_error} é emitida e a operação devolve o valor
+ * "neutro" (para {@code tryAcquire}, um lease adquirido), nunca bloqueando a requisição de negócio.
+ * Consequência: com o Redis indisponível não há lock de idempotência, e a garantia real contra
+ * duplicidade passa a ser a constraint {@code UNIQUE} do banco do consumidor.</p>
  */
 @Slf4j
 @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
@@ -284,10 +291,11 @@ public class RedisIdempotentRepository implements IdempotentRepository {
      * against a duplicated side effect in that window is the database {@code UNIQUE} constraint on
      * the idempotency key (NFR6), which is the consumer's responsibility, not this module's.</p>
      *
-     * @param idempotencyKey
-     * @param request
-     * @param response
-     * @param ttl
+     * @param idempotencyKey chave de idempotência
+     * @param request        payload da requisição
+     * @param response       resposta a guardar
+     * @param ttl            validade; {@code 0} usa {@code expirationTimeHour}
+     * @param timeUnit       unidade de {@code ttl}
      */
     @Override
     public void setResponse(IdempotencyKey idempotencyKey, IdempotentRequestWrapper request, IdempotentResponseWrapper response, Long ttl, TimeUnit timeUnit) {
@@ -314,12 +322,12 @@ public class RedisIdempotentRepository implements IdempotentRepository {
     }
 
     /**
-     * Prepares the value stored in redis
+     * Prepara o valor gravado no Redis.
      *
-     * if persistReqRes set to false,
-     * it does not persist related request values in redis
-     * @param request
-     * @return
+     * <p>Se {@code persistReqRes} for falso, a requisição não é persistida.</p>
+     *
+     * @param request payload da requisição
+     * @return o valor a gravar
      */
     private IdempotentRequestResponseWrapper prepareValue(IdempotentRequestWrapper request) {
         if (redisProperties.getPersistReqRes()) {
@@ -329,13 +337,13 @@ public class RedisIdempotentRepository implements IdempotentRepository {
     }
 
     /**
-     * Prepares the value stored in redis
+     * Prepara o valor gravado no Redis.
      *
-     * if persistReqRes set to false,
-     * it does not persist related request and response values in redis
-     * @param request
-     * @param response
-     * @return
+     * <p>Se {@code persistReqRes} for falso, nem a requisição nem a resposta são persistidas.</p>
+     *
+     * @param request  payload da requisição
+     * @param response resposta a guardar
+     * @return o valor a gravar
      */
     private IdempotentRequestResponseWrapper prepareValue(IdempotentRequestWrapper request, IdempotentResponseWrapper response) {
         if (redisProperties.getPersistReqRes()) {

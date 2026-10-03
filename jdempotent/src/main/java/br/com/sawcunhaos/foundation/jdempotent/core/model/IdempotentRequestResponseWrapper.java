@@ -22,9 +22,10 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
+ * Valor armazenado sob cada chave de idempotência: requisição, resposta e metadados.
  *
- *  That is a container for idempotent requests and responses
- *
+ * <p>Logo após {@code tryAcquire} guarda só o {@code payloadHash} (resposta {@code null} significa
+ * "em andamento"); após {@code setResponse} passa a carregar a resposta cacheada.</p>
  */
 @Getter
 @Setter
@@ -50,19 +51,41 @@ public class IdempotentRequestResponseWrapper implements Serializable {
      */
     private Instant expiresAt;
 
+    /**
+     * Indica se a entrada já passou da validade ({@code expiresAt}); sem validade, nunca expira.
+     *
+     * @return {@code true} se {@code expiresAt} está definido e já passou
+     */
     public boolean isExpired() {
         return expiresAt != null && Instant.now().isAfter(expiresAt);
     }
 
+    /**
+     * Cria o valor só com a requisição (sem resposta nem hash).
+     *
+     * @param request payload da requisição
+     */
     public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request) {
         this.request = request;
     }
 
+    /**
+     * Cria o valor com requisição e resposta.
+     *
+     * @param request  payload da requisição
+     * @param response resposta cacheada
+     */
     public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request, IdempotentResponseWrapper response) {
         this.request = request;
         this.response = response;
     }
 
+    /**
+     * Cria o valor "em andamento": requisição e hash do payload, sem resposta.
+     *
+     * @param request     payload da requisição
+     * @param payloadHash hash do payload que adquiriu o lease
+     */
     public IdempotentRequestResponseWrapper(IdempotentRequestWrapper request, String payloadHash) {
         this.request = request;
         this.payloadHash = payloadHash;

@@ -20,6 +20,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+/**
+ * Campos do payload que entram na chave (os não ignorados), indexados pelo nome do campo ou da
+ * propriedade, em ordem determinística ({@link TreeMap}).
+ */
 @Getter
 public class IdempotentIgnorableWrapper implements Serializable {
 
@@ -31,6 +35,7 @@ public class IdempotentIgnorableWrapper implements Serializable {
      */
     private final Map<String, Object> nonIgnoredFields;
 
+    /** Cria o wrapper sem campos. */
     public IdempotentIgnorableWrapper() {
         nonIgnoredFields = new TreeMap<>();
     }

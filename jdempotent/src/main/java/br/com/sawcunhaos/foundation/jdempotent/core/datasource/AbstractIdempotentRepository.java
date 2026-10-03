@@ -25,7 +25,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Includes all the methods of IdempotentRequestStore
+ * Base de {@link IdempotentRepository} sobre um {@link Map} concorrente: implementa lock atômico,
+ * TTL preguiçoso e resposta em cache; subclasses só fornecem o mapa via {@link #getMap()}.
+ *
+ * <p>{@code ConcurrentHashMap} não tem expiração nativa, então a validade de cada entrada
+ * ({@code expiresAt}) é conferida na leitura e a entrada expirada é tratada como ausente.</p>
  */
 public abstract class AbstractIdempotentRepository implements IdempotentRepository {
 
@@ -161,7 +165,10 @@ public abstract class AbstractIdempotentRepository implements IdempotentReposito
 
 
     /**
-     * @return
+     * Fornece o mapa que guarda as entradas; deve ser seguro para acesso concorrente, pois
+     * {@code compute}/{@code computeIfPresent} dependem do seu lock por chave.
+     *
+     * @return o mapa de apoio, nunca {@code null}
      */
     protected abstract Map<IdempotencyKey, IdempotentRequestResponseWrapper> getMap();
 }

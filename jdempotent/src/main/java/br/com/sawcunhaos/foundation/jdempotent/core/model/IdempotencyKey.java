@@ -21,9 +21,10 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
+ * Chave de idempotência: {@code [namespace-][cachePrefix-]<hash do payload>} (ver
+ * {@code DefaultKeyGenerator}).
  *
- * Wraps the combine of application name, listener name and incoming event value hash
- *
+ * <p>Igualdade e {@code hashCode} dependem só de {@code keyValue}.</p>
  */
 @Getter
 @Data
