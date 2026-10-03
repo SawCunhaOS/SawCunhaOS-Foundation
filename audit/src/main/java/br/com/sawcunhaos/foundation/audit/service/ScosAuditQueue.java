@@ -20,6 +20,14 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Fila em memória não bloqueante ({@code ConcurrentLinkedQueue}) com limite de capacidade.
+ *
+ * <p>O limite é verificado por um contador atômico antes de inserir; sob concorrência intensa a
+ * fila pode exceder levemente a capacidade (verificação e inserção não são atômicas em conjunto).
+ *
+ * @since 1.2.0
+ */
 @Slf4j
 public class ScosAuditQueue {
 

@@ -41,6 +41,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * Implementação de {@link ScosAuditService}: monta o {@code ScosAuditLog} a partir do evento,
+ * mascara/cifra campos configurados e entrega ao {@code ScosAuditBatchConsumer}.
+ *
+ * <p>Os métodos rodam no executor assíncrono {@code ScosAuditLogAsyncExecutor}; falhas ao montar o
+ * evento são apenas logadas, para nunca quebrar a transação de negócio. O estado da entidade é
+ * serializado como mapa ordenado (chaves em ordem alfabética), requisito da hash-chain.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit", name = "enabled", havingValue = "true")
 @Service("ScosAuditService")
 @RequiredArgsConstructor
@@ -52,6 +62,12 @@ public class ScosAuditServiceBean implements ScosAuditService {
     private final ObjectProvider<MaskingEngine> maskingEngineProvider;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Converte um evento Hibernate pós-operação em um registro de auditoria e o enfileira.
+     * Ignora silenciosamente classes sem {@code @Auditable} e tipos de evento não suportados.
+     *
+     * {@inheritDoc}
+     */
     @Async("ScosAuditLogAsyncExecutor")
     public void saveAuditLog(final AbstractEvent abstractEvent, final String user, final String ipAddress, final String xRequestId) {
         try {

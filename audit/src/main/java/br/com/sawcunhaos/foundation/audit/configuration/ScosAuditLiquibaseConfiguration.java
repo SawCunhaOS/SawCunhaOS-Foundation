@@ -26,6 +26,12 @@ import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
+/**
+ * Executa as migrations Liquibase do módulo no datasource de auditoria
+ * ({@code scos.audit.liquibase.*}); ativo apenas com {@code scos.audit.enabled=true}.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ScosAuditLiquibaseProperties.class})
@@ -34,6 +40,13 @@ public final class ScosAuditLiquibaseConfiguration {
 
     private final ScosAuditLiquibaseProperties liquibaseProperties;
 
+    /**
+     * Cria o Liquibase de auditoria, dependente do datasource {@code ScosAuditLogDataSource}.
+     * Marcado como {@code @Primary}; a execução real é controlada por {@code scos.audit.liquibase.enabled}.
+     *
+     * @param dataSource datasource de auditoria
+     * @return executor das migrations de auditoria
+     */
     @Bean("ScosAuditLiquibase")
     @Primary
     @DependsOn("ScosAuditLogDataSource")

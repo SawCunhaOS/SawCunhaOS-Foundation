@@ -11,10 +11,10 @@ paginada e retenção configurável.
 ```
 Produção de eventos
 ───────────────────
- @Auditable entity       @Auditable(READ) method / auditService.recordRead()
+ @Auditable entity       auditService.recordRead() / @Auditable(auditRead = true)
         │                                │
         ▼                                ▼
-ScosHibernateAuditListener       ScosAuditReadAspect
+ScosHibernateAuditListener       recordRead() (chamada direta)
   (PostInsert/Update/Delete)
         │                                │
         └──────────────┬─────────────────┘
@@ -24,7 +24,7 @@ ScosHibernateAuditListener       ScosAuditReadAspect
                        │
                        ▼
                ScosAuditQueue
-               (LinkedBlockingQueue — capacity: queue-capacity)
+               (ConcurrentLinkedQueue — capacity: queue-capacity)
                        │  fila cheia → DLQ direto
                        ▼
                ScosAuditBatchConsumer
@@ -47,6 +47,47 @@ Consulta / integridade
   SFA_LOG_AUDIT           verificação da cadeia
   (read-only queries)     hash SHA-256
 ```
+
+### Fluxo típico de uso (Mermaid)
+
+Mesmo fluxo do diagrama ASCII acima, em formato renderizável (GitHub/GitLab/IDE). A ASCII foi mantida
+como referência rápida em texto puro.
+
+```mermaid
+flowchart TD
+    subgraph Producao["Produção de eventos"]
+        E["Entidade @Auditable<br/>INSERT / UPDATE / DELETE"] --> L["ScosHibernateAuditListener<br/>(registrado pela aplicação)"]
+        R["Leitura<br/>auditService.recordRead()<br/>ou @Auditable(auditRead = true)"] --> S
+        L --> S["ScosAuditServiceBean<br/>(executor assíncrono ScosAuditLogAsyncExecutor)"]
+    end
+
+    S --> Q{"ScosAuditQueue<br/>tem espaço?"}
+    Q -- "não (queue-capacity)" --> DLQ[("SFA_AUDIT_DLQ")]
+    Q -- sim --> C["ScosAuditBatchConsumer<br/>a cada flush-interval-ms"]
+
+    C --> P["eventOrder monotônico<br/>executionDate em microssegundos"]
+    P --> H{"hash-chain<br/>habilitada?"}
+    H -- "sim" --> HC["SHA-256 por (entity, idEntity)"]
+    H -- "não" --> PR
+    HC --> PR["persistWithRetry<br/>retry-max, backoff exponencial"]
+    PR -- sucesso --> LOG[("SFA_LOG_AUDIT")]
+    PR -- "falha após retry-max" --> DLQ
+    DLQ -. "ScosAuditDlqJob<br/>a cada dlq-reprocess-interval-ms" .-> LOG
+
+    LOG --> QS["ScosAuditQueryService<br/>consulta paginada"]
+    LOG --> IS["ScosAuditIntegrityService<br/>verifyChain(entity, idEntity)"]
+    RET["ScosAuditRetentionJob<br/>(opt-in)"] -. "remove expirados + TOMBSTONE" .-> LOG
+```
+
+> **Dependência de `core`:** o `audit` obtém o usuário do evento por `ScosUserAuthentication`
+> (contrato do módulo `core`, que a aplicação consumidora deve implementar) e o nome do header
+> `X-Request-ID` por `Constant.REQUEST_ID_HEADER`; ambos vêm do `core`.
+
+> **Registro do listener Hibernate:** nenhuma autoconfiguração do módulo anexa o
+> `ScosHibernateAuditListener` ao `EventListenerRegistry` do Hibernate (somente a configuração de
+> teste `ScosLiquibaseTestConfiguration` faz isso). A aplicação consumidora precisa registrá-lo
+> (POST_INSERT, POST_UPDATE, POST_DELETE e, para `auditRead`, POST_LOAD) para a captura automática
+> de C/U/D funcionar.
 
 ---
 
@@ -101,11 +142,17 @@ public class Pedido {
 }
 ```
 
-Isso é suficiente. Toda operação C/U/D na entidade será capturada em `SFA_LOG_AUDIT`.
+Com o `ScosHibernateAuditListener` registrado pela aplicação (ver nota no diagrama acima), toda
+operação C/U/D na entidade é capturada em `SFA_LOG_AUDIT`.
 
 ---
 
 ## Auditando leituras de PII (`@Auditable` em métodos)
+
+> **Divergência conhecida:** o `ScosAuditReadAspect` citado no CHANGELOG não existe no código desta
+> versão, portanto `@Auditable(action = AuditAction.READ)` em métodos **não é processado**. Hoje as
+> leituras são registradas por `auditService.recordRead(...)` (abaixo) ou por
+> `@Auditable(auditRead = true)` na entidade (evento Hibernate `PostLoad`).
 
 ```java
 import br.com.sawcunhaos.foundation.audit.api.AuditAction;
@@ -142,6 +189,7 @@ public void processarBulk(String pedidoId) {
 @Autowired
 private ScosAuditQueryService auditQueryService;
 
+// Todas as consultas filtram por scos.audit.system (só enxergam eventos do próprio sistema)
 // Quem alterou o Pedido "abc-123" e quando?
 Page<ScosAuditLog> trilha = auditQueryService.findByEntity(
     "SFA_PEDIDO", "abc-123", PageRequest.of(0, 50, Sort.by("executionDate").descending())
@@ -176,6 +224,7 @@ private ScosAuditIntegrityService integrityService;
 
 boolean integra = integrityService.verifyChain("SFA_PEDIDO", "abc-123");
 // false = adulteração ou remoção de registro detectada
+// com hash-chain desligada lança UnsupportedOperationException("hash-chain not enabled")
 ```
 
 ---

@@ -32,6 +32,15 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Cálculo do hash SHA-256 encadeado de cada evento.
+ *
+ * <p>O hash cobre entidade, id, ação, {@code eventOrder}, JSON novo e antigo (canonicalizados, com
+ * chaves ordenadas), {@code executionDate} truncada a microssegundos e o hash anterior. O primeiro
+ * evento de um registro usa {@code GENESIS} como hash anterior.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit", name = "enabled", havingValue = "true")
 @Service
 @RequiredArgsConstructor
@@ -42,6 +51,13 @@ public class ScosAuditHashService {
 
     private final ScosAuditLogRepository repository;
 
+    /**
+     * Calcula o hash SHA-256 (hexadecimal) de um evento encadeado ao anterior.
+     *
+     * @param log          evento cujo hash será calculado
+     * @param previousHash hash do evento anterior do mesmo registro, ou {@code GENESIS}
+     * @return hash SHA-256 em hexadecimal (64 caracteres)
+     */
     public String computeHash(ScosAuditLog log, String previousHash) {
         // Covers metadata + JSONB content (entityNew/entityOld). The content is run through
         // canonicalizeJson, which sorts keys recursively — this neutralizes PostgreSQL JSONB
@@ -102,6 +118,13 @@ public class ScosAuditHashService {
         }
     }
 
+    /**
+     * Busca o hash do último evento do registro no banco, para encadear o próximo lote.
+     *
+     * @param entity   nome da entidade/tabela auditada
+     * @param idEntity identificador do registro
+     * @return hash do último evento, ou {@code GENESIS} se não há evento (ou ele não tem hash)
+     */
     @Transactional(value = "ScosAuditLogTransactionManager", readOnly = true)
     public String findLastHashFromDb(String entity, String idEntity) {
         return repository.findLastByEntityAndIdEntity(entity, idEntity)
@@ -120,6 +143,11 @@ public class ScosAuditHashService {
         }
     }
 
+    /**
+     * Hash anterior do primeiro evento de um registro.
+     *
+     * @return a constante {@code "GENESIS"}
+     */
     public static String genesisHash() {
         return GENESIS;
     }

@@ -24,6 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Implementação de {@link ScosAuditIntegrityService}: recalcula a hash-chain na ordem de
+ * {@code eventOrder}, partindo de {@code GENESIS}. Registros sem hash (anteriores à migration) são
+ * ignorados e reiniciam a cadeia.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit", name = "enabled", havingValue = "true")
 @Service
 @RequiredArgsConstructor

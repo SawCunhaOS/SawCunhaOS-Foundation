@@ -22,6 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Grava lotes de auditoria em {@code SFA_LOG_AUDIT} na transação dedicada de auditoria.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @Service
 @RequiredArgsConstructor

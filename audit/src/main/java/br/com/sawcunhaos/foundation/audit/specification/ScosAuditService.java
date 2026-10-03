@@ -42,6 +42,9 @@ public interface ScosAuditService {
      *
      * <p>Utilize quando a leitura não é capturada automaticamente pelo aspecto
      * {@code ScosAuditReadAspect} — por exemplo, em queries JPQL ou operações bulk.
+     * <b>Atenção:</b> nesta versão não existe nenhuma classe {@code ScosAuditReadAspect} no módulo;
+     * {@code @Auditable(action = AuditAction.READ)} em métodos ainda não é processado, então esta
+     * chamada explícita (ou {@code auditRead=true} na entidade) é a única forma de registrar leituras.
      *
      * @param entity   nome da entidade/tabela auditada (ex: {@code "SFA_PEDIDO"})
      * @param idEntity identificador do registro lido

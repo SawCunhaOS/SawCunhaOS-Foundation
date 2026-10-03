@@ -26,6 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * Implementação de {@link ScosAuditQueryService}. Todas as consultas filtram por
+ * {@code scos.audit.system} (origem), e {@code findByEntity} converte o nome da entidade para
+ * maiúsculas. {@code findByPeriod} lança {@link IllegalArgumentException} se {@code start > end}.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit", name = "enabled", havingValue = "true")
 @Service
 @RequiredArgsConstructor

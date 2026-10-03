@@ -28,6 +28,17 @@ import org.hibernate.event.spi.PostUpdateEventListener;
 import org.hibernate.persister.entity.EntityPersister;
 import org.slf4j.MDC;
 
+/**
+ * Listener Hibernate que captura INSERT/UPDATE/DELETE de entidades {@code @Auditable} (e, com
+ * {@code auditRead=true}, as leituras via {@code PostLoad}) e delega ao {@link ScosAuditService}.
+ *
+ * <p>Usuário vem de {@code ScosUserAuthentication}; IP e {@code X-Request-ID} vêm do MDC
+ * ({@code IS_IP} e {@code Constant.REQUEST_ID_HEADER}). <b>Atenção:</b> esta classe não é registrada
+ * por nenhuma autoconfiguração do módulo; a aplicação precisa anexá-la ao
+ * {@code EventListenerRegistry} (ver {@code ScosLiquibaseTestConfiguration} nos testes).
+ *
+ * @since 1.2.0
+ */
 @RequiredArgsConstructor
 public final class ScosHibernateAuditListener
         implements PostInsertEventListener, PostUpdateEventListener, PostDeleteEventListener, PostLoadEventListener {

@@ -27,6 +27,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Job de retenção: remove registros mais antigos que {@code scos.audit.retention.ttl-days}
+ * (cron {@code scos.audit.retention.cron}, padrão 02:00) e, para registros com hash-chain, insere um
+ * {@code TOMBSTONE} em seu lugar. Ativo apenas com {@code scos.audit.retention.enabled=true}.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit.retention", name = "enabled", havingValue = "true")
 @ConditionalOnBean(ScosAuditLogService.class)
 @Component
@@ -39,6 +46,9 @@ public class ScosAuditRetentionJob {
     private final ScosAuditRetentionProperties retentionProperties;
     private final ScosAuditLogService logService;
 
+    /**
+     * Apaga os registros expirados numa única transação (carrega todos em memória, sem paginação).
+     */
     @Scheduled(cron = "${scos.audit.retention.cron:0 0 2 * * *}")
     @Transactional("ScosAuditLogTransactionManager")
     public void purgeExpiredRecords() {

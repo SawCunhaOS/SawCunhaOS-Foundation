@@ -27,6 +27,15 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Job que reprocessa a DLQ ({@code SFA_AUDIT_DLQ}) em intervalo fixo
+ * ({@code scos.audit.durability.dlq-reprocess-interval-ms}, padrão 60 s).
+ *
+ * <p>Lê até 50 entradas por ciclo; cada uma é regravada em {@code SFA_LOG_AUDIT} e removida da DLQ, ou
+ * tem {@code retryCount} incrementado em caso de falha (sem limite máximo de tentativas).
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit", name = "enabled", havingValue = "true")
 @Component
 @RequiredArgsConstructor
@@ -39,6 +48,9 @@ public class ScosAuditDlqJob {
     private final ScosAuditLogService logService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Ciclo agendado: busca a primeira página (50) da DLQ e reprocessa cada entrada.
+     */
     @Scheduled(fixedDelayString = "${scos.audit.durability.dlq-reprocess-interval-ms:60000}")
     public void reprocess() {
         List<ScosAuditDlqLog> pending = dlqRepository.findAllBy(PageRequest.of(0, BATCH_LIMIT));
@@ -51,6 +63,14 @@ public class ScosAuditDlqJob {
         }
     }
 
+    /**
+     * Reprocessa uma entrada: desserializa o payload, zera o {@code id} (novo UUID) e grava o evento;
+     * em sucesso remove a entrada, em falha incrementa {@code retryCount} e guarda a mensagem de erro.
+     * Chamado por {@link #reprocess()} dentro da mesma classe, portanto o {@code @Transactional} não
+     * passa pelo proxy do Spring; cada operação do repositório roda na sua própria transação.
+     *
+     * @param dlqId identificador da entrada da DLQ
+     */
     @Transactional("ScosAuditLogTransactionManager")
     public void reprocessEntry(UUID dlqId) {
         ScosAuditDlqLog dlqEntry = dlqRepository.findById(dlqId).orElse(null);

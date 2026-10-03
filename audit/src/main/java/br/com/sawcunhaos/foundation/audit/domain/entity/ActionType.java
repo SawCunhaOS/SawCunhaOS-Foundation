@@ -21,9 +21,10 @@ package br.com.sawcunhaos.foundation.audit.domain.entity;
 public enum ActionType {
 
     /**
-     * Leitura explícita de dado sensível, registrada via {@code ScosAuditReadAspect}
-     * (em métodos anotados com {@code @Auditable(action = AuditAction.READ)}) ou
-     * por chamada direta a {@link ScosAuditService#recordRead}.
+     * Leitura explícita de dado sensível, registrada por chamada direta a
+     * {@link ScosAuditService#recordRead} ou por {@code @Auditable(auditRead = true)} na entidade.
+     * O {@code ScosAuditReadAspect} citado no CHANGELOG não existe nesta versão do módulo, então
+     * {@code @Auditable(action = AuditAction.READ)} em método não é processado.
      */
     SELECT,
 

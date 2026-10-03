@@ -35,6 +35,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Consumidor da fila de auditoria: a cada {@code flush-interval-ms} drena a fila em lotes e os grava.
+ *
+ * <p>Para cada lote: atribui {@code eventOrder} monotônico (contador em memória da JVM), trunca
+ * {@code executionDate} a microssegundos, calcula a hash-chain se habilitada e persiste com retry
+ * exponencial ({@code retry-max}, backoff {@code 2^n x 100 ms}); esgotadas as tentativas, os eventos
+ * vão para a DLQ (ou são perdidos se {@code dlq-enabled=false}). Registra as métricas Micrometer
+ * {@code audit.queue.depth}, {@code audit.batch.size} e {@code audit.events.dlq} quando há
+ * {@code MeterRegistry}.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix = "scos.audit", name = "enabled", havingValue = "true")
 @Component
 @Slf4j
@@ -49,6 +61,7 @@ public class ScosAuditBatchConsumer {
     private final ScosAuditImmutabilityProperties immutabilityProps;
     private final ObjectMapper objectMapper;
 
+    // Contador em memória da JVM: reinicia em 0 a cada start da aplicação (eventOrder não é global).
     private static final AtomicLong EVENT_ORDER_SEQ = new AtomicLong(0);
 
     /** Bounds work per scheduler tick so a runaway queue cannot starve the scheduler thread. */
@@ -57,6 +70,19 @@ public class ScosAuditBatchConsumer {
     private Counter dlqCounter;
     private DistributionSummary batchSizeSummary;
 
+    /**
+     * Cria o consumidor e registra as métricas quando há um {@code MeterRegistry}.
+     *
+     * @param queue               fila em memória
+     * @param logService          serviço que grava o lote em {@code SFA_LOG_AUDIT}
+     * @param dlqRepository       repositório da DLQ
+     * @param hashService         cálculo da hash-chain
+     * @param performanceProps    tuning de fila/lote/intervalo
+     * @param durabilityProps     retry e DLQ
+     * @param immutabilityProps   liga/desliga a hash-chain
+     * @param objectMapper        serializador do payload da DLQ
+     * @param meterRegistryProvider registro de métricas (opcional)
+     */
     @SuppressFBWarnings(value = {"EI_EXPOSE_REP2", "CT_CONSTRUCTOR_THROW"},
             justification = "Spring-injected @ConfigurationProperties singletons are shared by design (EI_EXPOSE_REP2). "
                     + "Metric registration may throw during construction, but the bean has no finalizer and no sensitive state, "
@@ -211,6 +237,11 @@ public class ScosAuditBatchConsumer {
         }
     }
 
+    /**
+     * Enfileira o evento; se a fila está cheia ({@code queue-capacity}), o roteia direto para a DLQ.
+     *
+     * @param auditLog evento a registrar
+     */
     public void offerOrDlq(ScosAuditLog auditLog) {
         if (!queue.offer(auditLog)) {
             log.warn("Audit queue full (capacity={}), routing event to DLQ", performanceProps.getQueueCapacity());

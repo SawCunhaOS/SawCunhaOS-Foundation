@@ -18,10 +18,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+/**
+ * Pool de threads do pipeline de auditoria; ativo apenas com {@code scos.audit.enabled=true}.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @Configuration(proxyBeanMethods = false)
 public final class ThreadsScosAuditConfiguration {
 
+    /**
+     * Scheduler baseado em threads virtuais (prefixo {@code vt-audit-sch-}, tamanho 30) usado pelos
+     * métodos {@code @Async("ScosAuditLogAsyncExecutor")} que montam e enfileiram os eventos. Por ser o
+     * único {@code TaskScheduler} do módulo, é também o que o Spring usa para os métodos
+     * {@code @Scheduled} do módulo.
+     *
+     * @return scheduler de auditoria
+     */
     @Bean(name = "ScosAuditLogAsyncExecutor")
     public ThreadPoolTaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

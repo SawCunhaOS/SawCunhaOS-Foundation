@@ -31,6 +31,11 @@ public class ScosAuditRetentionProperties {
     /** Tempo de vida dos registros de auditoria em dias. Registros mais antigos são deletados pelo job de retenção; um {@code TOMBSTONE} é inserido para preservar a hash-chain. Obrigatório quando {@code enabled = true}. */
     private Integer ttlDays;
 
+    /**
+     * Valida a configuração na inicialização.
+     *
+     * @throws IllegalStateException se {@code enabled=true} e {@code ttl-days} não foi informado
+     */
     @PostConstruct
     public void validate() {
         if (enabled && ttlDays == null) {

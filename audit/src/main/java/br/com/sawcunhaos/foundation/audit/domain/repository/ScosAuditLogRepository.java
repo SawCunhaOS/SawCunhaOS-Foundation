@@ -26,6 +26,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repositório da trilha ({@code SFA_LOG_AUDIT}).
+ *
+ * <p>As consultas {@code ...AndOriginSystem} (multi-sistema) alimentam o
+ * {@code ScosAuditQueryService}; as demais (sem filtro de sistema) são internas, usadas pela
+ * verificação de integridade e pela retenção.
+ *
+ * @since 1.2.0
+ */
 @Repository
 public interface ScosAuditLogRepository extends JpaRepository<ScosAuditLog, UUID> {
 

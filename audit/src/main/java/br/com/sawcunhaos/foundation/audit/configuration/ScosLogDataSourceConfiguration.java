@@ -36,6 +36,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+/**
+ * Autoconfiguração do datasource <b>isolado</b> da trilha de auditoria ({@code spring.datasource.audit.*}).
+ *
+ * <p>Cria um pool Hikari próprio, um {@code EntityManagerFactory} restrito ao pacote
+ * {@code domain.entity} e um {@code JpaTransactionManager} dedicado
+ * ({@code ScosAuditLogTransactionManager}), de modo que a gravação da auditoria nunca participa
+ * da transação de negócio. Os repositórios do pacote {@code domain.repository} são ligados a esses
+ * beans via {@code @EnableJpaRepositories}. Ativo apenas com {@code scos.audit.enabled=true}.
+ *
+ * @since 1.2.0
+ */
 @ConditionalOnProperty(prefix="scos.audit", name = "enabled", havingValue = "true")
 @AutoConfiguration
 @EnableJpaRepositories(
@@ -53,12 +64,30 @@ public class ScosLogDataSourceConfiguration {
 
     private final ScosAuditHikariConfigProperties scosAuditHikariConfigProperties;
 
+    /**
+     * Propriedades de conexão do datasource de auditoria, lidas de {@code spring.datasource.audit.*}.
+     *
+     * @return propriedades de conexão (url, usuário, senha, driver)
+     */
     @Bean(name="ScosAuditLogDataSourceProps")
     @ConfigurationProperties("spring.datasource.audit")
     public DataSourceProperties insideAuditLogDataSourceProps() {
         return new DataSourceProperties();
     }
 
+    /**
+     * Constrói o pool Hikari do datasource de auditoria.
+     *
+     * <p>Os parâmetros do pool vêm de {@link ScosAuditHikariConfigProperties}. O pool nasce com
+     * {@code autoCommit=false} e {@code isolateInternalQueries=true}, além de propriedades fixas do
+     * driver PostgreSQL (cache de prepared statements, {@code reWriteBatchedInserts} para acelerar o
+     * {@code saveAll} em lote, {@code socketTimeout}=30 s e {@code loginTimeout}=10 s). O
+     * {@code leakDetectionThreshold} só é aplicado quando maior que zero e as métricas Hikari só são
+     * registradas se houver um {@code MeterRegistry} no contexto.
+     *
+     * @param properties propriedades de conexão ({@code spring.datasource.audit})
+     * @return datasource de auditoria
+     */
     @Bean(name="ScosAuditLogDataSource")
     public DataSource insideAuditLogDataSource(@Qualifier("ScosAuditLogDataSourceProps") DataSourceProperties properties){
         HikariDataSource dataSource = properties.initializeDataSourceBuilder()
@@ -97,6 +126,14 @@ public class ScosLogDataSourceConfiguration {
         return dataSource;
     }
 
+    /**
+     * Fábrica de {@code EntityManager} do datasource de auditoria, restrita às entidades de
+     * {@code domain.entity} ({@code ScosAuditLog} e {@code ScosAuditDlqLog}).
+     *
+     * @param builder   builder do Spring Boot
+     * @param dataSource datasource de auditoria
+     * @return fábrica da unidade de persistência {@code ScosAuditLog}
+     */
     @Bean(name="ScosAuditLogEntityManager")
     public LocalContainerEntityManagerFactoryBean insideAuditLogEntityManager(
             EntityManagerFactoryBuilder builder,
@@ -108,6 +145,13 @@ public class ScosLogDataSourceConfiguration {
                 .build();
     }
 
+    /**
+     * Gerenciador de transações dedicado à auditoria; é o referenciado por
+     * {@code @Transactional("ScosAuditLogTransactionManager")} em todo o módulo.
+     *
+     * @param entityManagerFactory fábrica de auditoria
+     * @return gerenciador de transações JPA da auditoria
+     */
     @Bean(name = "ScosAuditLogTransactionManager")
     @ConfigurationProperties("spring.jpa")
     public PlatformTransactionManager insideAuditLogTransactionManager(

@@ -20,6 +20,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repositório da DLQ ({@code SFA_AUDIT_DLQ}); {@link #findAllBy} devolve uma página sem
+ * ordenação definida, usada pelo {@code ScosAuditDlqJob}.
+ *
+ * @since 1.2.0
+ */
 @Repository
 public interface ScosAuditDlqRepository extends JpaRepository<ScosAuditDlqLog, UUID> {
 

@@ -16,6 +16,15 @@ package br.com.sawcunhaos.foundation.audit.configuration.properties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Parâmetros do pool Hikari do datasource de auditoria ({@code spring.datasource.audit.hikari.*}).
+ *
+ * <p>Os campos {@code autoCommit}, {@code connectionTestQuery} e {@code healthCheckInterval}
+ * existem aqui mas <b>não são lidos</b> por {@link ScosLogDataSourceConfiguration}: o pool sempre
+ * nasce com {@code autoCommit=false}.
+ *
+ * @since 1.2.0
+ */
 @ConfigurationProperties(prefix = "spring.datasource.audit.hikari")
 @Data
 public class ScosAuditHikariConfigProperties {
