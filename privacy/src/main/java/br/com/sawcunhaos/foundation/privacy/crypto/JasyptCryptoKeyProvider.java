@@ -37,6 +37,8 @@ public final class JasyptCryptoKeyProvider implements ScosCryptoKeyProvider {
     private final byte[] hmacKey;
 
     /**
+     * Cria o provedor a partir de um segredo externalizado.
+     *
      * @param secret the externalized secret (must not be {@code null}/blank)
      */
     public JasyptCryptoKeyProvider(final String secret) {

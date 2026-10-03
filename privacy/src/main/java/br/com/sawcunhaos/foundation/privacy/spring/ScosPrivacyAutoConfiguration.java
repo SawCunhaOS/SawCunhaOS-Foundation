@@ -129,6 +129,8 @@ public class ScosPrivacyAutoConfiguration {
     }
 
     /**
+     * Registra o sanitizador de headers usado pelos filtros de log HTTP.
+     *
      * @param dataMaskingService the facade
      * @return the header sanitizer used by the HTTP logging filters
      */
@@ -139,6 +141,8 @@ public class ScosPrivacyAutoConfiguration {
     }
 
     /**
+     * Registra o sanitizador de corpo usado pelos filtros de log HTTP.
+     *
      * @param dataMaskingService the facade
      * @return the body sanitizer used by the HTTP logging filters
      */

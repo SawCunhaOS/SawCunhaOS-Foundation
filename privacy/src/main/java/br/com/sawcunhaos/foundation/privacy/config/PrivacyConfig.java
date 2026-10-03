@@ -92,17 +92,29 @@ public final class PrivacyConfig {
         builtins.addDisabled(item);
     }
 
-    /** @return the enabled builtin packs (unmodifiable). */
+    /**
+     * Retorna os packs builtin habilitados.
+     *
+     * @return the enabled builtin packs (unmodifiable).
+     */
     public List<String> getEnabledBuiltins() {
         return builtins.getEnabled();
     }
 
-    /** @return the individually disabled builtin items (unmodifiable). */
+    /**
+     * Retorna os itens builtin desabilitados individualmente.
+     *
+     * @return the individually disabled builtin items (unmodifiable).
+     */
     public Set<String> getDisabledBuiltins() {
         return builtins.getDisabled();
     }
 
-    /** @return an empty configuration (no rules, no builtins). */
+    /**
+     * Cria uma configuração vazia, sem regras e sem builtins.
+     *
+     * @return an empty configuration (no rules, no builtins).
+     */
     public static PrivacyConfig empty() {
         return new PrivacyConfig();
     }

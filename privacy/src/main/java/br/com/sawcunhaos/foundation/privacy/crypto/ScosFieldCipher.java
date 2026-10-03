@@ -107,6 +107,8 @@ public class ScosFieldCipher {
     }
 
     /**
+     * Indica se o valor é um token cifrado por esta cifra.
+     *
      * @param value any stored value
      * @return {@code true} when the value is an encrypted token
      */

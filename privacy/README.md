@@ -12,9 +12,34 @@ The core is **usable outside the SCOS layer** (no Spring required) through `Mask
 
 ## Why a dedicated module
 
-`privacy` sits at the base layer with **no dependency on `utils`** (it carries its own Gson). `utils` and
-`audit` depend on `privacy`. This avoids the `utils ↔ privacy` cycle that would appear if the masking lived
-in `utils` (whose logging filters consume it).
+`privacy` sits at the base layer with **no dependency on `utils`**: it carries its own Jackson
+(`tools.jackson.core:jackson-databind`, the engine only operates over `JsonNode`) — the Gson-based
+implementation was migrated in the 1.2.0 cycle (Story 1.3). Its direct dependents are `web` (the HTTP
+logging filters live there, not in `utils`), `audit` (field cipher), `jdempotent` and `archtest`. Keeping the
+masking out of `utils` avoids a `utils <-> privacy` cycle.
+
+### Typical usage flow
+
+Where each YAML section is loaded, which engine method resolves it and which consumer fires it
+(see the table in [Which rule fires where](#which-rule-fires-where) for the details):
+
+```mermaid
+flowchart TD
+    YML["privacy-masking.yml<br/>(external path or classpath)"] --> LOAD["PrivacyConfigLoader<br/>+ builtins + ReDoSGuard"]
+    LOAD --> ENG["MaskingEngine (immutable, thread-safe)"]
+    SPI["DataMaskingValues (optional SPI)"] --> ENG
+    KEY["ScosCryptoKeyProvider"] --> ENG
+
+    ENG -->|"headers: maskHeader(name, value)"| HF["web: LoggingInitialFilter<br/>(request headers)"]
+    ENG -->|"body: maskStructured(key, value)"| BF["web: Logging filters<br/>(request/response body)<br/>and %maskmdc{key}"]
+    ENG -->|"log-patterns + builtins: maskText(msg)"| LB["Logback converter %mask(%msg)"]
+    ENG -->|"audit-encrypt-fields"| CI["ScosFieldCipher.encrypt<br/>(audit trail, @Async thread)"]
+
+    HF --> OUT["masked log / persisted snapshot"]
+    BF --> OUT
+    LB --> OUT
+    CI --> OUT
+```
 
 ---
 

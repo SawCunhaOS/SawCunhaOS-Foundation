@@ -111,7 +111,11 @@ public final class MaskingEngine {
         return builder().config(config).build();
     }
 
-    /** @return a new {@link Builder}. */
+    /**
+     * Cria um novo {@link Builder}.
+     *
+     * @return a new {@link Builder}.
+     */
     public static Builder builder() {
         return new Builder();
     }
@@ -183,6 +187,8 @@ public final class MaskingEngine {
     }
 
     /**
+     * Retorna os nomes de campo a cifrar em repouso na trilha de auditoria.
+     *
      * @return the immutable set of field names to encrypt at rest in the audit trail
      */
     public Set<String> auditEncryptFields() {
@@ -190,6 +196,8 @@ public final class MaskingEngine {
     }
 
     /**
+     * Retorna a cifra de campo configurada.
+     *
      * @return the configured field cipher (may be {@code null} when crypto is not configured)
      */
     public ScosFieldCipher fieldCipher() {
@@ -279,31 +287,51 @@ public final class MaskingEngine {
         private PrivacyConfig config = PrivacyConfig.empty();
         private final List<DataMaskingValues> spi = new ArrayList<>();
 
-        /** @param strictMode whether missing crypto is a startup error; default {@code false} */
+        /**
+         * Define o modo estrito.
+         *
+         * @param strictMode whether missing crypto is a startup error; default {@code false}
+         */
         public Builder strict(final boolean strictMode) {
             this.strict = strictMode;
             return this;
         }
 
-        /** @param kb max payload size in KB before masking truncates the input */
+        /**
+         * Define o tamanho máximo do payload antes do mascaramento.
+         *
+         * @param kb max payload size in KB before masking truncates the input
+         */
         public Builder maxPayloadKb(final int kb) {
             this.maxPayloadKb = kb;
             return this;
         }
 
-        /** @param provider the crypto key provider (enables {@code hash}/{@code encrypt}) */
+        /**
+         * Define o provedor de chaves criptográficas.
+         *
+         * @param provider the crypto key provider (enables {@code hash}/{@code encrypt})
+         */
         public Builder keyProvider(final ScosCryptoKeyProvider provider) {
             this.keyProvider = provider;
             return this;
         }
 
-        /** @param config the parsed YAML configuration */
+        /**
+         * Define a configuração YAML já interpretada.
+         *
+         * @param config the parsed YAML configuration
+         */
         public Builder config(final PrivacyConfig config) {
             this.config = config != null ? config : PrivacyConfig.empty();
             return this;
         }
 
-        /** @param values an optional SPI source added on top of the YAML */
+        /**
+         * Adiciona uma fonte SPI opcional por cima do YAML.
+         *
+         * @param values an optional SPI source added on top of the YAML
+         */
         public Builder addSpi(final DataMaskingValues values) {
             if (values != null) {
                 this.spi.add(values);

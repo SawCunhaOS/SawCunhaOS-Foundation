@@ -30,6 +30,8 @@ import java.util.Set;
 public interface DataMaskingValues {
 
     /**
+     * Fornece as regras por chave aplicadas a headers HTTP.
+     *
      * @return key-based rules applied to HTTP headers
      */
     default Set<DataMask> headersValue() {
@@ -37,6 +39,8 @@ public interface DataMaskingValues {
     }
 
     /**
+     * Fornece as regras por chave aplicadas a campos do corpo JSON.
+     *
      * @return key-based rules applied to JSON body fields
      */
     default Set<DataMask> bodyValue() {
@@ -44,6 +48,8 @@ public interface DataMaskingValues {
     }
 
     /**
+     * Fornece as regras por texto (literal ou regex) aplicadas a mensagens de log livres.
+     *
      * @return text-based rules (literal or regex) applied to free-text log messages
      */
     default Set<DataMask> logPatterns() {
@@ -51,6 +57,8 @@ public interface DataMaskingValues {
     }
 
     /**
+     * Fornece os nomes de campo cujos valores devem ser cifrados em repouso na trilha de auditoria.
+     *
      * @return the set of field names whose values must be encrypted at rest in the audit trail
      */
     default Set<String> auditEncryptFields() {

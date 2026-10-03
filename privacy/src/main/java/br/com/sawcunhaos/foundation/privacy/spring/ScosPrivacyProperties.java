@@ -79,6 +79,8 @@ public class ScosPrivacyProperties {
     }
 
     /**
+     * Indica se o conversor Logback {@code %mask} é registrado programaticamente na inicialização.
+     *
      * @return whether the Logback {@code %mask} converter should be registered programmatically at startup
      */
     public boolean isLogConverterEnabled() {

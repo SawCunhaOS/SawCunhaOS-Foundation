@@ -24,6 +24,8 @@ package br.com.sawcunhaos.foundation.privacy.crypto;
 public interface ScosCryptoKeyProvider {
 
     /**
+     * Retorna o identificador da chave usada em novas cifragens.
+     *
      * @return the identifier of the key currently used for new encryptions (e.g. {@code "v1"})
      */
     String currentKeyId();
@@ -38,6 +40,8 @@ public interface ScosCryptoKeyProvider {
     byte[] keyFor(String keyId);
 
     /**
+     * Retorna o segredo usado na pseudonimização por HMAC.
+     *
      * @return the secret used for HMAC-based pseudonymization (stable correlation hashing)
      */
     byte[] hmacKey();

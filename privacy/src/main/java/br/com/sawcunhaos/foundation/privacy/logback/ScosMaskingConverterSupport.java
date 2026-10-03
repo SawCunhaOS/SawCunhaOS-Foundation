@@ -65,7 +65,11 @@ public final class ScosMaskingConverterSupport {
         registry.put(MDC_CONVERSION_WORD, ScosMaskingMdcConverter.class.getName());
     }
 
-    /** @return the wired engine, or {@code null} when not yet registered */
+    /**
+     * Retorna o {@link MaskingEngine} registrado para o conversor Logback.
+     *
+     * @return the wired engine, or {@code null} when not yet registered
+     */
     public static MaskingEngine engine() {
         return engine;
     }

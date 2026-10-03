@@ -74,7 +74,11 @@ public class DataMaskingService {
         return engine.maskText(message);
     }
 
-    /** @return the underlying immutable engine */
+    /**
+     * Retorna o engine imutável subjacente.
+     *
+     * @return the underlying immutable engine
+     */
     public MaskingEngine engine() {
         return engine;
     }
