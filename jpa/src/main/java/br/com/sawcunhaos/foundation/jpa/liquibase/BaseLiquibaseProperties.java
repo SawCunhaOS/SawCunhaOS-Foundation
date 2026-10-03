@@ -26,6 +26,15 @@ import java.util.Map;
 /**
  * Propriedades base para configuração do Liquibase
  * Estende as propriedades padrões do Spring Boot com funcionalidades adicionais
+ *
+ * <p>Classe abstrata para ser estendida e anotada com {@code @ConfigurationProperties(prefix = ...)}
+ * pelo módulo consumidor (ex.: {@code ScosAuditLiquibaseProperties} no módulo {@code audit}); esta
+ * classe só <b>carrega</b> valores, não executa o Liquibase. Quem a consome decide quais
+ * propriedades repassar ao {@code SpringLiquibase}: várias são apenas declarativas aqui
+ * (diff, multi-tenant, rollback, formatos), sem efeito próprio. Os getters/setters vêm do Lombok
+ * ({@code @Data}).
+ *
+ * @since 1.2.0
  */
 @Data
 public abstract class BaseLiquibaseProperties {
@@ -372,6 +381,8 @@ public abstract class BaseLiquibaseProperties {
 
     /**
      * Verifica se está configurado para usar DataSource customizado
+     *
+     * @return {@code true} se {@code url} estiver preenchida (não em branco)
      */
     public boolean hasCustomDataSource() {
         return url != null && !url.trim().isEmpty();
@@ -379,6 +390,8 @@ public abstract class BaseLiquibaseProperties {
 
     /**
      * Verifica se tem filtros de label configurados
+     *
+     * @return {@code true} se {@code labelFilter} ou {@code labels} estiver preenchido
      */
     public boolean hasLabelFilters() {
         return (labelFilter != null && !labelFilter.isEmpty()) ||
@@ -387,6 +400,8 @@ public abstract class BaseLiquibaseProperties {
 
     /**
      * Verifica se tem contextos configurados
+     *
+     * @return {@code true} se {@code contexts} estiver preenchido (não em branco)
      */
     public boolean hasContexts() {
         return contexts != null && !contexts.trim().isEmpty();
@@ -394,6 +409,9 @@ public abstract class BaseLiquibaseProperties {
 
     /**
      * Adiciona parâmetro customizado
+     *
+     * @param key   nome do parâmetro
+     * @param value valor do parâmetro
      */
     public void addParameter(String key, String value) {
         if (parameters == null) {
@@ -403,7 +421,9 @@ public abstract class BaseLiquibaseProperties {
     }
 
     /**
-     * Adiciona tenant à lista
+     * Adiciona tenant à lista, ignorando duplicados
+     *
+     * @param tenant identificador do tenant
      */
     public void addTenant(String tenant) {
         if (tenants == null) {
@@ -415,7 +435,12 @@ public abstract class BaseLiquibaseProperties {
     }
 
     /**
-     * Valida configuração básica
+     * Valida configuração básica. Não é chamado automaticamente: o consumidor deve invocá-lo
+     * (p.ex. num {@code @PostConstruct}).
+     *
+     * @throws IllegalStateException    se habilitado sem {@code changeLog}, ou {@code dropFirst}
+     *                                  fora de dev/local
+     * @throws IllegalArgumentException se {@code lockTimeout} for negativo
      */
     public void validate() {
         if (enabled && (changeLog == null || changeLog.trim().isEmpty())) {
@@ -440,6 +465,12 @@ public abstract class BaseLiquibaseProperties {
     /**
      * Detecta se está em modo de desenvolvimento
      * Sobrescrever em subclasses se necessário
+     *
+     * <p>Lê a <b>propriedade de sistema</b> {@code spring.profiles.active} (não o {@code Environment}
+     * do Spring): perfis definidos só por variável de ambiente/{@code application.yml} não são
+     * vistos, e um perfil que contenha "dev" ou "local" como substring (ex.: "devops") conta.
+     *
+     * @return {@code true} se o perfil ativo contém "dev" ou "local"
      */
     protected boolean isDevelopmentMode() {
         String profile = System.getProperty("spring.profiles.active", "");
