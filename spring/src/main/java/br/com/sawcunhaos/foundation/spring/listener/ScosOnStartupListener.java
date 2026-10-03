@@ -24,14 +24,35 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Despacha {@link ApplicationReadyEvent} para todo bean {@link ScosStartupListener} do contexto.
+ *
+ * <p>Este é o único {@code ApplicationListener} do Spring do módulo: o código consumidor implementa
+ * {@link ScosStartupListener} em vez de registrar seu próprio listener, e esta classe distribui o
+ * evento a todos eles, delimitado por uma linha de log {@code Init}/{@code Final}.
+ *
+ * <p>Registrado apenas via component scan — o módulo não traz auto-configuração, então a
+ * aplicação consumidora deve escanear {@code br.com.sawcunhaos.foundation.spring}.
+ */
 @Component
 @Order(1)
 @Log4j2
 public class ScosOnStartupListener implements ApplicationListener<ApplicationReadyEvent> {
 
+    /**
+     * Todos os beans {@link ScosStartupListener}. {@code required = false}: o Spring deixa este campo
+     * {@code null} (e não uma lista vazia) quando a aplicação não declara nenhum, daí a verificação de nulo
+     * em {@link #onApplicationEvent(ApplicationReadyEvent)}.
+     */
     @Autowired(required = false)
     private List<ScosStartupListener> scosStartupListener;
 
+    /**
+     * Invoca {@link ScosStartupListener#onStartupSystem(ApplicationReadyEvent)} em cada
+     * listener registrado; não faz nada se não houver nenhum.
+     *
+     * @param event o {@link ApplicationReadyEvent} a encaminhar
+     */
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         log.info("InsideSoftwaresOnStartupListener#onApplicationEvent() - Init");

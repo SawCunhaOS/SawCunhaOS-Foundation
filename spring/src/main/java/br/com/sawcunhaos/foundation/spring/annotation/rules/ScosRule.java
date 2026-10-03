@@ -24,12 +24,28 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marca uma classe como bean do Spring que é uma regra dentro de um conjunto ordenado (por exemplo, uma cadeia de
+ * regras de validação ou de negócio injetada como {@code List}).
+ *
+ * <p>Meta-anotada com {@code @Component} (detectada pelo component scan) e {@code @Order}:
+ * {@link #value()} é um alias de {@code @Order.value}, então um único {@code @ScosRule(10)} registra
+ * o bean e define sua posição quando o Spring ordena coleções injetadas. Valores menores
+ * executam primeiro; o padrão é {@link Ordered#LOWEST_PRECEDENCE} (por último). Use
+ * {@link ScosRuleService} no lugar, para um bean sem ordenação.
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
 @Order
 public @interface ScosRule {
+
+    /**
+     * O valor de ordem, com alias para {@code @Order.value}.
+     *
+     * @return a posição desta regra; valores menores têm maior prioridade
+     */
     @AliasFor(annotation = Order.class, attribute = "value")
     int value() default Ordered.LOWEST_PRECEDENCE;
 }

@@ -22,6 +22,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Estereótipo para um serviço que pertence à camada de regras: um {@code @Component} simples com um
+ * nome específico de domínio, para que os colaboradores de regras se distingam de serviços genéricos.
+ *
+ * <p>Não carrega ordenação (diferente de {@link ScosRule}) e não adiciona comportamento além do registro
+ * como componente.
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
