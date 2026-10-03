@@ -340,6 +340,9 @@
             <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, COMPACT_CTOR_DEF"/>
         </module>
         <module name="MissingJavadocMethod">
+            <!-- Gate mecânico (Story 4.16): único conjunto de regras com severidade error; o resto do
+                 arquivo segue warning (estilo pré-existente, fora do gate). -->
+            <property name="severity" value="error"/>
             <property name="scope" value="public"/>
             <property name="minLineCount" value="2"/>
             <property name="allowedAnnotations" value="Override, Test"/>
@@ -347,6 +350,7 @@
                                    COMPACT_CTOR_DEF"/>
         </module>
         <module name="MissingJavadocType">
+            <property name="severity" value="error"/>
             <property name="scope" value="protected"/>
             <property name="tokens"
                       value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF,

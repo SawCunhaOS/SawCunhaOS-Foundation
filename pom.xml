@@ -350,8 +350,7 @@
 
         <!-- Gate mecânico de análise estática: Jacoco, SpotBugs, OWASP dependency-check e Checkstyle.
              Herdado por todo módulo do reactor (existente e futuro) sem precisar declará-lo
-             individualmente. failOnViolation do Checkstyle continua desligado nesta story — ativação
-             global do gate é escopo exclusivo da Story 4.16. -->
+             individualmente. gate de Javadoc do Checkstyle ativado pela Story 4.16. -->
         <profile>
             <id>analyze</id>
             <build>
@@ -413,7 +412,21 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>checkstyle-javadoc-gate</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                         <configuration>
+                            <!-- Gate de Javadoc (Story 4.16): só violações de severidade error (Missing
+                                 Javadoc*, ver checkstyle.xml) quebram o build; avisos de estilo (warning)
+                                 continuam só reportados. -->
+                            <failOnViolation>true</failOnViolation>
+                            <violationSeverity>error</violationSeverity>
                             <!-- ${project.parent.basedir} não funciona a partir do POM raiz (o pai é o
                                  scos-bom externo, sem basedir no reactor); usa a raiz do multi-módulo. -->
                             <configLocation>${maven.multiModuleProjectDirectory}/etc/devops/checkstyle/checkstyle.xml</configLocation>
@@ -463,4 +476,4 @@
     </repositories>
 
 
-</project>
+</project>
