@@ -34,6 +34,16 @@ public class TaxIdentifierValidator implements ConstraintValidator<TaxIdentifier
     private final CNPJValidator cnpjValidator = new CNPJValidator();
     private final CPFValidator cpfValidator = new CPFValidator();
 
+    /**
+     * Verifica o valor como CNPJ ou, se falhar, como CPF (mesmas regras do value object
+     * {@code TaxIdentifier}).
+     *
+     * @param taxIdentifier o valor a verificar: dígitos de CPF ou CNPJ, sem formatação
+     * @param constraintValidatorContext não utilizado
+     * @return {@code true} se qualquer uma das validações de dígito verificador passar. Um valor {@code null} não é
+     *     tratado como válido de imediato (diferente da convenção usual do Bean Validation): falha com uma
+     *     exceção do {@code caelum-stella}
+     */
     @Override
     public boolean isValid(String taxIdentifier, ConstraintValidatorContext constraintValidatorContext) {
         return cnpjValidator.invalidMessagesFor(taxIdentifier).isEmpty() || cpfValidator.invalidMessagesFor(taxIdentifier).isEmpty();

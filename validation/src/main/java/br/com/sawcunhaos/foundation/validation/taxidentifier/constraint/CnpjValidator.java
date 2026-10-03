@@ -32,6 +32,15 @@ public class CnpjValidator implements ConstraintValidator<CNPJ, String> {
 
     private final CNPJValidator cnpjValidator = new CNPJValidator();
 
+    /**
+     * Verifica o valor com as mesmas regras de CNPJ do value object {@code Cnpj}.
+     *
+     * @param cnpj o valor a verificar: um CNPJ de 14 dígitos, sem formatação
+     * @param constraintValidatorContext não utilizado
+     * @return {@code true} se os dígitos verificadores forem válidos; entrada com pontuação resulta em {@code false}.
+     *     Um valor {@code null} não é tratado como válido de imediato (diferente da convenção usual do Bean Validation):
+     *     ele é repassado ao {@code caelum-stella} e falha com uma exceção
+     */
     @Override
     public boolean isValid(String cnpj, ConstraintValidatorContext constraintValidatorContext) {
         return cnpjValidator.invalidMessagesFor(cnpj).isEmpty();

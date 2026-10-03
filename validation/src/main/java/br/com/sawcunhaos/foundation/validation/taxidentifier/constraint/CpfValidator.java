@@ -32,6 +32,15 @@ public class CpfValidator implements ConstraintValidator<CPF, String> {
 
     private final CPFValidator cpfValidator = new CPFValidator();
 
+    /**
+     * Verifica o valor com as mesmas regras de CPF do value object {@code Cpf}.
+     *
+     * @param cpf o valor a verificar: um CPF de 11 dígitos, sem formatação
+     * @param constraintValidatorContext não utilizado
+     * @return {@code true} se os dígitos verificadores forem válidos; entrada com pontuação resulta em {@code false}.
+     *     Um valor {@code null} não é tratado como válido de imediato (diferente da convenção usual do Bean Validation):
+     *     ele é repassado ao {@code caelum-stella} e falha com uma exceção
+     */
     @Override
     public boolean isValid(String cpf, ConstraintValidatorContext constraintValidatorContext) {
         return cpfValidator.invalidMessagesFor(cpf).isEmpty();
