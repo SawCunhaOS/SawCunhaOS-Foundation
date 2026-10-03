@@ -23,17 +23,22 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Gerador de chaves customizado para cache
- * Formato da chave: ClassName::methodName::param1::param2::paramN
- * Características:
- * - Filtra tokens de autenticação (Bearer, JWT, Authorization)
- * - Trata valores nulos com segurança
- * - Usa hash para parâmetros muito grandes
- * - Performance otimizada com StringBuilder
- * - Seguro contra NPE
- * Exemplo de chave gerada:
- * "UserService::findById::123"
- * "ProductService::findByCategory::electronics::true"
+ * {@link KeyGenerator} do módulo, registrado como bean {@code "ScosCacheKeyGenerator"} (use em
+ * {@code @Cacheable(keyGenerator = "ScosCacheKeyGenerator")}).
+ *
+ * <p>Formato da chave: {@code Classe::método::param1::param2::paramN}, por exemplo
+ * {@code UserService::findById::123}. A classe é o nome simples do alvo, sem o sufixo de proxy
+ * ({@code $$}).</p>
+ *
+ * <p>Regras por parâmetro: {@code null} é omitido; um parâmetro cujo {@code toString()} contenha
+ * (sem diferenciar maiúsculas) {@code bearer}, {@code token}, {@code authorization},
+ * {@code password}, {@code secret}, {@code jwt}, {@code apikey} ou {@code api-key} é
+ * <b>descartado da chave</b> (não entra nem em hash); um com mais de 200 caracteres vira
+ * {@code hash_<String.hashCode>}; nos demais, espaço vira {@code _}, {@code :} vira {@code -} e
+ * quebras de linha/tab são removidas.</p>
+ *
+ * <p>Se a geração lançar exceção, devolve uma chave de fallback com {@code currentTimeMillis}, que
+ * na prática nunca produz acerto de cache (o método é só executado sem cachear).</p>
  */
 @Slf4j
 public class ScosCacheKeyGenerator implements KeyGenerator {
@@ -46,6 +51,14 @@ public class ScosCacheKeyGenerator implements KeyGenerator {
             "bearer", "token", "authorization", "password", "secret", "jwt", "apikey", "api-key"
     };
 
+    /**
+     * Gera a chave de cache para a invocação.
+     *
+     * @param target alvo da chamada (usado só pelo nome simples da classe)
+     * @param method método invocado
+     * @param params argumentos da chamada
+     * @return chave no formato {@code Classe::método[::params]}; nunca {@code null}
+     */
     @Override
     public Object generate(Object target, Method method, Object... params) {
         try {
@@ -102,7 +115,8 @@ public class ScosCacheKeyGenerator implements KeyGenerator {
 
         String paramStr = param.toString().toLowerCase();
 
-        // Filtra se contiver qualquer palavra sensível
+        // Match por substring: descarta também valores inofensivos que contenham a palavra
+        // (ex.: "tokenizer"). Dois pedidos que só diferem nesse parâmetro geram a mesma chave.
         for (String keyword : SENSITIVE_KEYWORDS) {
             if (paramStr.contains(keyword)) {
                 log.trace("Parâmetro sensível filtrado da chave de cache");
@@ -123,7 +137,8 @@ public class ScosCacheKeyGenerator implements KeyGenerator {
 
         String paramStr = param.toString();
 
-        // Se parâmetro for muito grande, usa hash
+        // Se parâmetro for muito grande, usa hash. String.hashCode tem colisões: dois parâmetros
+        // longos distintos podem compartilhar chave (trade-off aceito por tamanho de chave).
         if (paramStr.length() > MAX_PARAM_LENGTH) {
             int hash = paramStr.hashCode();
             log.trace("Parâmetro muito longo, usando hash: {}", hash);

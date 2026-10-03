@@ -25,9 +25,32 @@ import tools.jackson.dataformat.smile.SmileMapper;
 import java.util.Collection;
 import java.util.Set;
 
+/**
+ * {@link RedisSerializer} que grava qualquer objeto como um envelope Smile (JSON binário) com o
+ * nome da classe concreta e o reconstrói na leitura, para que um mesmo cache guarde tipos
+ * diferentes sem configuração por tipo.
+ *
+ * <p><b>Formato:</b> {@code Payload(type, elementType, value)}. {@code elementType} só existe para
+ * coleções cujos elementos não nulos compartilham uma única classe concreta (os genéricos são
+ * apagados em tempo de execução, então sem ele {@code List<Foo>} voltaria como lista de mapas).</p>
+ *
+ * <p><b>Contrato de segurança (allowlist, Story 3.16):</b> o nome da classe vem do valor lido do
+ * Redis, ou seja, de dados que um atacante com escrita no Redis controla. Por isso, antes de
+ * qualquer {@link Class#forName(String)}, {@code type} e {@code elementType} são checados contra a
+ * allowlist; o que não bater é rejeitado com {@link SerializationException} e a classe nunca é
+ * carregada. Tipos aceitos: pacote {@code br.com.sawcunhaos.}, {@code java.math.}, {@code java.time.},
+ * {@code java.util.}, {@code java.lang.String}, arrays primitivos, arrays de objeto cujo componente
+ * seja permitido (uma dimensão) e os nomes completos passados ao construtor
+ * {@link #PolymorphicRedisSerializer(Set)}. Classes de terceiros (origem dos gadget chains de
+ * Jackson conhecidos) só entram por esse construtor.</p>
+ *
+ * <p>{@code null} serializa para {@code byte[0]}; {@code null} ou {@code byte[0]} desserializa para
+ * {@code null}. Falhas viram {@link SerializationException}. A instância é thread-safe (o
+ * {@code ObjectMapper} é imutável após o build).</p>
+ */
 public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
 
-    /**
+    /*
      * Story 3.16 (AC #1): allowlist gate applied to {@code payload.type()} — and, for collections,
      * {@code payload.elementType()} — BEFORE either is ever passed to {@link Class#forName(String)}.
      * Without this gate, any class name an attacker could write into the Redis value backing this
@@ -48,7 +71,7 @@ public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
      * instantiable through this exact gate with no legitimate reason to ever be a cached value
      * here). Anything else — third-party library classes in particular, the actual source of known
      * Jackson gadget chains — is rejected unless the consumer explicitly adds it via the
-     * constructor.</p>
+     * constructor.
      */
     private static final String DOMAIN_PACKAGE_PREFIX = "br.com.sawcunhaos.";
 
@@ -63,11 +86,16 @@ public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
     private final ObjectMapper mapper;
     private final Set<String> extraAllowedTypeNames;
 
+    /**
+     * Cria o serializador apenas com a allowlist padrão (sem tipos extras).
+     */
     public PolymorphicRedisSerializer() {
         this(Set.of());
     }
 
     /**
+     * Cria o serializador com a allowlist padrão mais tipos extras.
+     *
      * @param extraAllowedTypeNames fully-qualified class names allowed in addition to the default
      *                              allowlist ({@link #DOMAIN_PACKAGE_PREFIX},
      *                              {@link #ALLOWED_JDK_PACKAGE_PREFIXES} and
@@ -102,6 +130,13 @@ public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
      */
     record Payload(String type, String elementType, JsonNode value) {}
 
+    /**
+     * Serializa o valor como {@link Payload} em Smile.
+     *
+     * @param value objeto a gravar; {@code null} gera {@code byte[0]}
+     * @return bytes do envelope
+     * @throws SerializationException se o Jackson falhar ao converter o valor
+     */
     @Override
     public byte[] serialize(Object value) {
         try {
@@ -147,12 +182,22 @@ public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
         return elementType;
     }
 
+    /**
+     * Reconstrói o objeto gravado por {@link #serialize(Object)}, validando o tipo contra a
+     * allowlist antes de resolvê-lo.
+     *
+     * @param bytes envelope lido do Redis; {@code null} ou vazio gera {@code null}
+     * @return o objeto reconstruído
+     * @throws SerializationException se o tipo não for permitido, não existir ou o conteúdo for
+     *                                inválido
+     */
     @Override
     public Object deserialize(byte[] bytes) {
         try {
             if (bytes == null || bytes.length == 0) return null;
 
             Payload payload = mapper.readValue(bytes, Payload.class);
+            // Ordem importa: a allowlist roda dentro de resolveAllowedType, antes do Class.forName.
             Class<?> clazz = resolveAllowedType(payload.type());
 
             if (payload.elementType() == null) {
@@ -164,6 +209,7 @@ public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
                     .constructCollectionType(clazz.asSubclass(Collection.class), elementClazz);
             return mapper.treeToValue(payload.value(), collectionType);
         } catch (SerializationException e) {
+            // Rejeição da allowlist já é SerializationException: relança sem embrulhar de novo.
             throw e;
         } catch (Exception e) {
             throw new SerializationException("Erro ao desserializar", e);
@@ -186,6 +232,7 @@ public class PolymorphicRedisSerializer implements RedisSerializer<Object> {
         if (extraAllowedTypeNames.contains(typeName)) {
             return true;
         }
+        // Só String em java.lang: liberar o pacote todo permitiria, p.ex., java.lang.Thread.
         if (typeName.equals(ALLOWED_JAVA_LANG_TYPE)) {
             return true;
         }

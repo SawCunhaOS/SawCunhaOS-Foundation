@@ -54,10 +54,27 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Configuração resiliente de cache com Redis Sentinel
- * - Sistema funciona sem Redis (cache desabilitado)
- * - Reconexão automática em caso de falha
- * - Configurações customizadas por cache
+ * Configuração de cache Redis do módulo, ativa por padrão (desligue com
+ * {@code spring.cache.enabled=false}).
+ *
+ * <ul>
+ *   <li>Conexão Lettuce montada a partir de {@code spring.data.redis.*}: Sentinel, Cluster ou
+ *       Standalone, nessa ordem de precedência.</li>
+ *   <li>Chaves em {@link StringRedisSerializer}; valores em {@link PolymorphicRedisSerializer}
+ *       (com a allowlist padrão, sem tipos extras: um tipo de terceiros em cache exige um
+ *       {@code RedisCacheConfiguration} próprio).</li>
+ *   <li>TTL padrão {@code scos.cache.redis-time-to-live}; TTL por cache em
+ *       {@code scos.cache.caches[]}; prefixo global {@code scos.cache.key-prefix}.</li>
+ *   <li>Resiliência: se o {@code ping} no startup falhar, o {@link CacheManager} vira um
+ *       {@link NoOpCacheManager} (a aplicação sobe sem cache); falhas em runtime são só logadas
+ *       pelo {@link CacheErrorHandler} e o método anotado executa normalmente.</li>
+ * </ul>
+ *
+ * <p>Limitações reais: a decisão de fallback acontece uma única vez, no startup (um Redis que volta
+ * depois não reativa o cache sem reiniciar); {@code null} nunca é cacheado; as propriedades
+ * {@code enableCompression}, {@code compressionThreshold}, {@code allowNullValues} e
+ * {@code maxSize} existem em {@link ScosCacheProperties}/{@link ScosCacheModel} mas não são lidas
+ * por esta classe.</p>
  */
 @Slf4j
 @ConditionalOnProperty(
@@ -75,7 +92,10 @@ public class ScosCacheConfiguration implements CachingConfigurer {
     private final DataRedisProperties redisProperties;
 
     /**
-     * Cria ConnectionFactory com Sentinel e configurações resilientes
+     * Cria a {@link LettuceConnectionFactory} {@code @Primary}: comando 5 s, conexão 3 s,
+     * reconexão automática e comandos rejeitados (falha rápida) enquanto desconectado.
+     *
+     * @return factory com conexão nativa compartilhada
      */
     @Bean(name = "ScosLettuceConnectionFactory")
     @Primary
@@ -169,7 +189,10 @@ public class ScosCacheConfiguration implements CachingConfigurer {
     }
 
     /**
-     * Configuração padrão do Redis Cache com Jackson2
+     * Configuração padrão dos caches: TTL global, prefixo, chaves string e valores via
+     * {@link PolymorphicRedisSerializer} (apesar do nome do helper, o formato é Smile, não JSON).
+     *
+     * @return configuração aplicada a todo cache sem entrada própria em {@code scos.cache.caches}
      */
     @Bean
     public RedisCacheConfiguration defaultCacheConfiguration() {
@@ -187,7 +210,11 @@ public class ScosCacheConfiguration implements CachingConfigurer {
     }
 
     /**
-     * CacheManager com fallback para NoOp se Redis falhar
+     * {@link CacheManager} {@code @Primary}: testa o Redis com {@code ping} no startup e, se falhar,
+     * devolve um {@link NoOpCacheManager}.
+     *
+     * @param redisConnectionFactory a factory {@code ScosLettuceConnectionFactory}
+     * @return {@link RedisCacheManager} transaction-aware, ou {@link NoOpCacheManager} sem Redis
      */
     @Bean
     @Primary
@@ -195,7 +222,8 @@ public class ScosCacheConfiguration implements CachingConfigurer {
     public CacheManager cacheManager(@Qualifier("ScosLettuceConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
         try {
 
-            // Testa conexão no startup
+            // Testa conexão no startup. Cada cache de scos.cache.caches usa seu TTL; os demais caem
+            // em defaultCacheConfiguration(). A conexão do ping não é fechada aqui.
             redisConnectionFactory.getConnection().ping();
             log.info("Redis conectado. Cache HABILITADO.");
 
@@ -255,7 +283,9 @@ public class ScosCacheConfiguration implements CachingConfigurer {
     }
 
     /**
-     * KeyGenerator customizado
+     * Expõe o {@link ScosCacheKeyGenerator} como bean {@code "ScosCacheKeyGenerator"}.
+     *
+     * @return o gerador de chaves do módulo
      */
     @Bean("ScosCacheKeyGenerator")
     public KeyGenerator keyGenerator() {
@@ -263,8 +293,11 @@ public class ScosCacheConfiguration implements CachingConfigurer {
     }
 
     /**
-     * Error Handler que captura falhas do Redis em runtime
-     * Permite que sistema continue funcionando mesmo com erros de cache
+     * {@link CacheErrorHandler} que engole (log WARN) erros de get/put/evict/clear: o cache vira
+     * best-effort e a aplicação continua sem ele. Atenção: um {@code evict} que falha deixa dado
+     * velho no Redis até o TTL, sem propagar erro.
+     *
+     * @return handler resiliente
      */
     @Bean
     @Override

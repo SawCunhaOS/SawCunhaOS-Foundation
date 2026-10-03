@@ -21,7 +21,11 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Modelo de configuração individual de cache
+ * Configuração de um cache nomeado em {@code scos.cache.caches[]}. Hoje só {@code name} e
+ * {@code timeToLiveSeconds} afetam o comportamento; {@code description}, {@code allowNullValues}
+ * e {@code maxSize} são informativos e não são lidos por
+ * {@link br.com.sawcunhaos.foundation.cache.ScosCacheConfiguration} (o cache sempre rejeita
+ * {@code null}).
  */
 @Data
 @Validated

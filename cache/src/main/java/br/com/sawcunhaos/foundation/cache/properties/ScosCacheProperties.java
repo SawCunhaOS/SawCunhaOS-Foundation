@@ -26,8 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Propriedades de configuração para caches customizados
- * Suporta refresh dinâmico via Spring Cloud Config
+ * Propriedades {@code scos.cache.*}: TTL padrão, prefixo de chave e lista de caches com TTL
+ * próprio. Validada com Bean Validation e recarregável via {@code @RefreshScope}.
+ *
+ * <p>Atenção: só {@code redisTimeToLive}, {@code keyPrefix} e {@code caches} são consumidos por
+ * {@link br.com.sawcunhaos.foundation.cache.ScosCacheConfiguration}; {@code enableCompression} e
+ * {@code compressionThreshold} hoje não têm efeito.</p>
  */
 @RefreshScope
 @ConfigurationProperties(prefix = "scos.cache")
@@ -68,7 +72,9 @@ public class ScosCacheProperties {
     private int compressionThreshold = 1024;
 
     /**
-     * Adiciona um cache à lista de configurações
+     * Adiciona um cache à lista de configurações (cria a lista se estiver {@code null}).
+     *
+     * @param cache configuração do cache a adicionar
      */
     public void addCache(ScosCacheModel cache) {
         if (this.caches == null) {
@@ -78,7 +84,10 @@ public class ScosCacheProperties {
     }
 
     /**
-     * Busca configuração de um cache específico pelo nome
+     * Busca a configuração de um cache pelo nome.
+     *
+     * @param cacheName nome do cache
+     * @return a configuração, ou {@code null} se não houver
      */
     public ScosCacheModel getCacheByName(String cacheName) {
         if (caches == null) {
@@ -91,7 +100,10 @@ public class ScosCacheProperties {
     }
 
     /**
-     * Verifica se existe configuração para um cache específico
+     * Indica se há configuração para o cache.
+     *
+     * @param cacheName nome do cache
+     * @return {@code true} se {@link #getCacheByName(String)} achar uma entrada
      */
     public boolean hasCacheConfig(String cacheName) {
         return getCacheByName(cacheName) != null;
